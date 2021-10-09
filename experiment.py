@@ -1,7 +1,7 @@
 import functools
 import random
 
-n=8
+n=9
 
 @functools.lru_cache(maxsize=400000)
 def dp_two_thinning_constant_threshold(loads_tuple, chosen, threshold):
@@ -22,6 +22,27 @@ def dp_two_thinning_constant_threshold(loads_tuple, chosen, threshold):
                 res+=dp_two_thinning_constant_threshold(tuple(loads), j, threshold)
             loads[i]-=1
         return res/(n*n)
+
+@functools.lru_cache(maxsize=400000)
+def dp_two_thinning_constant_threshold_simpler_state(loads_tuple, threshold):
+    loads=list(loads_tuple)
+    if sum(loads)==n:
+        return max(loads)
+    else:
+        res=0
+        for chosen in range(n):
+            if loads[chosen]<=threshold:
+                loads[chosen]+=1
+                res+=dp_two_thinning_constant_threshold(tuple(loads), threshold)
+                loads[chosen]-=1
+            else:
+                subres=0
+                for rejected in range(n):
+                    loads[rejected]+=1
+                    subres+=dp_two_thinning_constant_threshold(tuple(loads), threshold)
+                    loads[rejected]-=1
+                res+=subres/n
+        return res/n
 
 
 @functools.lru_cache(maxsize=400000)
