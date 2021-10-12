@@ -3,7 +3,7 @@ import random
 
 from mathematical_results import one_choice_maths
 
-n=10
+n=20
 
 def one_choice_simulate_one_run():
     loads=[0]*n
