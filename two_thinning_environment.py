@@ -18,12 +18,12 @@ class TwoThinning(gym.Env):
 
         self.n=n
         self.action_space = spaces.Discrete(2)
-        self.observation_space = spaces.Dict({"load_configuration": spaces.Box(low=np.array([0]*n), high=np.array([n]*n), dtype=np.uint), "location": spaces.Discrete(n)})
+        self.observation_space = spaces.Dict({"load_configuration": spaces.Box(low=np.array([0]*n), high=np.array([n]*n), dtype=np.float64), "location": spaces.Discrete(n)})
 
     def reset(self):
-        self.load_configuration=np.array([0]*self.n).astype(np.uint)
+        self.load_configuration=np.array([0]*self.n).astype(np.float64)
         self.currently_chosen=self.get_random_bin()
-        return {"load_configuration": self.load_configuration, "location": self.currently_chosen}
+        return {"load_configuration": self.load_configuration.copy(), "location": self.currently_chosen}
 
     def step(self, action):
         if action == self.ACCEPT:
@@ -34,10 +34,10 @@ class TwoThinning(gym.Env):
 
 
         if np.sum(self.load_configuration)==self.n:
-            return {"load_configuration": self.load_configuration, "location": 0}, self.evaluate(), True, {}
+            return {"load_configuration": self.load_configuration.copy(), "location": 0}, self.evaluate(), True, {}
         else:
             self.currently_chosen=self.get_random_bin()
-            return {"load_configuration": self.load_configuration, "location": self.currently_chosen}, 0, False, {}
+            return {"load_configuration": self.load_configuration.copy(), "location": self.currently_chosen}, 0, False, {}
 
 
     def close(self):
