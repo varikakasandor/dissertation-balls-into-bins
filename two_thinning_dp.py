@@ -5,12 +5,13 @@ import time
 from mathematical_results import two_thinning_constant_threshold_maths
 from helper import number_of_increasing_partitions
 
-n=20
+n=8
+m=15
 
-@functools.lru_cache(maxsize=n*n*number_of_increasing_partitions(n, n))
+@functools.lru_cache(maxsize=n*m*number_of_increasing_partitions(m, n))
 def two_thinning_constant_threshold_dp(loads_tuple, chosen, threshold):
     loads=list(loads_tuple)
-    if sum(loads)==n:
+    if sum(loads)==m:
         return max(loads)
     elif loads[chosen]<=threshold:
         loads[chosen]+=1
@@ -32,7 +33,7 @@ def two_thinning_constant_threshold_dp(loads_tuple, chosen, threshold):
 @functools.lru_cache(maxsize=400000)
 def two_thinning_constant_threshold_simpler_state_dp(loads_tuple, threshold):
     loads=list(loads_tuple)
-    if sum(loads)==n:
+    if sum(loads)==m:
         return max(loads)
     else:
         res=0
@@ -51,10 +52,10 @@ def two_thinning_constant_threshold_simpler_state_dp(loads_tuple, threshold):
         return res/n
 
 
-@functools.lru_cache(maxsize=n*n*number_of_increasing_partitions(n, n))
+@functools.lru_cache(maxsize=m*n*number_of_increasing_partitions(m, n))
 def two_thinning_dp(loads_tuple, chosen):
     loads=list(loads_tuple)
-    if sum(loads)==n:
+    if sum(loads)==m:
         return max(loads)
 
     accept=0
@@ -80,9 +81,9 @@ def two_thinning_dp(loads_tuple, chosen):
 
 if __name__=="__main__":
     start_time = time.time()
-    for threshold in range(n+1):
-        print(f"With {n} balls, {n} bins and constant threshold {threshold} the expected maximum load is {two_thinning_constant_threshold_dp(tuple([0]*n),0,threshold)}")
+    for threshold in range(m+1):
+        print(f"With {m} balls, {n} bins and constant threshold {threshold} the expected maximum load is {two_thinning_constant_threshold_dp(tuple([0]*n),0,threshold)}")
 
-    print(f"With {n} balls, {n} bins the best achievable expected maximum load is {two_thinning_dp(tuple([0]*n),0)}")
-    print(f"According to the mathematical bounds the optimal constant threshold should be around {two_thinning_constant_threshold_maths(n)}")
+    print(f"With {m} balls, {n} bins the best achievable expected maximum load is {two_thinning_dp(tuple([0]*n),0)}")
+    #print(f"According to the mathematical bounds the optimal constant threshold should be around {two_thinning_constant_threshold_maths(n)}")
     print("--- %s seconds ---" % (time.time() - start_time))

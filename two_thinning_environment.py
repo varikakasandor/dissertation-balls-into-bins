@@ -13,12 +13,13 @@ class TwoThinning(gym.Env):
     def evaluate(self):
         return -np.max(self.load_configuration)
 
-    def __init__(self, n=10):
+    def __init__(self, n=8, m=15):
         super(TwoThinning, self).__init__()
 
         self.n=n
+        self.m=m
         self.action_space = spaces.Discrete(2)
-        self.observation_space = spaces.Dict({"load_configuration": spaces.Box(low=np.array([0]*n), high=np.array([n]*n), dtype=np.float64), "location": spaces.Discrete(n)})
+        self.observation_space = spaces.Dict({"load_configuration": spaces.Box(low=np.array([0]*n), high=np.array([m]*n), dtype=np.float64), "location": spaces.Discrete(n)})
 
     def reset(self):
         self.load_configuration=np.array([0]*self.n).astype(np.float64)
@@ -33,13 +34,8 @@ class TwoThinning(gym.Env):
             self.load_configuration[arbitrary]+=1
 
 
-        if np.sum(self.load_configuration)==self.n:
+        if np.sum(self.load_configuration)==self.m:
             return {"load_configuration": self.load_configuration.copy(), "location": 0}, self.evaluate(), True, {}
         else:
             self.currently_chosen=self.get_random_bin()
             return {"load_configuration": self.load_configuration.copy(), "location": self.currently_chosen}, 0, False, {}
-
-
-    def close(self):
-        pass
-    

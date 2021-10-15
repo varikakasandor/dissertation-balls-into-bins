@@ -4,7 +4,8 @@ from stable_baselines3 import PPO
 
 from two_thinning_environment import TwoThinning
 
-n=20
+n=8
+m=15
 
 def test_agent(env, model, runs=1):
     rewards=[]
@@ -24,7 +25,7 @@ def test_agent(env, model, runs=1):
 
 
 if __name__=="__main__":
-    env = TwoThinning(n=n)
+    env = TwoThinning(n=n, m=m)
     check_env(env, warn=True)
     model = PPO('MultiInputPolicy', env).learn(5000)
     print(f"Learning has finished.")

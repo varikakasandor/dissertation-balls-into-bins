@@ -1,6 +1,7 @@
 import functools
 
 n=8
+m=20
 
 @functools.lru_cache()
 def number_of_increasing_partitions(n, k):
@@ -12,4 +13,4 @@ def number_of_increasing_partitions(n, k):
 
 
 if __name__=="__main__":
-    print(number_of_increasing_partitions(n,n))
+    print(number_of_increasing_partitions(m,n))
