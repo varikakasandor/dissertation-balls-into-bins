@@ -1,0 +1,402 @@
+\newif\ifdraft
+\draftfalse
+
+
+\usepackage{hyperref,url}
+\usepackage{tikz,subfigure}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.7}
+
+\usepackage[active]{srcltx}
+\ifdraft
+  \setlength{\marginparwidth}{1.3in}
+  \usepackage[top=1in,bottom=1in,left=0.5in,right=1.5in]{geometry}
+\else
+  \usepackage[margin=1in]{geometry}
+\fi
+
+\usepackage[labelfont=bf]{caption} % Makes caption have Table/Figure bold.
+\usepackage{wrapfig}
+%\documentclass[draft]{thesis}
+%\usepackage{algorithmicx,algorithmicx,algpascal,algpseudocode}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{epsfig,amssymb,amsfonts,amsmath,amsthm}
+%\usepackage{times}
+\usepackage[numbers,sort&compress,longnamesfirst,sectionbib]{natbib}
+\usepackage[framemethod=TikZ]{mdframed}
+%\usepackage[numbers,sort&compress]{natbib}             % for nicer citations
+%\bibliographystyle{abbrvnat}
+%\usepackage{anysize}
+\newcommand{\tsum}{\textstyle\sum}
+\newcommand{\tprod}{\textstyle\prod}
+%\usepackage{harvard}
+%\usepackage{a4wide}
+\usepackage{epsfig,amssymb,amsfonts,amsmath}
+\usepackage{amssymb,amsmath,amsfonts}
+\usepackage{thmtools,thm-restate} % For re-stating theorems.
+\usepackage{makecell} % For adding multiple items in a single table cell
+%\usepackage{shadethm}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{tabu}
+%\usepackage{pstricks}
+%\usepackage{setspace}
+%\ifx\bibfont\undefined\newcommand\bibfont\small\else\renewcommand\bibfont\small\fi
+\usepackage{xcolor}
+\usepackage{authblk}
+\usepackage{soul}
+\usepackage{enumitem}
+\usepackage{comment}
+\usepackage[capitalise, nameinlink]{cleveref} % Automatically add Lemma/Theorem/Section to references
+\crefname{ineq}{inequality}{inequalities}
+\begin{comment}
+\usepackage{refcheck} % Checks if any label is unused 
+% The following commands make refcheck work with cleveref.
+% Source: https://tex.stackexchange.com/questions/87610/making-refcheck-work-with-cleveref/
+%%% Infrastructure    
+\makeatletter
+\newcommand{\refcheckize}[1]{%
+  \expandafter\let\csname @@\string#1\endcsname#1%
+  \expandafter\DeclareRobustCommand\csname relax\string#1\endcsname[1]{%
+    \csname @@\string#1\endcsname{##1}\wrtusdrf{##1}}%
+  \expandafter\let\expandafter#1\csname relax\string#1\endcsname
+}
+\makeatother
+%%%
+\refcheckize{\cref}
+\refcheckize{\Cref}
+\end{comment}
+
+\usepackage{mdframed}
+
+\mdfdefinestyle{MyFormStyle}{%
+    linewidth=1.5pt,
+    skipbelow=\topskip,
+    % skipabove=\topskip,
+    leftmargin=-\csname @totalleftmargin\endcsname-0.5cm % the devious trick
+}
+\newcommand{\ProcessBox}[1]{%
+    \begin{mdframed}[style=MyFormStyle]%
+    {\noindent\footnotesize#1}%
+    \end{mdframed}%
+}
+
+% \newcommand{\removed}[1]{\st{#1}}
+
+
+%\usepackage[usenames]{color}
+
+%\usepackage{newcent}
+%\usepackage{times}
+%\usepackage{hyperref}
+
+%\usepackage{graphicx}
+%\usepackage{setspace}                  % for change of line spacing
+%\usepackage{xspace}
+%\usepackage[usenames]{color}
+%\usepackage[latin1]{inputenc}
+
+%\usepackage{courier}
+%\usepackage[numbers,sort&compress,longnamesfirst]{natbib}             % for nicer citations
+%\bibliographystyle{abbrvnat}
+
+%\usepackage{anysize}
+
+
+
+\newcommand{\remove}[1]{}
+%\newcommand{\ts}{}
+\renewcommand{\textstyle}{}
+\renewcommand{\d}{{\ensuremath{ \mathbf{d}}}}
+\newcommand{\x}{{\ensuremath{ \mathbf{x}}}}
+\newcommand{\y}{{\ensuremath{ \mathbf{y}}}}
+\newcommand{\A}{{\ensuremath{ \mathbf{A}}}}
+\newcommand{\block}{\mathsf{Block}}
+\newcommand{\periodic}{\mathsf{Periodic}}
+\newcommand{\bitonic}{\mathsf{Bitonic}}
+\newcommand{\ccc}{\mathsf{CCC}}
+\newcommand{\Geo}{\mathsf{Geo}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\rot}{\mathrm{T}}
+\newcommand{\ce}{\mathrm{e}}
+\newcommand{\n}{1}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\polylog}{\operatorname{polylog}}
+\renewcommand{\deg}{\operatorname{deg}}
+\newcommand{\diam}{\operatorname{diam}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\vol}{\operatorname{vol}}
+\newcommand{\OPT}{\operatorname{OPT}}
+\newcommand{\sign}{\mathsf{sign}}
+\newcommand{\de}{\operatorname{de}}
+\newcommand{\even}{\mathsf{even}}
+\newcommand{\odd}{\mathsf{odd}}
+\newcommand{\parti}[1]{\operatorname{part}(#1)}
+\newcommand{\subsec}[1]{%
+   \vspace{\baselineskip} \emph{#1} \vspace{\baselineskip}}
+
+\newcommand{\argmin}{\operatorname{argmin}}
+\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\mix}{\operatorname{mix}}
+
+
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
+
+
+\newcommand{\bw}[1]{\mathsf{bw}(#1)}
+\newcommand{\bal}{\mathsf{b}}
+\newcommand{\subs}[1]{\noindent{\bf #1}}
+\newcommand{\subsubs}[1]{\noindent{\sf #1}}
+%\renewcommand{\O}{\mathcal{O}}
+\newcommand{\Oh}{\mathcal{O}}
+\newcommand{\RBA}{\mathcal{RBA}}
+\newcommand{\RBC}{\mathsf{RBC}}
+%\newcommand{\RT}[2]{\mathsf{RT}_{#1}(#2)}
+\newcommand{\AT}[2]{\mathsf{AT}_{#1}(#2)}
+\newcommand{\DT}[2]{\mathsf{DT}_{#1}(#2)}
+\newcommand{\RTT}[2]{\mathsf{RT}(#1,#2)}
+\newcommand{\RTC}{\mathsf{RTC}}
+\newcommand{\MIX}[2]{\mathsf{MIX}_{#1}(#2)}
+\newcommand{\MI}[2]{\widetilde{\mathsf{MIX}}_{#1}(#2)}
+\newcommand{\SEP}[2]{\mathsf{SEP}_{#1}(#2)}
+%\newcommand{\MIXX}[3]{\mathsf{MIX}_{#1}^{#2}(#3)}
+\newcommand{\AVG}[3]{\mathsf{AVG}_{#1}^{#2}(#3)}
+\newcommand{\Hit}[2]{\mathsf{H}(#1,#2)}
+\newcommand{\Hmax}[2]{\mathsf{H}_{\max}}
+\newcommand{\Com}[2]{\mathsf{C}(#1,#2)}
+\newcommand{\Res}[2]{\mathsf{R}(#1,#2)}
+\newcommand{\COV}{\mathsf{C}}
+\newcommand{\Speed}{\mathsf{S}}
+\newcommand{\cov}{\mathsf{COV}}
+\newcommand{\COVMOD}{\mathsf{\overline{COV}}}
+\newcommand{\BLA}{\mathsf{BLA}}
+
+\renewcommand{\P}{\mathbf{P}}
+\newcommand{\bP}{\mathbf{P}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\M}{\mathbf{M}}
+\newcommand{\bQ}{\mathbf{Q}}
+\newcommand{\bR}{\mathbf{R}}
+\newcommand{\LL}{\mathbf{L}}
+
+%\renewcommand{\bigcap}{\cap}
+%\renewcommand{\bigcup}{\cup}
+
+\newcommand{\arxive}[1]{}
+\newcommand{\algref}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{thm:#1}}
+\newcommand{\thmrefs}[2]{Theorems~\ref{thm:#1} and~\ref{thm:#2}}
+\newcommand{\proref}[1]{Proposition~\ref{pro:#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}}
+\newcommand{\lemrefs}[2]{Lemmas~\ref{lem:#1} and~\ref{lem:#2}}
+\newcommand{\lemrefss}[3]{Lemmas~\ref{lem:#1},~\ref{lem:#2}, and~\ref{lem:#3}}
+\newcommand{\corref}[1]{Corollary~\ref{cor:#1}}
+\newcommand{\defref}[1]{Definition~\ref{def:#1}}
+\newcommand{\defrefs}[2]{Definitions~\ref{def:#1} and~\ref{def:#2}}
+\newcommand{\assref}[1]{Assumption~\eqref{ass:#1}}
+\newcommand{\conref}[1]{Conjecture~\ref{con:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figrefs}[2]{Figures~\ref{fig:#1} and~\ref{fig:#2}}
+\newcommand{\tabref}[1]{Table~\ref{tab:#1}}
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\secrefs}[2]{Sections~\ref{sec:#1} and~\ref{sec:#2}}
+\newcommand{\charef}[1]{Chapter~\ref{cha:#1}}
+\newcommand{\eq}[1]{equation~\eqref{eq:#1}}
+\newcommand{\eqs}[2]{equations~\eqref{eq:#1} and~\eqref{eq:#2}}
+\newcommand{\eqss}[3]{equations~\eqref{eq:#1},~\eqref{eq:#2}, and~\eqref{eq:#3}}
+\newcommand{\Eqs}[2]{Equations~\eqref{eq:#1} and~\eqref{eq:#2}}
+\newcommand{\propref}[1]{P\ref{prop:#1}}
+
+\newcommand{\COOR}{\mathcal{PR}}
+%\newcommand{\pro}[1]{\mathbf{Pr}[\,#1\,]}
+\newcommand{\Pro}[1]{\mathbf{Pr} \left[\,#1\,\right]}
+\newcommand{\PRO}[1]{\mathbf{Pr}\Bigl[\,#1\,\Bigr]}
+\newcommand{\PrO}{\mathbf{Pr}}
+\newcommand{\Proo}[1]{\mathbf{Pr}[\,#1\,]}
+\newcommand{\pr}{\PrO}
+\newcommand{\e}{\mathbf{E}}
+\newcommand{\ex}[1]{\mathbf{E}[\,#1\,]}
+\newcommand{\Ex}[1]{\mathbf{E} \left[\,#1\,\right]}
+\newcommand{\EX}[2]{\mathbf{E}_{#1} \left[\,#2\,\right]}
+\newcommand{\var}[1]{\mathbf{Var}[\,#1\,]}
+\newcommand{\Var}[1]{\mathbf{Var} \left[\,#1\,\right]}
+%\newcommand{\EX}[1]{\mathbb{E}\Bigl[\,#1\,\Bigr]}
+\newcommand{\degree}{\operatorname{deg}}
+\newcommand{\girth}{\operatorname{girth}}
+\renewcommand{\diam}{\operatorname{diam}}
+\newcommand{\id}{\mathsf{id}}
+
+
+
+\renewcommand{\tilde}{\widetilde}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\opt}{\mathrm{opt}}
+\newcommand{\Sopt}{S_{\opt}}
+\newcommand{\Sapprox}{S_{\mathrm{approx}}}
+\newcommand{\Sbw}{S_{\mathrm{bw}}}
+\newcommand{\innerexpansion}{\beta^+}
+\newcommand{\outerexpansion}{\beta^-}
+\newcommand{\tinnerexpansion}{\tilde{\beta}^+}
+\newcommand{\touterexpansion}{\tilde{\beta}^-}
+\newcommand{\ctest}{c_{\mathrm{test}}}
+\newcommand{\minsize}{n_{\min}}
+\newcommand{\mindegree}{\delta_{\min}}
+\newcommand{\maxnumexpanders}{k_{\max}}
+\newcommand{\minsizeconstant}{c_s}
+\newcommand{\mindegreeconstant}{c_d}
+\newcommand{\lconst}{c_\ell}
+\newcommand{\mixingtimeconstant}{c_{\mathrm{mix}}}
+\newcommand{\noconstant}{c_{\mathrm{no}}}
+\newcommand{\yesconstant}{c_{\mathrm{yes}}}
+
+
+
+%\newcommand{\NOTE}[1]{\marginpar{\setstretch{0.43}\textcolor{red}{\bf\tiny#1}}}{\bf\tiny #1}}}
+%\newcommand{\NOTE}[1]{\marginpar{\setstretch{0.43}\textcolor{red}{\bf\tiny #1}}}
+
+%\newcommand{\RM}{{\ensuremath{\mathcal{R}}}}
+%\newcommand{\QM}{{\ensuremath{\mathcal{Q}}}}
+
+\newcommand{\FOCS}[2]{#1 Annual IEEE Symposium on Foundations of Computer Science
+(FOCS'#2)}
+\newcommand{\STOC}[2]{#1 Annual ACM Symposium on Theory of Computing (STOC'#2)}
+\newcommand{\SODA}[2]{#1 Annual ACM-SIAM Symposium on Discrete Algorithms (SODA'#2)}
+\newcommand{\ICALP}[2]{#1 International Colloquium on Automata, Languages, and
+Programming (ICALP'#2)}
+\newcommand{\PODC}[2]{#1 Annual ACM-SIGOPT Principles of Distributed Computing
+(PODC'#2)}
+\newcommand{\STACS}[2]{#1 International Symposium on Theoretical Aspects of Computer
+Science (STACS'#2)}
+\newcommand{\SPAA}[2]{#1 Annual ACM Symposium on Parallel Algorithms and
+Architectures (SPAA'#2)}
+\newcommand{\MFCS}[2]{#1 International Symposium on Mathematical Foundations of
+Computer
+Science (MFCS'#2)}
+\newcommand{\ISAAC}[2]{#1 International Symposium on Algorithms and Computation
+(ISAAC'#2)}
+\newcommand{\WG}[2]{#1 Workshop of Graph-Theoretic Concepts in Computer Science
+(WG'#2)}
+\newcommand{\SIROCCO}[2]{#1 International Colloquium on Structural Information and
+Communication Complexity (SIROCCO'#2)}
+\newcommand{\IPDPS}[2]{#1 IEEE International Parallel and Distributed Processing
+Symposium (IPDPS'#2)}
+\newcommand{\RANDOM}[2]{#1 International Workshop on Randomization and Computation
+(RANDOM'#2)}
+
+\usepackage{setspace,color}   % just for \NOTE
+\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+
+\def\argmax{\operatornamewithlimits{argmax}}
+\def\argmin{\operatornamewithlimits{argmin}}
+\def\mod{\operatorname{mod}}
+
+\newcommand{\Wlog}{W.\,l.\,o.\,g.\xspace}
+\newcommand{\wrt}{w.\,r.\,t.\xspace}
+\newcommand{\wlo}{w.\,l.\,o.\,g.\xspace}
+%\renewcommand{\wlog}{w.\,l.\,o.\,g.\xspace}
+% \newcommand{\st}{s.\,t.\xspace}
+\newcommand{\ie}{i.\,e.\xspace}
+\newcommand{\eg}{e.\,g.\xspace}
+\newcommand{\uar}{u.\,a.\,r.\xspace}
+\newcommand{\Whp}{w.h.p.\xspace}
+% Mitten im Satz sollte man \whp\ verwenden
+\newcommand{\whp}{\mbox{w.\,p.\ \ensuremath{1-\Oh(n^{-1})}}\xspace}
+\renewcommand{\wp}{w.\,p.\xspace}
+\newcommand{\wpo}{\mbox{w.\,p.\ 1}\xspace}
+\newcommand{\wlp}{\mbox{w.\,p.\ \ensuremath{1-o(1)}}\xspace}
+%\numberwithin{chapter}
+
+\newcommand{\Z}{{\mathbb{Z}}}
+\newcommand{\setmid}{\,|\,}
+\newcommand{\ee}{\varepsilon}
+
+\newcommand{\mycorollary}[2]{\begin{cor}\label{cor:#1}#2\end{cor}}
+
+ \newcommand{\againcorollary}[2]{\noindent\textbf{Corollary~\ref{cor:#1}}
+    (from page \pageref{cor:#1})\textbf{.}\emph{#2}}
+
+\newcommand{\mylemma}[2]{\begin{lem}\label{lem:#1}#2\end{lem}}
+
+\newcommand{\againlemma}[2]{\noindent\textbf{Lemma~\ref{lem:#1}}
+    (from page \pageref{lem:#1})\textbf{.}\emph{#2}}
+
+\newcommand{\mytheorem}[2]{\begin{thm}\label{thm:#1}#2\end{thm}}
+
+\newcommand{\myproposition}[2]{\begin{pro}\label{prop:#1}#2\end{pro}}
+
+\newcommand{\againtheorem}[2]{\noindent\textbf{Theorem~\ref{thm:#1}}
+    (from page \pageref{thm:#1})\textbf{.}\emph{#2}}
+
+
+
+\newcommand{\againproposition}[2]{\noindent\textbf{Proposition~\ref{prop:#1}}
+    (from page \pageref{prop:#1})\textbf{.}\emph{#2}}
+
+
+
+%\usepackage[linkcolor=red,citecolor=green]{hyperref}
+
+%\renewcommand{\baselinestretch}{0.99}
+%\setlength{\textwidth}{17.4cm}   % originally 12.2cm
+% \setlength{\textheight}{24cm}  % originally 19.3cm
+
+% \setlength{\evensidemargin}{-0.1in}
+%\setlength{\oddsidemargin}{-0.1in}
+%\setlength{\marginparwidth}{0.6in}
+%\setlength{\textwidth}{6.9in}
+%\setlength{\textheight}{8.9in}
+%\setlength{\topmargin}{-0.7in}
+%\setlength\footnotesep{0.1cm}
+%\setlength{\parindent}{0mm}
+%\setlength{\evensidemargin}{-0.1in}
+%\setlength{\oddsidemargin}{-0.1in}
+%\setlength{\marginparwidth}{0.6in}
+%\setlength{\textwidth}{6.1in}
+%\setlength{\textheight}{8.9in}
+%\setlength{\topmargin}{-0.7in}
+%\setlength\footnotesep{0.1cm}
+% to get nice proofs ...
+\newcommand{\qedsymb}{\hfill{\rule{2mm}{2mm}}}
+%\renewenvironment{proof}{\begin{trivlist}
+%\item[\hspace{\labelsep}{\it\noindent Proof. }]
+%}{\qedsymb\end$1/3 (\log n)^{-i \cdot \epsilon}${trivlist}}
+
+\newtheorem{thm}{Theorem}[section]  %[chapter]
+\newtheorem{fact}[thm]{Fact}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{obs}[thm]{Observation}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{fac}[thm]{Fact}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{ass}[thm]{Assumption}
+\newtheorem{pro}[thm]{Proposition}
+\newtheorem{con}[thm]{Conjecture}
+\newtheorem{clm}[thm]{Claim}
+%\theoremstyle{definition}
+%\newtheorem{pbl}{Open Problem}
+\newtheorem{defi}[thm]{Definition}
+\renewcommand{\tilde}{\widetilde}
+\newcommand{\outline}{\noindent {\it Proof Sketch}.~}
+
+\numberwithin{thm}{section}
+\numberwithin{equation}{section}
+
+\newcommand{\TwoChoice}{two-choice\xspace}
+\newcommand{\OneChoice}{one-choice\xspace}
+\newcommand{\Quantile}{\textsc{Quantile}}
+\newcommand{\Threshold}{\textsc{Threshold}}
+\DeclareMathOperator{\Gap}{Gap}
+\DeclareMathOperator{\Rank}{Rank}
+
+\newcommand{\SuggestChange}[2]{{\color{red} \relax\ifmmode\text{\st{$#1$}}\else \st{#1}\fi}\ {\color{blue} #2}}
+
+
