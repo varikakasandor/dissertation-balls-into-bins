@@ -1,7 +1,7 @@
 import random
 
-n=100
-m=200
+n=50
+m=250
 episodes=10000
 epsilon=0.1
 
@@ -29,7 +29,9 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon):
         r=reward(a)
         cnt[a]+=1
         q[a]+=(r-q[a])/cnt[a]
-    print(q)
+    
+    best_threshold=q.index(min(q))
+    print(f"The best threshold is {best_threshold}, producing on average a maximum load of {q[best_threshold]}")
 
 if __name__=="__main__":
     train()
