@@ -12,5 +12,9 @@ def number_of_increasing_partitions(n, k):
     return number_of_increasing_partitions(n,k-1)
 
 
+def argmax(l):
+    f = lambda i: l[i]
+    return max(range(len(l)), key=f)
+
 if __name__=="__main__":
     print(number_of_increasing_partitions(m,n))

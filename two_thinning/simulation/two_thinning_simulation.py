@@ -1,7 +1,7 @@
 import functools
 import random
 
-from mathematical_results import two_thinning_constant_threshold_maths
+import two_thinning.helper #import number_of_increasing_partitions
 
 n=8
 m=15
