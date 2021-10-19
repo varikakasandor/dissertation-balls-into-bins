@@ -1,1 +1,11 @@
 *__pycache__*
+*aux
+*.bbl
+*.blg
+*.dvi
+*.log
+*.out
+*.gz
+*.log
+
+proposal/main.pdf
