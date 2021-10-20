@@ -1,10 +1,10 @@
 import functools
 import random
 
-from mathematical_results import one_choice_maths
+#from mathematical_results import one_choice_maths
 
-n=8
-m=15
+n=10
+m=n
 
 def one_choice_simulate_one_run():
     loads=[0]*n
