@@ -12,7 +12,7 @@ m=n
 alpha=0.1
 epsilon=0.1 #TODO: set (exponential) decay
 train_episodes=100
-eval_episodes=3
+eval_episodes=100
 
 model=TwoThinningNet(n,m,device)
 model.to(device).double()
@@ -51,15 +51,16 @@ for _ in range(train_episodes):
         loss.backward()
         optimizer.step()
 
-
+max_loads=[]
 for _ in range(eval_episodes):
     loads=np.zeros(n)
     for i in range(m):
         a,old_val=epsilon_greedy(torch.from_numpy(loads).double(),0)
-        print(loads, a.item())
         randomly_selected=np.random.randint(n)
         if loads[randomly_selected]<=a:
             loads[randomly_selected]+=1
         else:
             loads[np.random.randint(n)]+=1
-    print('\n')
+    max_loads.append(np.max(loads))
+
+print(sum(max_loads)/len(max_loads))
