@@ -5,8 +5,9 @@ import time
 from mathematical_results import two_thinning_constant_threshold_maths
 from helper import number_of_increasing_partitions
 
-n=8
-m=15
+
+n=20
+m=n
 
 @functools.lru_cache(maxsize=n*m*number_of_increasing_partitions(m, n))
 def two_thinning_constant_threshold_dp(loads_tuple, chosen, threshold):

@@ -1,37 +1,38 @@
 import random
 
-n=2
-m=100
-episodes=10000
-epsilon=0.1
+n=20
+m=n
+episodes=100000
+epsilon=0.01
+alpha=0.1
 
-def reward(threshold, n=n, m=m): #Should be imported from two_thinning_simulation
-    loads=[0]*n
-    for _ in range(m):
-        chosen=random.randrange(n)
-        if loads[chosen]<=threshold:
-            loads[chosen]+=1
-        else:
-            arbitrary=random.randrange(n)
-            loads[arbitrary]+=1
+def reward(loads):
     return max(loads)
 
-
 def train(n=n, m=m, episodes=episodes, epsilon=epsilon):
-    q=[0]*(m+1)
-    cnt=[0]*(m+1)
+    q=[[0]*(i+1) for i in range(m)]
     for _ in range(episodes):
-        r=random.random()
-        if r<epsilon:
-            a=random.randrange(m+1)
-        else:
-            a=q.index(min(q))
-        r=reward(a,n,m)
-        cnt[a]+=1
-        q[a]+=(r-q[a])/cnt[a]
+        loads=[0]*n
+        for i in range(m):
+            r=random.random()
+            if r<epsilon:
+                a=random.randrange(i+1)
+            else:
+                a=q[i].index(min(q[i]))
+            randomly_selected=random.randrange(n)
+            if loads[randomly_selected]<=a:
+                loads[randomly_selected]+=1
+            else:
+                loads[random.randrange(n)]+=1
+
+            if i==m-1:
+                q[i][a]+=alpha*(reward(loads)-q[i][a])
+            else:
+                q[i][a]+=alpha*(min(q[i+1])-q[i][a])
     
-    best_threshold=q.index(min(q))
-    print(f"The best threshold is {best_threshold}, producing on average a maximum load of {q[best_threshold]}")
+    for i in range(m):
+        print(f"After {i} balls have been placed, the ideal threshold is {q[i].index(min(q[i]))} with an expected maximum load of {min(q[i])}")
+    print(q[-1])
 
 if __name__=="__main__":
     train()

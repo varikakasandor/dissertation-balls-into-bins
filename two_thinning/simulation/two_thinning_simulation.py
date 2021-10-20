@@ -1,10 +1,11 @@
 import functools
 import random
 
-import two_thinning.helper #import number_of_increasing_partitions
+#from two_thinning.helper import number_of_increasing_partitions
 
-n=8
-m=15
+
+n=20
+m=20
 
 def two_thinning_constant_threshold_simulate_one_run(threshold):
     loads=[0]*n
