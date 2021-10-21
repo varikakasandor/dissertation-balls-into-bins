@@ -15,6 +15,8 @@ model.eval()
 eval_episodes=3
 
 
+
+
 max_loads=[]
 for _ in range(eval_episodes):
     loads=np.zeros(n)

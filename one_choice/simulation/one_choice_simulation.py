@@ -1,7 +1,7 @@
 import functools
 import random
 
-#from mathematical_results import one_choice_maths
+from mathematical_results import one_choice_maths
 
 n=10
 m=n
@@ -22,4 +22,4 @@ def one_choice_simulate_many_runs(runs=100):
 
 if __name__=="__main__":
     one_choice_simulate_many_runs()
-    #print(f"According to the mathematical bounds the optimal constant threshold should be around {one_choice_maths(n)}")
+    print(f"According to the mathematical bounds the optimal constant threshold should be around {one_choice_maths(n)}")
