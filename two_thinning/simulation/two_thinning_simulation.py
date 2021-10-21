@@ -1,13 +1,12 @@
 import functools
 import random
 
-#from two_thinning.helper import number_of_increasing_partitions
-
+from mathematical_results import two_thinning_constant_threshold_maths
 
 n=20
 m=20
 
-def two_thinning_constant_threshold_simulate_one_run(threshold):
+def two_thinning_constant_threshold_simulate_one_run(threshold, n=n, m=m):
     loads=[0]*n
     for _ in range(m):
         chosen=random.randrange(n)
@@ -45,4 +44,4 @@ def two_thinning_constant_threshold_simulate(top=10):
 
 if __name__=="__main__":
     two_thinning_constant_threshold_simulate()
-    #print(f"According to the mathematical bounds the optimal constant threshold should be around {two_thinning_constant_threshold_maths(n)}")
+    print(f"According to the mathematical bounds the optimal constant threshold should be around {two_thinning_constant_threshold_maths(n)}")
