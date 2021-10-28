@@ -1,13 +1,13 @@
-import functools
 import random
 
 from two_thinning.constant_threshold.maths_results import optimal_threshold
 
 n = 20
 m = 20
+reward = max
 
 
-def simulate_one_run(threshold, n=n, m=m):
+def simulate_one_run(threshold, reward=reward, n=n, m=m):
     loads = [0] * n
     for _ in range(m):
         chosen = random.randrange(n)
@@ -16,19 +16,21 @@ def simulate_one_run(threshold, n=n, m=m):
         else:
             arbitrary = random.randrange(n)
             loads[arbitrary] += 1
-    return max(loads)
+    return reward(loads)
 
 
-def simulate_many_runs(threshold, runs=100):
-    return sum([simulate_one_run(threshold) for _ in range(runs)]) / runs
+def simulate_many_runs(threshold, reward=reward, n=n, m=m, runs=100):
+    return sum([simulate_one_run(threshold, reward=reward, n=n, m=m) for _ in range(runs)]) / runs
 
 
-def simulate_and_compare(top=10):
-    performances = [(simulate_many_runs(threshold), threshold) for threshold in range(m + 1)]
+def simulate_and_compare(reward=reward, n=n, m=m, runs=100, top=10):
+    performances = [(simulate_many_runs(threshold, reward=reward, n=n, m=m, runs=runs), threshold) for threshold in
+                    range(m + 1)]
     best_performances = sorted(performances)[:top]
     for performance, threshold in best_performances:
         print(
             f"With {m} balls, {n} bins and constant threshold {threshold} the maximum load is on average approximately {performance}")
+    return best_performances
 
 
 if __name__ == "__main__":

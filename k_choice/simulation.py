@@ -18,14 +18,15 @@ def simulate_one_run(choices, n=n, m=m):
 def simulate_many_runs(choices, runs=100, n=n, m=m):
     avg = sum([simulate_one_run(choices, n, m) for _ in range(runs)]) / runs
     print(f"With {m} balls and {n} bins {choices}-choice achieves on simulation approximately {avg} maximum load.")
+    return avg
 
 
 def one_choice_simulate_many_runs(runs=100, n=n, m=m):
-    simulate_many_runs(1, runs, n, m)
+    return simulate_many_runs(1, runs, n, m)
 
 
 def two_choice_simulate_many_runs(runs=100, n=n, m=m):
-    simulate_many_runs(2, runs, n, m)
+    return simulate_many_runs(2, runs, n, m)
 
 
 if __name__ == "__main__":

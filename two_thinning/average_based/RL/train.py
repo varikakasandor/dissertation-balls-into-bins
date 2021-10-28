@@ -1,16 +1,12 @@
 import random
 
-from two_thinning.average_based.simulation import simulate_many_runs
-
 n = 10
 m = n
 episodes = 100000
 epsilon = 0.1
 alpha = 0.1
-
-
-def reward(loads):
-    return max(loads)
+version = 'Q'
+reward = max
 
 
 def epsilon_greedy(options, epsilon=epsilon):
@@ -23,13 +19,7 @@ def epsilon_greedy(options, epsilon=epsilon):
     return a, options[a]
 
 
-def evaluate(q_values, runs=10000):
-    thresholds = [q_i.index(min(q_i)) for q_i in q_values]
-    avg_load = simulate_many_runs(thresholds, runs=runs)
-    print(f"The average load of the derived greedy policy is {avg_load}")
-
-
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon, version="Q"):
+def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=version, reward=reward):
     q = [[(m + 1)] * (i + 1) for i in range(m)]  # TODO: good initialization
     for _ in range(episodes):
         loads = [0] * n
@@ -56,7 +46,7 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, version="Q"):
         print(
             f"After {i} balls have been placed, the ideal threshold is {q[i].index(min(q[i]))} with an expected maximum load of {min(q[i])}")
 
-    evaluate(q)
+    return [q[i].index(min(q[i])) for i in range(m)]
 
 
 if __name__ == "__main__":

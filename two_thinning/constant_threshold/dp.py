@@ -6,13 +6,13 @@ from helper import number_of_increasing_partitions
 
 n = 20
 m = n
+reward = max
 
-
-@functools.lru_cache(maxsize=n * m * number_of_increasing_partitions(m, n))
-def dp(loads_tuple, chosen, threshold):
+@functools.lru_cache(maxsize=400000) # n * m * number_of_increasing_partitions(m, n))
+def dp(loads_tuple, chosen, threshold, n=n, m=m, reward=reward):
     loads = list(loads_tuple)
     if sum(loads) == m:
-        return max(loads)
+        return reward(loads)
     elif loads[chosen] <= threshold:
         loads[chosen] += 1
         res = 0
@@ -32,10 +32,10 @@ def dp(loads_tuple, chosen, threshold):
 
 
 @functools.lru_cache(maxsize=400000)
-def dp_simpler_state(loads_tuple, threshold):
+def dp_simpler_state(loads_tuple, threshold, n=n, m=m, reward=reward):
     loads = list(loads_tuple)
     if sum(loads) == m:
-        return max(loads)
+        return reward(loads)
     else:
         res = 0
         for chosen in range(n):

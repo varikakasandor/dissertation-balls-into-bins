@@ -5,13 +5,14 @@ from helper import number_of_increasing_partitions
 
 n = 20
 m = n
+reward = max
 
 
-@functools.lru_cache(maxsize=m * n * number_of_increasing_partitions(m, n))
-def dp(loads_tuple, chosen):
+@functools.lru_cache(maxsize=400000)  # m * n * number_of_increasing_partitions(m, n))
+def dp(loads_tuple, chosen, n=n, m=m, reward=reward):
     loads = list(loads_tuple)
     if sum(loads) == m:
-        return max(loads)
+        return reward(loads)
 
     accept = 0
     loads[chosen] += 1

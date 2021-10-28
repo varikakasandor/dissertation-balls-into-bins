@@ -7,8 +7,10 @@ m = 1000
 episodes = 10000
 epsilon = 0.1
 
+reward = max
 
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon):
+
+def train(n=n, m=m, episodes=episodes, epsilon=epsilon, reward=reward):
     q = [0] * (m + 1)
     cnt = [0] * (m + 1)
     for _ in range(episodes):
@@ -17,12 +19,13 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon):
             a = random.randrange(m + 1)
         else:
             a = q.index(min(q))
-        r = simulate_one_run(a, n, m)
+        r = simulate_one_run(a, reward=reward, n=n, m=m)
         cnt[a] += 1
         q[a] += (r - q[a]) / cnt[a]
 
     best_threshold = q.index(min(q))
     print(f"The best threshold is {best_threshold}, producing on average a maximum load of {q[best_threshold]}")
+    return best_threshold
 
 
 if __name__ == "__main__":

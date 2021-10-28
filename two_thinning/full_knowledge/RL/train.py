@@ -7,10 +7,13 @@ from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
 n = 10
 m = n
 
-# alpha = 0.1
 epsilon = 0.1  # TODO: set (exponential) decay
 train_episodes = 300
-eval_episodes = 300
+
+
+def reward(x):
+    return -np.max(x)
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,7 +28,7 @@ def epsilon_greedy(model, loads, epsilon=epsilon):
     return a, action_values[a]
 
 
-def train(n=n, m=m, episodes=train_episodes, epsilon=epsilon, device=device):
+def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device):
     model = TwoThinningNet(n, m, device)
     model.to(device).double()
     optimizer = torch.optim.Adam(model.parameters())
@@ -42,7 +45,7 @@ def train(n=n, m=m, episodes=train_episodes, epsilon=epsilon, device=device):
                 loads[np.random.randint(n)] += 1
 
             if i == m - 1:
-                new_val = torch.as_tensor(-np.max(loads)).to(device)
+                new_val = torch.as_tensor(reward(loads)).to(device)
             else:
                 _, new_val = epsilon_greedy(model, torch.from_numpy(loads).double(), epsilon)
                 new_val = new_val.detach()
