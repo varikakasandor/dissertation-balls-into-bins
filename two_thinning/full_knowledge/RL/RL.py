@@ -7,7 +7,7 @@ from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
 n = 10
 m = n
 
-alpha = 0.1
+# alpha = 0.1
 epsilon = 0.1  # TODO: set (exponential) decay
 train_episodes = 300
 eval_episodes = 300
