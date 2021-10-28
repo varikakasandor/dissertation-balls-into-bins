@@ -1,33 +1,58 @@
 import torch
 import numpy as np
+import os
 
 from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
+from two_thinning.full_knowledge.RL.RL import train
 
 n = 10
 m = n
+eval_episodes = 300
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = TwoThinningNet(n, m)
-model.to(device).double()
-model.load_state_dict(torch.load('two_thinning/RL/saved_models/best.pth'))
-model.eval()
 
-eval_episodes = 3
 
-max_loads = []
-for _ in range(eval_episodes):
-    loads = np.zeros(n)
-    for i in range(m):
-        options = model(torch.from_numpy(loads).double())
-        print(f"The options are: {options}")
-        a = torch.argmax(options)
-        print(f"With load vector {loads}, the model chooses a threshold {a}")
-        randomly_selected = np.random.randint(n)
-        if loads[randomly_selected] <= a:
-            loads[randomly_selected] += 1
-        else:
-            loads[np.random.randint(n)] += 1
-    max_loads.append(np.max(loads))
+def evaluate(model):
+    max_loads = []
+    for _ in range(eval_episodes):
+        loads = np.zeros(n)
+        for i in range(m):
+            options = model(torch.from_numpy(loads).double())
+            # print(f"The options are: {options}")
+            a = torch.argmax(options)
+            # print(f"With load vector {loads}, the model chooses a threshold {a}")
+            randomly_selected = np.random.randint(n)
+            if loads[randomly_selected] <= a:
+                loads[randomly_selected] += 1
+            else:
+                loads[np.random.randint(n)] += 1
+        max_loads.append(np.max(loads))
 
-avg_max_load = sum(max_loads) / len(max_loads)
-print(avg_max_load)
+    avg_max_load = sum(max_loads) / len(max_loads)
+    # print(avg_max_load)
+    return avg_max_load
+
+
+def load_best_model():
+    best_model = TwoThinningNet(n, m)
+    best_model.to(device).double()
+    best_model.load_state_dict(torch.load('saved_models/best.pth'))
+    best_model.eval()
+    return best_model
+
+
+def compare():
+    best_model = load_best_model()
+    current_model = train(n, m)
+    best_model_performance = evaluate(best_model)
+    current_model_performance = evaluate(current_model)
+    print(f"The average maximum load of the best model is {best_model_performance}.")
+    print(f"The average maximum load of the current mode is {current_model_performance}.")
+    if current_model_performance < best_model_performance:
+        torch.save(current_model.state_dict(),
+                   os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", "best.pth"))
+        print(f"The best model has been updated to the current model.")
+
+
+if __name__ == '__main__':
+    compare()
