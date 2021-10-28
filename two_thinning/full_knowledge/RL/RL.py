@@ -5,7 +5,6 @@ import os
 
 from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
 
-print(__file__)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
