@@ -1,6 +1,6 @@
 import random
 
-from two_thinning.simulation.two_thinning_simulation import two_thinning_constant_threshold_simulate_one_run
+from two_thinning.constant_threshold.simulation import simulate_one_run
 
 n = 2
 m = 1000
@@ -17,7 +17,7 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon):
             a = random.randrange(m + 1)
         else:
             a = q.index(min(q))
-        r = two_thinning_constant_threshold_simulate_one_run(a, n, m)
+        r = simulate_one_run(a, n, m)
         cnt[a] += 1
         q[a] += (r - q[a]) / cnt[a]
 

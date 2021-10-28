@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import os
 
-from two_thinning.RL.two_thinning_models import TwoThinningNet
+from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
 
 print(__file__)
 
@@ -72,6 +72,6 @@ for _ in range(repetition):
 
     avg_max_load = sum(max_loads) / len(max_loads)
     if avg_max_load < best_performance:
-        torch.save(model.state_dict(), os.path.join(os.path.dirname(os.path.abspath(__file__)) ,"saved_models","best.pth"))
+        torch.save(model.state_dict(), os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", "best.pth"))
         best_performance = avg_max_load
     print(avg_max_load)

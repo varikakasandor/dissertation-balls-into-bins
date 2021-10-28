@@ -1,6 +1,6 @@
 import random
 
-from two_thinning.simulation.two_thinning_simulation import two_thinning_average_based_simulate_many_runs
+from two_thinning.average_based.simulation import simulate_many_runs
 
 n = 10
 m = n
@@ -25,7 +25,7 @@ def epsilon_greedy(options, epsilon=epsilon):
 
 def evaluate(q_values, runs=10000):
     thresholds = [q_i.index(min(q_i)) for q_i in q_values]
-    avg_load = two_thinning_average_based_simulate_many_runs(thresholds, runs=runs)
+    avg_load = simulate_many_runs(thresholds, runs=runs)
     print(f"The average load of the derived greedy policy is {avg_load}")
 
 
