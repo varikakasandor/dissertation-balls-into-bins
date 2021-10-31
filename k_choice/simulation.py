@@ -2,9 +2,10 @@ import random
 
 from k_choice.maths_results import one_choice_high_probability_maximum_load, two_choice_high_probability_maximum_load
 
-n = 1000
-m = n
-reward=max
+n = 10
+m = 20
+reward = max
+
 
 def simulate_one_run(choices, n=n, m=m, reward=reward):
     loads = [0] * n
@@ -32,5 +33,7 @@ def two_choice_simulate_many_runs(runs=100, n=n, m=m, reward=reward):
 if __name__ == "__main__":
     one_choice_simulate_many_runs()
     two_choice_simulate_many_runs()
-    print(f"According to mathematics, the maximum load of 1-choice should be around {one_choice_high_probability_maximum_load(n,m)} with high probability.")
-    print(f"According to mathematics, the maximum load of 2-choice should be around {two_choice_high_probability_maximum_load(n,m)} with high probability.")
+    print(
+        f"According to mathematics, the maximum load of 1-choice should be around {one_choice_high_probability_maximum_load(n, m)} with high probability.")
+    print(
+        f"According to mathematics, the maximum load of 2-choice should be around {two_choice_high_probability_maximum_load(n, m)} with high probability.")

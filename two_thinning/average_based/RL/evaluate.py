@@ -1,7 +1,7 @@
 from two_thinning.average_based.RL.train import train
 from two_thinning.average_based.simulation import simulate_many_runs
 
-n = 10
+n = 20
 m = n
 episodes = 100000
 epsilon = 0.1

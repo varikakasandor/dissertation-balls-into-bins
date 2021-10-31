@@ -12,10 +12,10 @@ def k_choice_high_probability_maximum_load(d, n, m):
         else:
             return m / n + sqrt(m * log(n) / n)
     else:
-        if m <= n:  # TODO: not prices, only for m=n
+        if m <= n:  # TODO: not precise, only for m=n
             return log(log(n)) / log(d)
         else:
-            (m - n) / n + log(log(n)) / log(d)
+            return (m - n) / n + log(log(n)) / log(d)
 
 
 def one_choice_high_probability_maximum_load(n, m):

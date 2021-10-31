@@ -1,7 +1,7 @@
 import random
 
-n = 10
-m = n
+n = 20
+m = 20
 episodes = 100000
 epsilon = 0.1
 alpha = 0.1

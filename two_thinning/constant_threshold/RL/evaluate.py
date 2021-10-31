@@ -12,7 +12,7 @@ runs = 10000
 
 def evaluate_q_value(best_threshold, n=n, m=m, reward=reward, runs=runs):
     avg_load = simulate_many_runs(best_threshold, reward=reward, runs=runs, n=n, m=m)
-    print(f"With {m} balls and {n} bins the average maximum load of the derived greedy constant threshold policy is {avg_load}")
+    print(f"With {m} balls and {n} bins the average maximum load of the derived constant threshold greedy policy is {avg_load}")
 
 
 def evaluate(n=n, m=m, episodes=episodes, epsilon=epsilon, reward=reward, runs=runs):

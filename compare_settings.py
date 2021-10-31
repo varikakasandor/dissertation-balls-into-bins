@@ -4,7 +4,7 @@ import two_thinning
 # TODO: call these evaluation functions
 
 
-def compare_settings(n=10, m=10, runs=100, reward=max, episodes=100000, epsilon=0.1,alpha = 0.1,version = 'Q'):
+def compare_settings(n=20, m=20, runs=100, reward=max, episodes=100000, epsilon=0.1,alpha = 0.1,version = 'Q'):
     k_choice.simulation.one_choice_simulate_many_runs(n=n,m=m,runs=runs,reward=reward)
     k_choice.simulation.two_choice_simulate_many_runs(n=n,m=m,runs=runs,reward=reward)
     two_thinning.constant_threshold.dp.find_best_constant_threshold(n=n,m=m,reward=reward)

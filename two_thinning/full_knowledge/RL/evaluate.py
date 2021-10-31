@@ -24,6 +24,7 @@ def get_best_model_path(n=n, m=m):
     best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", f"best_{n}_{m}.pth")
     return best_model_path
 
+
 def evaluate(model, n=n, m=m, reward=reward, runs=runs):
     max_loads = []
     for _ in range(runs):
@@ -54,12 +55,12 @@ def load_best_model(n=n, m=m, device=device):
 
 def evaluate_best(n=n, m=m, reward=reward, device=device, runs=runs):
     avg_load = -evaluate(load_best_model(n=n, m=m, device=device), n=n, m=m, reward=reward, runs=runs)
-    print(f"With {m} balls and {n} bins the average maximum load of the derived greedy full knowledge policy is {avg_load}")
+    print(
+        f"With {m} balls and {n} bins the average maximum load of the derived full knowledge greedy policy is {avg_load}")
     return avg_load
 
 
 def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episodes, device=device):
-
     current_model = train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device)
     current_model_performance = evaluate(current_model, n=n, m=m, reward=reward, runs=runs)
     print(f"The average maximum load of the current model is {current_model_performance}.")
@@ -77,4 +78,4 @@ def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episo
 
 
 if __name__ == '__main__':
-    compare(n=10, m=20)
+    compare(n=20, m=20)

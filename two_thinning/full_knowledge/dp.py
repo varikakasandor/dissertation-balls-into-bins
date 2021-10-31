@@ -35,7 +35,7 @@ def dp(loads_tuple, chosen, n=n, m=m, reward=reward):
 
 
 def find_best_thresholds(n=n, m=m, reward=reward):
-    print(f"With {m} balls and {n} bins the best achievable expected maximum load is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
+    print(f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
 
 if __name__ == "__main__":
     start_time = time.time()
