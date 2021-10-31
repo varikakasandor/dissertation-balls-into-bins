@@ -14,12 +14,15 @@ def reward(x):
     return -np.max(x)
 
 
-train_episodes = 300
+train_episodes = 3000
 runs = 300
-best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", "best.pth")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+def get_best_model_path(n=n, m=m):
+    best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", f"best_{n}_{m}.pth")
+    return best_model_path
 
 def evaluate(model, n=n, m=m, reward=reward, runs=runs):
     max_loads = []
@@ -44,7 +47,7 @@ def evaluate(model, n=n, m=m, reward=reward, runs=runs):
 def load_best_model(n=n, m=m, device=device):
     best_model = TwoThinningNet(n, m)
     best_model.to(device).double()
-    best_model.load_state_dict(torch.load(best_model_path))
+    best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m)))
     best_model.eval()
     return best_model
 
@@ -56,16 +59,22 @@ def evaluate_best(n=n, m=m, reward=reward, device=device, runs=runs):
 
 
 def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episodes, device=device):
-    best_model = load_best_model()
+
     current_model = train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device)
-    best_model_performance = evaluate(best_model, n=n, m=m, reward=reward, runs=runs)
     current_model_performance = evaluate(current_model, n=n, m=m, reward=reward, runs=runs)
-    print(f"The average maximum load of the best model is {best_model_performance}.")
-    print(f"The average maximum load of the current mode is {current_model_performance}.")
-    if current_model_performance < best_model_performance:
-        torch.save(current_model.state_dict(), best_model_path)
-        print(f"The best model has been updated to the current model.")
+    print(f"The average maximum load of the current model is {current_model_performance}.")
+
+    if os.path.exists(get_best_model_path(n=n, m=m)):
+        best_model = load_best_model()
+        best_model_performance = evaluate(best_model, n=n, m=m, reward=reward, runs=runs)
+        print(f"The average maximum load of the best model is {best_model_performance}.")
+        if current_model_performance < best_model_performance:
+            torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m))
+            print(f"The best model has been updated to the current model.")
+    else:
+        torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m))
+        print(f"This is the first model trained with these parameters. This trained model is now saved.")
 
 
 if __name__ == '__main__':
-    compare()
+    compare(n=10, m=20)

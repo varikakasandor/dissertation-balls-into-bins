@@ -56,3 +56,7 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, dev
             optimizer.step()
 
     return model
+
+
+if __name__=="__main__":
+    train()
