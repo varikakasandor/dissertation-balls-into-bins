@@ -18,7 +18,7 @@ def dp(loads_tuple, chosen, n=n, m=m, reward=reward):
     loads[chosen] += 1
     loads_sorted = sorted(loads)
     for i in range(n):
-        accept += dp(tuple(loads_sorted), i)
+        accept += dp(tuple(loads_sorted), i, n, m, reward)
     loads[chosen] -= 1
     accept /= n
 
@@ -27,16 +27,19 @@ def dp(loads_tuple, chosen, n=n, m=m, reward=reward):
         loads[i] += 1
         loads_sorted = sorted(loads)
         for j in range(n):
-            reject += dp(tuple(loads_sorted), j)
+            reject += dp(tuple(loads_sorted), j, n, m, reward)
         loads[i] -= 1
     reject /= (n * n)
 
     return min(accept, reject)
 
 
+def find_best_thresholds(n=n, m=m, reward=reward):
+    print(f"With {m} balls and {n} bins the best achievable expected maximum load is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
+
 if __name__ == "__main__":
     start_time = time.time()
 
-    print(f"With {m} balls, {n} bins the best achievable expected maximum load is {dp(tuple([0] * n), 0)}")
+    print(f"With {m} balls and {n} bins the best achievable expected maximum load is {dp(tuple([0] * n), 0)}")
 
     print("--- %s seconds ---" % (time.time() - start_time))

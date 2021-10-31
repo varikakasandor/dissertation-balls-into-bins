@@ -42,9 +42,8 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=ver
                 else:
                     raise NotImplementedError(version)
 
-    for i in range(m):
-        print(
-            f"After {i} balls have been placed, the ideal threshold is {q[i].index(min(q[i]))} with an expected maximum load of {min(q[i])}")
+    #for i in range(m):
+        #print(f"After {i} balls have been placed, the ideal threshold is {q[i].index(min(q[i]))} with an expected maximum load of {min(q[i])}")
 
     return [q[i].index(min(q[i])) for i in range(m)]
 

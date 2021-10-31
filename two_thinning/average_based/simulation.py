@@ -4,6 +4,7 @@ n = 20
 m = n
 reward = max
 
+
 def simulate_one_run(thresholds, reward=reward, n=n, m=m):
     loads = [0] * n
     for i in range(m):
@@ -18,4 +19,3 @@ def simulate_one_run(thresholds, reward=reward, n=n, m=m):
 
 def simulate_many_runs(thresholds, reward=reward, runs=100, n=n, m=m):
     return sum([simulate_one_run(thresholds, reward=reward, n=n, m=m) for _ in range(runs)]) / runs
-

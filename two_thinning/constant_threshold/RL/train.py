@@ -24,7 +24,7 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, reward=reward):
         q[a] += (r - q[a]) / cnt[a]
 
     best_threshold = q.index(min(q))
-    print(f"The best threshold is {best_threshold}, producing on average a maximum load of {q[best_threshold]}")
+    #print(f"The best threshold is {best_threshold}, producing on average a maximum load of {q[best_threshold]}")
     return best_threshold
 
 

@@ -15,15 +15,15 @@ def reward(x):
 
 
 train_episodes = 300
-eval_episodes = 300
-best_model_path = 'saved_models/best.pth'
+runs = 300
+best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", "best.pth")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate(model, n=n, m=m, reward=reward, eval_episodes=eval_episodes):
+def evaluate(model, n=n, m=m, reward=reward, runs=runs):
     max_loads = []
-    for _ in range(eval_episodes):
+    for _ in range(runs):
         loads = np.zeros(n)
         for i in range(m):
             options = model(torch.from_numpy(loads).double())
@@ -38,7 +38,6 @@ def evaluate(model, n=n, m=m, reward=reward, eval_episodes=eval_episodes):
         max_loads.append(-reward(loads))
 
     avg_max_load = sum(max_loads) / len(max_loads)
-    # print(avg_max_load)
     return avg_max_load
 
 
@@ -50,20 +49,21 @@ def load_best_model(n=n, m=m, device=device):
     return best_model
 
 
-def evaluate_best(n=n, m=m, device=device, eval_episodes=eval_episodes):
-    return evaluate(load_best_model(n=n, m=m, device=device), n=n, m=m, reward=reward, eval_episodes=eval_episodes)
+def evaluate_best(n=n, m=m, reward=reward, device=device, runs=runs):
+    avg_load = -evaluate(load_best_model(n=n, m=m, device=device), n=n, m=m, reward=reward, runs=runs)
+    print(f"With {m} balls and {n} bins the average maximum load of the derived greedy full knowledge policy is {avg_load}")
+    return avg_load
 
 
 def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episodes, device=device):
     best_model = load_best_model()
     current_model = train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device)
-    best_model_performance = evaluate(best_model, n=n, m=m, reward=reward, eval_episodes=eval_episodes)
-    current_model_performance = evaluate(current_model, n=n, m=m, reward=reward, eval_episodes=eval_episodes)
+    best_model_performance = evaluate(best_model, n=n, m=m, reward=reward, runs=runs)
+    current_model_performance = evaluate(current_model, n=n, m=m, reward=reward, runs=runs)
     print(f"The average maximum load of the best model is {best_model_performance}.")
     print(f"The average maximum load of the current mode is {current_model_performance}.")
     if current_model_performance < best_model_performance:
-        torch.save(current_model.state_dict(),
-                   os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", "best.pth"))
+        torch.save(current_model.state_dict(), best_model_path)
         print(f"The best model has been updated to the current model.")
 
 
