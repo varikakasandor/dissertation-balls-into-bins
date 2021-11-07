@@ -8,8 +8,6 @@
 *.out
 *.gz
 
-*.csv
-
 proposal/main.pdf
 
 experiment
