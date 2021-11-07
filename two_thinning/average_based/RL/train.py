@@ -1,11 +1,16 @@
 import random
+from ray import tune
 
-n = 20
-m = 20
+from two_thinning.average_based.simulation import simulate_many_runs
+
+
+n = 5
+m = 5
 episodes = 100000
 epsilon = 0.1
 alpha = 0.1
 version = 'Q'
+test_runs=300
 reward = max
 
 
@@ -19,9 +24,11 @@ def epsilon_greedy(options, epsilon=epsilon):
     return a, options[a]
 
 
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=version, reward=reward):
+def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=version, reward=reward, test_runs=test_runs, use_tune=False):
     q = [[(m + 1)] * (i + 1) for i in range(m)]  # TODO: good initialization
-    for _ in range(episodes):
+    best_thresholds=None
+    best_avg_test_load=None
+    for ep in range(episodes):
         loads = [0] * n
         for i in range(m):
             a, _ = epsilon_greedy(q[i], epsilon)
@@ -42,10 +49,15 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=ver
                 else:
                     raise NotImplementedError(version)
 
-    #for i in range(m):
-        #print(f"After {i} balls have been placed, the ideal threshold is {q[i].index(min(q[i]))} with an expected maximum load of {min(q[i])}")
+        curr_thresholds=[q[i].index(min(q[i])) for i in range(m)]
+        avg_test_load = simulate_many_runs(curr_thresholds, reward=reward, runs=test_runs, n=n, m=m)
+        if best_avg_test_load is None or avg_test_load<best_avg_test_load:
+            best_avg_test_load=avg_test_load
+            best_thresholds=curr_thresholds
+        if use_tune:
+            tune.report(avg_test_load=avg_test_load)
 
-    return [q[i].index(min(q[i])) for i in range(m)]
+    return best_thresholds
 
 
 if __name__ == "__main__":
