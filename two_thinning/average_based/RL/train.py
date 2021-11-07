@@ -9,9 +9,12 @@ m = 5
 episodes = 100000
 epsilon = 0.1
 alpha = 0.1
+initial_q_value=m+1
 version = 'Q'
 test_runs=300
 reward = max
+use_tune=False
+report_frequency=None
 
 
 def epsilon_greedy(options, epsilon=epsilon):
@@ -24,8 +27,9 @@ def epsilon_greedy(options, epsilon=epsilon):
     return a, options[a]
 
 
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=version, reward=reward, test_runs=test_runs, use_tune=False):
-    q = [[(m + 1)] * (i + 1) for i in range(m)]  # TODO: good initialization
+def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, initial_q_value=initial_q_value, version=version,
+          reward=reward, test_runs=test_runs, use_tune=use_tune, report_frequency=report_frequency):
+    q = [[initial_q_value] * (i + 1) for i in range(m)]  # TODO: good initialization
     best_thresholds=None
     best_avg_test_load=None
     for ep in range(episodes):
@@ -54,7 +58,7 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, alpha=alpha, version=ver
         if best_avg_test_load is None or avg_test_load<best_avg_test_load:
             best_avg_test_load=avg_test_load
             best_thresholds=curr_thresholds
-        if use_tune:
+        if use_tune and ep%report_frequency==0:
             tune.report(avg_test_load=avg_test_load)
 
     return best_thresholds
