@@ -8,7 +8,7 @@ m = 20
 episodes = 10000
 epsilon = 0.1
 
-initial_value = 0
+initial_q_value = 0
 reward = max
 
 
@@ -18,12 +18,12 @@ def choose_random_min(q):
     return random_mini
 
 
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_value=initial_value, reward=reward, use_tune=False):
+def train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_q_value, reward=reward, use_tune=False):
     # TODO: Strangely, for m=n, it always trains to output the constant threshold 1. \
     # I wonder why it doesn't increase the threshold as n grows larger and larger. The probability of having 1 balls in each bin \
     # decreases (very sharply!) by n, so it should be worth making the threshold equal to 2, what do I miss?
-    q = [initial_value] * (m + 1)
-    cnt = [initial_value] * (m + 1)
+    q = [initial_q_value] * (m + 1)
+    cnt = [0] * (m + 1)
     for _ in range(episodes):
         r = random.random()
         if r < epsilon:
