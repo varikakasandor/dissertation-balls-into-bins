@@ -1,7 +1,7 @@
 import random
 
-n = 20
-m = n
+n = 10
+m = 20
 reward = max
 
 
