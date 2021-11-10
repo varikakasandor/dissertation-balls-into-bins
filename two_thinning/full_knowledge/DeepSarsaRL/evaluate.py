@@ -2,11 +2,11 @@ import torch
 import numpy as np
 import os
 
-from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
-from two_thinning.full_knowledge.RL.train import train
+from two_thinning.full_knowledge.DeepSarsaRL.neural_network import FullTwoThinningNet
+from two_thinning.full_knowledge.DeepSarsaRL.train import train
 
 n = 10
-m = n
+m = 20
 epsilon = 0.1  # TODO: set (exponential) decay
 
 
@@ -14,7 +14,7 @@ def reward(x):
     return -np.max(x)
 
 
-train_episodes = 3000
+train_episodes = 30000
 runs = 300
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,10 +30,10 @@ def evaluate(model, n=n, m=m, reward=reward, runs=runs):
     for _ in range(runs):
         loads = np.zeros(n)
         for i in range(m):
-            options = model(torch.from_numpy(loads).double())
-            # print(f"The options are: {options}")
+            options = model(torch.from_numpy(loads))
+            print(f"The options are: {options}")
             a = torch.argmax(options)
-            # print(f"With load vector {loads}, the model chooses a threshold {a}")
+            print(f"With load vector {loads}, the model chooses a threshold {a}")
             randomly_selected = np.random.randint(n)
             if loads[randomly_selected] <= a:
                 loads[randomly_selected] += 1
@@ -46,8 +46,7 @@ def evaluate(model, n=n, m=m, reward=reward, runs=runs):
 
 
 def load_best_model(n=n, m=m, device=device):
-    best_model = TwoThinningNet(n, m)
-    best_model.to(device).double()
+    best_model = FullTwoThinningNet(n, m, device=device)
     best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m)))
     best_model.eval()
     return best_model
@@ -78,4 +77,4 @@ def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episo
 
 
 if __name__ == '__main__':
-    compare(n=20, m=20)
+    compare(n=10, m=20)

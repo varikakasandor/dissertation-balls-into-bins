@@ -4,7 +4,7 @@ from ray.tune.schedulers import ASHAScheduler
 import numpy as np
 import torch
 
-from two_thinning.full_knowledge.RL.train import train
+from two_thinning.full_knowledge.DeepSarsaRL.train import train
 
 n = 10
 m = n

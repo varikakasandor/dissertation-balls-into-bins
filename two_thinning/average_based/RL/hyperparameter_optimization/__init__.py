@@ -1,1 +1,1 @@
-from two_thinning.average_based.RL.hyperparameter_optimization.tune import tune_hyperparameters
+import two_thinning.average_based.RL.hyperparameter_optimization.tune

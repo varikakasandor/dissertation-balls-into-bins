@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 
 
-class TwoThinningNet(nn.Module):
+class FullTwoThinningNet(nn.Module):
 
     def __init__(self, n, m, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
-        super(TwoThinningNet, self).__init__()
+        super(FullTwoThinningNet, self).__init__()
         self.n = n
         self.m = m
         self.device = device
@@ -18,7 +18,10 @@ class TwoThinningNet(nn.Module):
             nn.Linear(256, self.m + 1)
         )
 
+        self.to(self.device).double()
+
+
     def forward(self, x):
-        x = x.to(self.device)
+        x = x.to(self.device).double()
         res = self.fc(x)
         return res

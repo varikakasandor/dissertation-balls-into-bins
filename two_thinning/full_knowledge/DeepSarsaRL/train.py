@@ -2,13 +2,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from two_thinning.full_knowledge.RL.neural_network import TwoThinningNet
+from two_thinning.full_knowledge.DeepSarsaRL.neural_network import FullTwoThinningNet
 
 n = 10
-m = n
+m = 20
 
 epsilon = 0.1  # TODO: set (exponential) decay
-train_episodes = 300
+train_episodes = 3000
 
 
 def reward(x):
@@ -19,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def epsilon_greedy(model, loads, epsilon=epsilon):
-    action_values = model(loads)
+    action_values = model(torch.from_numpy(loads))
     r = torch.rand(1)
     if r < epsilon:
         a = torch.randint(len(action_values), (1,))[0]
@@ -29,15 +29,14 @@ def epsilon_greedy(model, loads, epsilon=epsilon):
 
 
 def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device):
-    model = TwoThinningNet(n, m, device)
-    model.to(device).double()
+    model = FullTwoThinningNet(n, m, device)
     optimizer = torch.optim.Adam(model.parameters())
     mse_loss = nn.MSELoss()
 
     for _ in range(episodes):
         loads = np.zeros(n)
         for i in range(m):
-            a, old_val = epsilon_greedy(model, torch.from_numpy(loads).double(), epsilon)
+            a, old_val = epsilon_greedy(model, loads, epsilon)
             randomly_selected = np.random.randint(n)
             if loads[randomly_selected] <= a:
                 loads[randomly_selected] += 1
@@ -47,7 +46,7 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, dev
             if i == m - 1:
                 new_val = torch.as_tensor(reward(loads)).to(device)
             else:
-                _, new_val = epsilon_greedy(model, torch.from_numpy(loads).double(), epsilon)
+                _, new_val = epsilon_greedy(model, loads, epsilon)
                 new_val = new_val.detach()
 
             loss = mse_loss(old_val, new_val)
