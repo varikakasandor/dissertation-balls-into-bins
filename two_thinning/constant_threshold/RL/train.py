@@ -28,7 +28,8 @@ def train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_
         r = random.random()
         if r < epsilon:
             a = random.randrange(m + 1)
-        else:  # TODO: Why does it sample randomly in this case? Why doesn't it sample in a weighted way according to the current q-values?
+        else:  # TODO: Why does it sample randomly in this case? Why doesn't it sample in a weighted way according to
+            # the current q-values?
             a = choose_random_min(q)  # q.index(min(q))
         result = simulate_one_run(a, reward=reward, n=n, m=m)
         cnt[a] += 1

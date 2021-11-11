@@ -18,7 +18,7 @@ def reward(x):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def evaluate_config(n=n, m=m, reward=reward, config):
+def evaluate_config(config, n=n, m=m, reward=reward):
     train(n=config['n'], m=config['m'], epsilon=config['epsilon'], reward=reward, episodes=train_episodes, device=device)
 
 def tune_hyperparameters(train_episodes=train_episodes):
