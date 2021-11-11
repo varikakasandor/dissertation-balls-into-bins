@@ -1,4 +1,4 @@
-from two_thinning.average_based.Invalid_RL.train import train
+from two_thinning.average_based.invalid_RL.train import train
 from two_thinning.average_based.simulation import simulate_many_runs
 
 

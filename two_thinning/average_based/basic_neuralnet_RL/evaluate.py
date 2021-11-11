@@ -1,4 +1,4 @@
-from two_thinning.average_based.AverageBasedNeuralNetRL.train import train, evaluate_q_values
+from two_thinning.average_based.basic_neuralnet_RL.train import train, evaluate_q_values
 
 n = 5
 m = 10

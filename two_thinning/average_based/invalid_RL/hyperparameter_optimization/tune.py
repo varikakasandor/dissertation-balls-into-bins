@@ -2,7 +2,7 @@ import ray
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 
-from two_thinning.average_based.Invalid_RL.train import train
+from two_thinning.average_based.invalid_RL.train import train
 
 # ray.init(log_to_driver=False)
 ray.init(local_mode=True)

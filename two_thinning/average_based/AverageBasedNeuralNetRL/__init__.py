@@ -1,3 +1,0 @@
-import two_thinning.average_based.AverageBasedNeuralNetRL.evaluate
-import two_thinning.average_based.AverageBasedNeuralNetRL.train
-import two_thinning.average_based.AverageBasedNeuralNetRL.neural_network

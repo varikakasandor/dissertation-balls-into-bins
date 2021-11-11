@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from two_thinning.average_based.AverageBasedNeuralNetRL.neural_network import AverageTwoThinningNet
+from two_thinning.average_based.basic_neuralnet_RL.neural_network import AverageTwoThinningNet
 
 n = 10
 m = n
