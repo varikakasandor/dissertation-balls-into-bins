@@ -7,11 +7,12 @@ from two_thinning.average_based.basic_neuralnet_RL.neural_network import Average
 n = 10
 m = n
 
-epsilon = 0.1  # TODO: set (exponential) decay
+epsilon = 0.1
 train_episodes = 3000
 eval_runs = 300
-patience = 7
+patience = 20
 print_progress = True
+print_behaviour = False
 
 
 def reward(x):
@@ -37,7 +38,7 @@ def epsilon_greedy(model, ball_number, epsilon=epsilon):
     return a, action_values[a]
 
 
-def evaluate_q_values(model, n=n, m=m, reward=reward, eval_runs=eval_runs, print_behaviour=False):
+def evaluate_q_values(model, n=n, m=m, reward=reward, eval_runs=eval_runs, print_behaviour=print_behaviour):
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
@@ -52,14 +53,15 @@ def evaluate_q_values(model, n=n, m=m, reward=reward, eval_runs=eval_runs, print
                 else:
                     loads[np.random.randint(n)] += 1
             sum_loads += reward(loads)
-        avg_load = sum_loads / eval_runs
-        return avg_load
+        avg_score = sum_loads / eval_runs
+        return avg_score
 
 
 def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, eval_runs=eval_runs, patience=patience,
-          print_progress=print_progress, device=device):
-    model = AverageTwoThinningNet(m, device)
-    optimizer = torch.optim.Adam(model.parameters())
+          print_progress=print_progress, print_behaviour=print_behaviour, device=device):
+    curr_model = AverageTwoThinningNet(m, device)
+    best_model = AverageTwoThinningNet(m, device)
+    optimizer = torch.optim.Adam(curr_model.parameters())
     mse_loss = nn.MSELoss()
 
     best_eval_score = None
@@ -68,7 +70,7 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, eva
     for ep in range(episodes):
         loads = np.zeros(n)
         for i in range(m):
-            a, old_val = epsilon_greedy(model, i, epsilon)
+            a, old_val = epsilon_greedy(curr_model, i, epsilon)
             randomly_selected = np.random.randint(n)
             if loads[randomly_selected] <= a:
                 loads[randomly_selected] += 1
@@ -78,7 +80,7 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, eva
             if i == m - 1:
                 new_val = torch.as_tensor(reward(loads)).to(device)
             else:
-                _, new_val = epsilon_greedy(model, i + 1, epsilon)
+                _, new_val = epsilon_greedy(curr_model, i + 1, epsilon)
                 new_val = new_val.detach()
 
             loss = mse_loss(old_val, new_val)
@@ -86,9 +88,11 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, eva
             loss.backward()
             optimizer.step()
 
-        curr_eval_score = evaluate_q_values(model, n=n, m=m, reward=reward, eval_runs=eval_runs)
-        if best_eval_score is None or curr_eval_score < best_eval_score:
+        curr_eval_score = evaluate_q_values(curr_model, n=n, m=m, reward=reward, eval_runs=eval_runs,
+                                            print_behaviour=print_behaviour)
+        if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
+            best_model.load_state_dict(curr_model.state_dict())
             not_improved = 0
             if print_progress:
                 print(f"At episode {ep} the best eval score has improved to {curr_eval_score}.")
@@ -99,9 +103,9 @@ def train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, eva
         else:
             if print_progress:
                 print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
-            return model
+            break
 
-    return model
+    return best_model
 
 
 if __name__ == "__main__":

@@ -13,24 +13,56 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
 EPS_START = 0.9
 EPS_END = 0.05
-EPS_DECAY = 200
-REWARD_FUN = max
+EPS_DECAY = 2000
 TRAIN_EPISODES = 100
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 10000
+EVAL_RUNS = 100
+PATIENCE = 20
+PRINT_BEHAVIOUR = False
+PRINT_PROGRESS = True
 N = 10
-M = 10
+M = 20
 
 
-def epsilon_greedy(policy_net, ball_number, m, steps_done, device):
+def REWARD_FUN(x):
+    return -max(x)
+
+
+def epsilon_greedy(policy_net, ball_number, m, steps_done, eps_start, eps_end, eps_decay, device):
     sample = random.random()
-    eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
+    eps_threshold = eps_end + (eps_start - eps_end) * math.exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
         with torch.no_grad():
             options = policy_net(torch.DoubleTensor([ball_number]))
             return options.max(0)[1].type(dtype=torch.int64)
     else:
         return torch.as_tensor(random.randrange(m + 1), dtype=torch.int64).to(device)
+
+
+def greedy(policy_net, ball_number):
+    with torch.no_grad():
+        options = policy_net(torch.DoubleTensor([ball_number]))
+        return options.max(0)[1].type(dtype=torch.int64)  # TODO: instead torch.argmax (?)
+
+
+def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS, print_behaviour=PRINT_BEHAVIOUR):
+    with torch.no_grad():
+        sum_loads = 0
+        for _ in range(eval_runs):
+            loads = [0] * n
+            for i in range(m):
+                a = greedy(model, i)
+                if print_behaviour:
+                    print(f"With loads {loads} the trained model chose {a}")
+                randomly_selected = random.randrange(n)
+                if loads[randomly_selected] <= a:
+                    loads[randomly_selected] += 1
+                else:
+                    loads[random.randrange(n)] += 1
+            sum_loads += reward(loads)
+        avg_score = sum_loads / eval_runs
+        return avg_score
 
 
 def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
@@ -43,7 +75,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     non_final_next_states = torch.DoubleTensor([[s] for s in batch.next_state if s is not None])
 
     state_action_values = policy_net(torch.DoubleTensor([[x] for x in batch.state]))
-    state_action_values = state_action_values.gather(1, torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
+    state_action_values = state_action_values.gather(1,
+                                                     torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
     next_state_values = torch.zeros(batch_size).double().to(device)
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
@@ -60,9 +93,13 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     optimizer.step()
 
 
-def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE, target_update_freq=TARGET_UPDATE_FREQ, device=DEVICE):
+def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, eps_decay=EPS_DECAY,
+          target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
+          print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
     policy_net = AverageTwoThinningNet(m, device=device)
     target_net = AverageTwoThinningNet(m, device=device)
+    best_net = AverageTwoThinningNet(m, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -70,35 +107,54 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
+    best_eval_score = None
+    not_improved = 0
 
-    for i_episode in range(num_episodes):
+    for ep in range(num_episodes):
         loads = [0] * n
         for i in range(m):
 
-            threshold = epsilon_greedy(policy_net=policy_net, ball_number=i, m=m, steps_done=steps_done, device=device)
+            threshold = epsilon_greedy(policy_net=policy_net, ball_number=i, m=m, steps_done=steps_done,
+                                       eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             if loads[randomly_selected] <= threshold.item():
-                loads[randomly_selected]+=1
+                loads[randomly_selected] += 1
             else:
-                loads[random.randrange(n)]+=1
+                loads[random.randrange(n)] += 1
 
-            reward = torch.DoubleTensor([0 if i+1<m else reward_fun(loads)]).to(device)
+            reward = torch.DoubleTensor([0 if i + 1 < m else reward_fun(loads)]).to(device)
 
             curr_state = i
-            next_state = i+1
+            next_state = i + 1
             memory.push(curr_state, threshold, next_state, reward)
 
-            optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer, batch_size=batch_size, device=device)
+            optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
+                           batch_size=batch_size, device=device)
 
-            steps_done += 1
+        steps_done += 1
 
-        if i_episode % target_update_freq == 0:
+        curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
+                                            print_behaviour=print_behaviour)
+        if best_eval_score is None or curr_eval_score > best_eval_score:
+            best_eval_score = curr_eval_score
+            best_net.load_state_dict(policy_net.state_dict())
+            not_improved = 0
+            if print_progress:
+                print(f"At episode {ep} the best eval score has improved to {curr_eval_score}.")
+        elif not_improved < patience:
+            not_improved += 1
+            if print_progress:
+                print(f"At episode {ep} no improvement happened.")
+        else:
+            if print_progress:
+                print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
+            break
+
+        if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
-    print('Complete')
-
-    return policy_net
+    return best_net
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     train()
