@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from two_thinning.average_based.basic_neuralnet_RL.train import train, evaluate_q_values
+from two_thinning.average_based.RL.basic_neuralnet_RL.train import train, evaluate_q_values
 
 n = 10
 m = n

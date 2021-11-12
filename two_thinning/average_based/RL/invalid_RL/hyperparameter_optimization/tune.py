@@ -2,7 +2,7 @@ import ray
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 
-from two_thinning.average_based.invalid_RL.train import train
+from two_thinning.average_based.RL.invalid_RL.train import train
 
 # ray.init(log_to_driver=False)
 ray.init(local_mode=True)
@@ -44,7 +44,7 @@ def tune_hyperparameters(n=n, m=m, reward=reward, test_runs=test_runs, max_episo
         'version': tune.grid_search(["Q", "Sarsa"])
     }
     result = tune.run(evaluate_config, config=config, metric="avg_test_load", mode="min", num_samples=1,
-                      local_dir="./individual_runs", verbose=False)  # , scheduler=scheduler)
+                      local_dir="individual_runs", verbose=False)  # , scheduler=scheduler)
     (result.results_df).to_csv("./summary.csv")
     print(result.best_config)
 

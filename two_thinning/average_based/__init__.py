@@ -1,2 +1,2 @@
 import two_thinning.average_based.simulation
-import two_thinning.average_based.basic_neuralnet_RL
+import two_thinning.average_based.RL.basic_neuralnet_RL
