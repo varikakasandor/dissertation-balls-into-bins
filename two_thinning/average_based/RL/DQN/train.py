@@ -17,7 +17,7 @@ EPS_DECAY = 2000
 CONTINUOUS_REWARD = True
 TRAIN_EPISODES = 100
 TARGET_UPDATE_FREQ = 10
-MEMORY_CAPACITY = 10000
+MEMORY_CAPACITY = 10*BATCH_SIZE
 EVAL_RUNS = 100
 PATIENCE = 20
 PRINT_BEHAVIOUR = False
@@ -81,6 +81,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
 
     next_state_values = torch.zeros(batch_size).double().to(device)
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
+    # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
+    # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
@@ -125,7 +127,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             max_load = max(max_load,loads[to_place])
 
             if continuous_reward:
-                reward = -10 if increased_max_load else 0 # TODO : change back to -1
+                reward = -1 if increased_max_load else 0 # TODO : maybe change to -100
             else:
                 reward = reward_fun(loads) if i == m-1 else 0
 

@@ -6,10 +6,10 @@ from two_thinning.average_based.RL.DQN.neural_network import AverageTwoThinningN
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-BATCH_SIZE = 4
+BATCH_SIZE = 32
 EPS_START = 0.9
 EPS_END = 0.05
-EPS_DECAY = 40
+EPS_DECAY = 50
 CONTINUOUS_REWARD = True
 TRAIN_EPISODES = 1000
 TARGET_UPDATE_FREQ = 10
@@ -18,8 +18,8 @@ EVAL_RUNS = 100
 PATIENCE = 1000
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-N = 10
-M = 20
+N = 100
+M = 500
 
 
 def REWARD_FUN(x):
