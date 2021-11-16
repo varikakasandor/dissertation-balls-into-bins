@@ -4,8 +4,8 @@ import time
 from two_thinning.constant_threshold.maths_results import optimal_threshold
 from helper import number_of_increasing_partitions, argmin
 
-n = 15
-m = n
+n = 10
+m = 20
 reward = max
 
 @functools.lru_cache(maxsize=400000) # n * m * number_of_increasing_partitions(m, n))
@@ -59,6 +59,6 @@ def find_best_constant_threshold(n=n, m=m, reward=reward):
 
 if __name__ == "__main__":
     start_time = time.time()
-    find_best_constant_threshold(n=10, m=10)
+    find_best_constant_threshold()
     print(f"According to the mathematical bounds the optimal constant threshold should be around {optimal_threshold(n)}")
     print("--- %s seconds ---" % (time.time() - start_time))

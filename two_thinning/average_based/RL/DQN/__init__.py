@@ -1,1 +1,1 @@
-import two_thinning.average_based.replay_neuralnet_RL.train
+from two_thinning.average_based.RL.DQN import *

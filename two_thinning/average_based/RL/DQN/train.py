@@ -5,8 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from two_thinning.average_based.replay_neuralnet_RL.neural_network import AverageTwoThinningNet
-from two_thinning.average_based.replay_neuralnet_RL.replay_memory import ReplayMemory, Transition
+from two_thinning.average_based.RL.DQN.neural_network import AverageTwoThinningNet
+from two_thinning.average_based.RL.DQN.replay_memory import ReplayMemory, Transition
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -14,6 +14,7 @@ BATCH_SIZE = 64
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 2000
+CONTINUOUS_REWARD = True
 TRAIN_EPISODES = 100
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 10000
@@ -25,7 +26,7 @@ N = 10
 M = 20
 
 
-def REWARD_FUN(x):
+def REWARD_FUN(x): # TODO: Not yet used in training, it is hardcoded
     return -max(x)
 
 
@@ -94,8 +95,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
 
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, eps_decay=EPS_DECAY,
-          target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
+          continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+          eps_decay=EPS_DECAY, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
           print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
     policy_net = AverageTwoThinningNet(m, device=device)
     target_net = AverageTwoThinningNet(m, device=device)
@@ -112,17 +113,23 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     for ep in range(num_episodes):
         loads = [0] * n
+        max_load = 0
         for i in range(m):
 
             threshold = epsilon_greedy(policy_net=policy_net, ball_number=i, m=m, steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
-            if loads[randomly_selected] <= threshold.item():
-                loads[randomly_selected] += 1
-            else:
-                loads[random.randrange(n)] += 1
+            to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
+            increased_max_load = (max_load == loads[to_place])
+            loads[to_place] += 1
+            max_load = max(max_load,loads[to_place])
 
-            reward = torch.DoubleTensor([0 if i + 1 < m else reward_fun(loads)]).to(device)
+            if continuous_reward:
+                reward = -10 if increased_max_load else 0 # TODO : change back to -1
+            else:
+                reward = reward_fun(loads) if i == m-1 else 0
+
+            reward = torch.DoubleTensor([reward]).to(device)
 
             curr_state = i
             next_state = i + 1
