@@ -1,7 +1,7 @@
 import functools
 import time
 
-from helper import number_of_increasing_partitions
+from helper.helper import number_of_increasing_partitions
 
 n = 5
 m = n

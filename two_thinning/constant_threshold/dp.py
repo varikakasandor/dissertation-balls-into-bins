@@ -2,7 +2,7 @@ import functools
 import time
 
 from two_thinning.constant_threshold.maths_results import optimal_threshold
-from helper import number_of_increasing_partitions, argmin
+from helper.helper import number_of_increasing_partitions, argmin
 
 n = 10
 m = 20

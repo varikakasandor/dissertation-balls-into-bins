@@ -2,8 +2,8 @@ import torch
 import numpy as np
 import os
 
-from two_thinning.full_knowledge.DeepSarsaRL_single_output.neural_network import FullTwoThinningNet
-from two_thinning.full_knowledge.DeepSarsaRL_single_output.train import train
+from two_thinning.full_knowledge.RL.DeepSarsaRL_single_output.neural_network import FullTwoThinningNet
+from two_thinning.full_knowledge.RL.DeepSarsaRL_single_output.train import train
 
 n = 10
 m = 20

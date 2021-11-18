@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from two_thinning.average_based.RL.DQN.neural_network import AverageTwoThinningNet
+from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet
 from helper.replay_memory import ReplayMemory, Transition
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,7 +17,7 @@ EPS_DECAY = 2000
 CONTINUOUS_REWARD = True
 TRAIN_EPISODES = 100
 TARGET_UPDATE_FREQ = 10
-MEMORY_CAPACITY = 10 * BATCH_SIZE
+MEMORY_CAPACITY = 10*BATCH_SIZE
 EVAL_RUNS = 100
 PATIENCE = 20
 MAX_LOAD_INCREASE_REWARD = -1
@@ -25,14 +25,13 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 N = 10
 M = 20
-MAX_THRESHOLD = max(3, M // 10)
 
 
-def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
+def REWARD_FUN(x): # TODO: Not yet used in training, it is hardcoded
     return -max(x)
 
 
-def epsilon_greedy(policy_net, ball_number, max_threshold, steps_done, eps_start, eps_end, eps_decay, device):
+def epsilon_greedy(policy_net, ball_number, m, steps_done, eps_start, eps_end, eps_decay, device):
     sample = random.random()
     eps_threshold = eps_end + (eps_start - eps_end) * math.exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
@@ -40,7 +39,7 @@ def epsilon_greedy(policy_net, ball_number, max_threshold, steps_done, eps_start
             options = policy_net(torch.DoubleTensor([ball_number]))
             return options.max(0)[1].type(dtype=torch.int64)
     else:
-        return torch.as_tensor(random.randrange(max_threshold + 1), dtype=torch.int64).to(device)
+        return torch.as_tensor(random.randrange(m + 1), dtype=torch.int64).to(device)
 
 
 def greedy(policy_net, ball_number):
@@ -101,11 +100,10 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
           continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
-          max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
-          print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
-    policy_net = AverageTwoThinningNet(max_threshold, device=device)
-    target_net = AverageTwoThinningNet(max_threshold, device=device)
-    best_net = AverageTwoThinningNet(max_threshold, device=device)
+          max_load_increase_reward=MAX_LOAD_INCREASE_REWARD, print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
+    policy_net = FullTwoThinningNet(m, device=device)
+    target_net = FullTwoThinningNet(m, device=device)
+    best_net = FullTwoThinningNet(m, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -121,18 +119,18 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
         max_load = 0
         for i in range(m):
 
-            threshold = epsilon_greedy(policy_net=policy_net, ball_number=i, max_threshold=max_threshold, steps_done=steps_done,
+            threshold = epsilon_greedy(policy_net=policy_net, ball_number=i, m=m, steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
             increased_max_load = (max_load == loads[to_place])
             loads[to_place] += 1
-            max_load = max(max_load, loads[to_place])
+            max_load = max(max_load,loads[to_place])
 
             if continuous_reward:
                 reward = max_load_increase_reward if increased_max_load else 0
             else:
-                reward = reward_fun(loads) if i == m - 1 else 0
+                reward = reward_fun(loads) if i == m-1 else 0
 
             reward = torch.DoubleTensor([reward]).to(device)
 
