@@ -121,8 +121,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
         loads = [0] * n
         max_load = 0
         for i in range(m):
-
-            threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold, steps_done=steps_done,
+            threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
+                                       steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
@@ -138,8 +138,6 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                 reward = reward_fun(loads) if i == m - 1 else 0
 
             reward = torch.DoubleTensor([reward]).to(device)
-
-
 
             memory.push(curr_state, threshold, next_state, reward)
 

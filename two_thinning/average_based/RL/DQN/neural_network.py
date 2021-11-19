@@ -4,9 +4,9 @@ import torch.nn as nn
 
 class AverageTwoThinningNet(nn.Module):
 
-    def __init__(self, m, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, max_threshold, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(AverageTwoThinningNet, self).__init__()
-        self.m = m
+        self.max_threshold = max_threshold
         self.device = device
 
         self.fc = nn.Sequential(
@@ -14,7 +14,7 @@ class AverageTwoThinningNet(nn.Module):
             nn.ReLU(),
             nn.Linear(128, 256),
             nn.ReLU(),
-            nn.Linear(256, self.m + 1)
+            nn.Linear(256, self.max_threshold + 1)
         )
 
         self.to(self.device).double()
