@@ -7,7 +7,7 @@ class TheRelativeThresholdStrategy(StrategyBase):
     def __init__(self, n, m, limit):
         super(TheRelativeThresholdStrategy, self).__init__(n, m)
         self.limit = limit  # l is the constant threshold parameter of this strategy
-        self.primary_count = [0] * n
+        self.primary_count = [0] * self.n
         self.round = 0
 
     def decide(self, bin):
@@ -21,3 +21,8 @@ class TheRelativeThresholdStrategy(StrategyBase):
 
     def note(self, bin):
         self.loads[bin] += 1
+
+    def reset(self):
+        self.loads = [0] * self.n
+        self.primary_count = [0] * self.n
+        self.round = 0

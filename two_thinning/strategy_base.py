@@ -15,3 +15,7 @@ class StrategyBase(metaclass=ABCMeta):
     @abstractmethod
     def note(self, bin):
         pass
+
+    @abstractmethod
+    def reset(self):
+        pass

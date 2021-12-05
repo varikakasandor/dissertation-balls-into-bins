@@ -10,4 +10,7 @@ class AlwaysAcceptStrategy(StrategyBase):
         return True
 
     def note(self, bin):
-        self.loads[bin] += 1
+        pass
+
+    def reset(self):
+        pass
