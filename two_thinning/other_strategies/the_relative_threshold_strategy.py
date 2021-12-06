@@ -20,6 +20,7 @@ class TheRelativeThresholdStrategy(StrategyBase):
             return False
 
     def note(self, bin):
+        self.round += 1
         self.loads[bin] += 1
 
     def reset(self):

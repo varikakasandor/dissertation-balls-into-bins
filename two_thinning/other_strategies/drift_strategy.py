@@ -22,9 +22,7 @@ class DriftStrategy(StrategyBase):
             [(1 + self.theta) if self.cnt_points[i] < self.t else (1 - self.theta) for i in range(self.n)])
         lambda_i = (1 + self.theta) if self.cnt_points[bin] < self.t else (1 - self.theta)
         p_i = lambda_i / sum_lambdas
-        c = 2 * self.theta / (
-                    1 - self.theta)  # TODO: c can be anything between 2theta/(1-theta) and (1-theta)/(1+theta),
-        # it all works out for any such c
+        c = 2 * self.theta / (1 - self.theta)  # TODO: c can be anything between 2theta/(1-theta) and (1-theta)/(1+theta), it all works out for any such c
         u = np.random.default_rng().uniform()
         if self.n * p_i - c >= u:
             return True
