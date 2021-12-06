@@ -3,8 +3,8 @@ import time
 
 from helper.helper import number_of_increasing_partitions
 
-n = 5
-m = n
+n = 20
+m = 40
 reward = max
 
 

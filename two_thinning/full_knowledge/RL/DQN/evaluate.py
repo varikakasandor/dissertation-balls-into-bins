@@ -15,13 +15,15 @@ TRAIN_EPISODES = 1000
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 1000
 EVAL_RUNS = 100
-PATIENCE = 200
+PATIENCE = 20
 MAX_LOAD_INCREASE_REWARD = -1  # TODO: -1 is the realistic one, but maybe other values work better
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-N = 10
-M = 20
+N = 20
+M = 40
 MAX_THRESHOLD = 2 * M // N
+MAX_WEIGHT = 10
+
 
 
 def REWARD_FUN(x):
@@ -42,13 +44,13 @@ def evaluate_new_model(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=
                        eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE,
                        target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD, eval_runs=EVAL_RUNS,
                        patience=PATIENCE, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
-                       max_threshold=MAX_THRESHOLD,
+                       max_threshold=MAX_THRESHOLD, max_weight=MAX_WEIGHT,
                        print_progress=PRINT_PROGRESS, print_behaviour=PRINT_BEHAVIOUR, device=DEVICE):
     trained_model = train(n=N, m=M, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
                           continuous_reward=continuous_reward, max_threshold=max_threshold,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs,
-                          patience=patience, max_load_increase_reward=max_load_increase_reward,
+                          patience=patience, max_load_increase_reward=max_load_increase_reward, max_weight=max_weight,
                           print_behaviour=print_behaviour, print_progress=print_progress, device=device)
     return evaluate(trained_model, n=n, m=m, reward_fun=reward_fun, eval_runs=eval_runs)
 
@@ -68,13 +70,13 @@ def load_best_model(n=N, m=M, device=DEVICE):
 def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
             eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE,
             target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD, max_threshold=MAX_THRESHOLD,
-            eval_runs=EVAL_RUNS, patience=PATIENCE, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
+            eval_runs=EVAL_RUNS, patience=PATIENCE, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD, max_weight=MAX_WEIGHT,
             print_progress=PRINT_PROGRESS, print_behaviour=PRINT_BEHAVIOUR, device=DEVICE):
     current_model = train(n=N, m=M, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
                           continuous_reward=continuous_reward, max_threshold=max_threshold,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs,
-                          patience=patience, max_load_increase_reward=max_load_increase_reward,
+                          patience=patience, max_load_increase_reward=max_load_increase_reward, max_weight=max_weight,
                           print_behaviour=print_behaviour, print_progress=print_progress, device=device)
     current_model_performance = evaluate(current_model, n=n, m=m, reward_fun=reward_fun, eval_runs=eval_runs)
     print(
