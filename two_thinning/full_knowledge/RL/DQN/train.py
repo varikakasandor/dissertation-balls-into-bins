@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet
+from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet, FullTwoThinningOneHotNet
 from helper.replay_memory import ReplayMemory, Transition
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,7 +26,7 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 N = 10
 M = 20
-MAX_THRESHOLD = max(3, M // 10)
+MAX_THRESHOLD = max(3, 2 * M // N)
 MAX_WEIGHT = 10
 
 
@@ -39,7 +39,7 @@ def epsilon_greedy(policy_net, loads, max_threshold, steps_done, eps_start, eps_
     eps_threshold = eps_end + (eps_start - eps_end) * math.exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
         with torch.no_grad():
-            options = policy_net(torch.DoubleTensor(loads))
+            options = policy_net(torch.tensor(loads).unsqueeze(0)).squeeze(0)
             return options.max(0)[1].type(dtype=torch.int64)
     else:
         return torch.as_tensor(random.randrange(max_threshold + 1), dtype=torch.int64).to(device)
@@ -47,7 +47,7 @@ def epsilon_greedy(policy_net, loads, max_threshold, steps_done, eps_start, eps_
 
 def greedy(policy_net, loads):
     with torch.no_grad():
-        options = policy_net(torch.DoubleTensor(loads))
+        options = policy_net(torch.tensor(loads).unsqueeze(0)).squeeze(0)
         return options.max(0)[1].type(dtype=torch.int64)  # TODO: instead torch.argmax (?)
 
 
@@ -77,9 +77,9 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     batch = Transition(*zip(*transitions))
 
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool).to(device)
-    non_final_next_states = torch.DoubleTensor([s for s in batch.next_state if s is not None])
+    non_final_next_states = torch.tensor([s for s in batch.next_state if s is not None])
 
-    state_action_values = policy_net(torch.DoubleTensor([x for x in batch.state]))
+    state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,
                                                      torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
@@ -105,9 +105,9 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
           eps_decay=EPS_DECAY, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
           max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD, max_weight=MAX_WEIGHT,
           print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
-    policy_net = FullTwoThinningNet(n, max_threshold, device=device)
-    target_net = FullTwoThinningNet(n, max_threshold, device=device)
-    best_net = FullTwoThinningNet(n, max_threshold, device=device)
+    policy_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
+    target_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
+    best_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 

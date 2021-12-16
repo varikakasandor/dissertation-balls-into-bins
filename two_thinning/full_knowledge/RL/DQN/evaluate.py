@@ -2,7 +2,7 @@ import torch
 import os
 
 from two_thinning.full_knowledge.RL.DQN.train import train, evaluate_q_values
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet
+from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet, FullTwoThinningOneHotNet
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -11,17 +11,17 @@ EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 200
 CONTINUOUS_REWARD = True
-TRAIN_EPISODES = 1000
+TRAIN_EPISODES = 10000
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 1000
-EVAL_RUNS = 100
-PATIENCE = 20
+EVAL_RUNS = 1000
+PATIENCE = 50
 MAX_LOAD_INCREASE_REWARD = -1  # TODO: -1 is the realistic one, but maybe other values work better
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-N = 20
-M = 40
-MAX_THRESHOLD = 2 * M // N
+N = 5
+M = 20
+MAX_THRESHOLD = max(3, 2 * M // N)  # TODO: find some mathematical bound which is provable
 MAX_WEIGHT = 10
 
 
@@ -30,8 +30,9 @@ def REWARD_FUN(x):
     return -max(x)
 
 
-def get_best_model_path(n=N, m=M):
-    best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", f"best_{n}_{m}.pth")
+def get_best_model_path(n=N, m=M, one_hot=True):
+    one_hot_string = "one_hot_" if one_hot else ""
+    best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", f"best_{one_hot_string}{n}_{m}.pth")
     return best_model_path
 
 
@@ -58,13 +59,14 @@ def evaluate_new_model(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=
 def load_best_model(n=N, m=M, device=DEVICE):
     for max_threshold in range(m + 1):
         try:
-            best_model = FullTwoThinningNet(n=n, max_threshold=max_threshold, device=device)
+            best_model = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
             best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m)))
             best_model.eval()
             return best_model
         except:
             continue
     print("ERROR: trained model not found with any max_threshold")
+
 
 
 def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
