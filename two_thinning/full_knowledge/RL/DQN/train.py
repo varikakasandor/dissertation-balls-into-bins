@@ -89,7 +89,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    expected_state_action_values = (max_weight * steps_done / all_steps) * next_state_values + torch.as_tensor(
+    curr_weight = max_weight * steps_done / all_steps
+    expected_state_action_values = curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(
         batch.reward).to(device)  # TODO: remove weighting
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
