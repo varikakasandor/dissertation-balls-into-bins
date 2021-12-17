@@ -2,8 +2,8 @@ import random
 
 from k_choice.maths_results import one_choice_high_probability_maximum_load, two_choice_high_probability_maximum_load
 
-n = 80
-m = 80
+n = 5
+m = 20
 reward = max
 
 

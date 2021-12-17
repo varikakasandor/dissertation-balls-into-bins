@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+# from pytimedinput import timedInput # Works only with interactive interpreter
+
 from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet, FullTwoThinningOneHotNet
 from helper.replay_memory import ReplayMemory, Transition
 
@@ -27,7 +29,7 @@ PRINT_PROGRESS = True
 N = 10
 M = 20
 MAX_THRESHOLD = max(3, 2 * M // N)
-MAX_WEIGHT = 10
+MAX_WEIGHT = 1000
 
 
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
@@ -87,7 +89,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    expected_state_action_values = (max_weight*steps_done/all_steps)*next_state_values + torch.as_tensor(batch.reward).to(device)  # TODO: remove weighting
+    expected_state_action_values = (max_weight * steps_done / all_steps) * next_state_values + torch.as_tensor(
+        batch.reward).to(device)  # TODO: remove weighting
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
@@ -131,7 +134,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             curr_state = copy.deepcopy(loads)
             # increased_max_load = (max_load == loads[to_place])
             loads[to_place] += 1
-            next_state = copy.deepcopy(loads)
+            next_state = copy.deepcopy(loads) if i != m - 1 else None
             # max_load = max(max_load, loads[to_place])
 
             if continuous_reward:
@@ -144,7 +147,9 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             memory.push(curr_state, threshold, next_state, reward)
 
             optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                           batch_size=batch_size, steps_done=steps_done, all_steps=num_episodes*m, max_weight=max_weight, device=device)
+                           batch_size=batch_size, steps_done=steps_done, all_steps=num_episodes * m,
+                           max_weight=max_weight,
+                           device=device)  # TODO: should I not call it after every step instead only after every episode?
 
         steps_done += 1
 
@@ -165,7 +170,15 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                 print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
             break
 
-        if ep % target_update_freq == 0:
+        if ep % target_update_freq == 0:  # TODO: decouple target update and optional user halting
+            """user_text, timed_out = timedInput(prompt="Press Y if you would like to stop the training now!\n", timeout=2)
+
+            if not timed_out and user_text == "Y":
+                print("Training has been stopped by the user.")
+                return best_net
+            else:
+                if not timed_out:
+                    print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
     return best_net

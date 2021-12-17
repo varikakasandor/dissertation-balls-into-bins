@@ -15,14 +15,14 @@ TRAIN_EPISODES = 10000
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 1000
 EVAL_RUNS = 1000
-PATIENCE = 50
+PATIENCE = 100
 MAX_LOAD_INCREASE_REWARD = -1  # TODO: -1 is the realistic one, but maybe other values work better
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 N = 5
 M = 20
 MAX_THRESHOLD = max(3, 2 * M // N)  # TODO: find some mathematical bound which is provable
-MAX_WEIGHT = 10
+MAX_WEIGHT = 1000
 
 
 
@@ -37,7 +37,7 @@ def get_best_model_path(n=N, m=M, one_hot=True):
 
 
 def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs=EVAL_RUNS, ):
-    avg_score = evaluate_q_values(trained_model, n=n, m=m, reward=reward_fun, eval_runs=eval_runs, print_behaviour=True)
+    avg_score = evaluate_q_values(trained_model, n=n, m=m, reward=reward_fun, eval_runs=eval_runs, print_behaviour=False) # TODO: set back print_behaviour to True
     return avg_score
 
 
@@ -88,7 +88,7 @@ def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPA
         best_model = load_best_model(n=n, m=m, device=device)
         best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs=eval_runs)
         print(f"The average maximum load of the best model is {best_model_performance}.")
-        if current_model_performance < best_model_performance:
+        if current_model_performance > best_model_performance:
             torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m))
             print(f"The best model has been updated to the current model.")
         else:
