@@ -19,8 +19,8 @@ PATIENCE = 100
 MAX_LOAD_INCREASE_REWARD = -1  # TODO: -1 is the realistic one, but maybe other values work better
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-N = 5
-M = 20
+N = 30
+M = 150
 MAX_THRESHOLD = max(3, 2 * M // N)  # TODO: find some mathematical bound which is provable
 MAX_WEIGHT = 1000
 
