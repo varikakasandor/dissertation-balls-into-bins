@@ -1,5 +1,5 @@
 import copy
-import math
+from math import sqrt, exp
 import random
 
 import torch
@@ -21,13 +21,14 @@ CONTINUOUS_REWARD = True
 TRAIN_EPISODES = 100
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 10 * BATCH_SIZE
-EVAL_RUNS = 100
+EVAL_RUNS = 10
 PATIENCE = 20
 MAX_LOAD_INCREASE_REWARD = -1
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 N = 10
 M = 20
+OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
 MAX_THRESHOLD = max(3, 2 * M // N)
 MAX_WEIGHT = 1000
 
@@ -38,7 +39,7 @@ def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
 
 def epsilon_greedy(policy_net, loads, max_threshold, steps_done, eps_start, eps_end, eps_decay, device):
     sample = random.random()
-    eps_threshold = eps_end + (eps_start - eps_end) * math.exp(-1. * steps_done / eps_decay)
+    eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
         with torch.no_grad():
             options = policy_net(torch.tensor(loads).unsqueeze(0)).squeeze(0)
@@ -106,7 +107,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
           continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
-          eps_decay=EPS_DECAY, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
+          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
           max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD, max_weight=MAX_WEIGHT,
           print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
     policy_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
@@ -142,17 +143,18 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                 reward = larger  # max_load_increase_reward if increased_max_load else 0
             else:
                 reward = reward_fun(loads) if i == m - 1 else 0
-
             reward = torch.DoubleTensor([reward]).to(device)
-
             memory.push(curr_state, threshold, next_state, reward)
 
-            optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                           batch_size=batch_size, steps_done=steps_done, all_steps=num_episodes * m,
-                           max_weight=max_weight,
-                           device=device)  # TODO: should I not call it after every step instead only after every episode?
+            steps_done += 1
 
-        steps_done += 1
+            if steps_done % optimise_freq == 0:
+                optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
+                               batch_size=batch_size, steps_done=steps_done, all_steps=num_episodes * m,
+                               max_weight=max_weight,
+                               device=device)  # TODO: should I not call it after every step instead only after every episode?
+
+
 
         curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                             print_behaviour=print_behaviour)
