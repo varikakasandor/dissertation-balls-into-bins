@@ -1,40 +1,14 @@
 import copy
-from math import sqrt, exp
 import random
+from math import exp
 
-import torch
-import torch.nn as nn
 import torch.optim as optim
 
-# from pytimedinput import timedInput # Works only with interactive interpreter
-
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningNet, FullTwoThinningOneHotNet
 from helper.replay_memory import ReplayMemory, Transition
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-BATCH_SIZE = 64
-EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 2000
-CONTINUOUS_REWARD = True
-TRAIN_EPISODES = 100
-TARGET_UPDATE_FREQ = 10
-MEMORY_CAPACITY = 10 * BATCH_SIZE
-EVAL_RUNS = 10
-PATIENCE = 20
-MAX_LOAD_INCREASE_REWARD = -1
-PRINT_BEHAVIOUR = False
-PRINT_PROGRESS = True
-N = 10
-M = 20
-OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
-MAX_THRESHOLD = max(3, 2 * M // N)
-MAX_WEIGHT = 1000
+from two_thinning.full_knowledge.RL.DQN.constants import *
 
 
-def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
-    return -max(x)
+# from pytimedinput import timedInput # Works only with interactive interpreter
 
 
 def epsilon_greedy(policy_net, loads, max_threshold, steps_done, eps_start, eps_end, eps_decay, device):
@@ -54,7 +28,7 @@ def greedy(policy_net, loads):
         return options.max(0)[1].type(dtype=torch.int64)  # TODO: instead torch.argmax (?)
 
 
-def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS, print_behaviour=PRINT_BEHAVIOUR):
+def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN, print_behaviour=PRINT_BEHAVIOUR):
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
@@ -73,7 +47,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS, p
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_done, all_steps, max_weight, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_done, saturate_steps, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -90,7 +64,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    curr_weight = max_weight * steps_done / all_steps
+    curr_weight = sqrt(min(steps_done,saturate_steps) / saturate_steps)/2 # Converges to 0.5 starting from 0
     expected_state_action_values = curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(
         batch.reward).to(device)  # TODO: remove weighting
 
@@ -107,12 +81,12 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
           continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
-          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS, patience=PATIENCE,
-          max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD, max_weight=MAX_WEIGHT,
-          print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, device=DEVICE):
-    policy_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
-    target_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
-    best_net = FullTwoThinningOneHotNet(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
+          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE,
+          max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
+          print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
+    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
+    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
+    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -150,9 +124,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, all_steps=num_episodes * m,
-                               max_weight=max_weight,
-                               device=device)  # TODO: should I not call it after every step instead only after every episode?
+                               batch_size=batch_size, steps_done=steps_done, saturate_steps=10 * m,
+                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
 
 

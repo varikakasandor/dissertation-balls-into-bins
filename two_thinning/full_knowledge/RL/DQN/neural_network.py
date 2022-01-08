@@ -12,7 +12,8 @@ class FullTwoThinningNet(nn.Module):
         self.max_threshold = max_threshold
         self.device = device
         self.inner1_size = inner1_size if inner1_size else max(self.max_threshold + 1, self.n // 2)  # TODO: 256
-        self.inner2_size = inner2_size if inner2_size else max(self.max_threshold + 1, self.inner1_size // 2)  # TODO: 128
+        self.inner2_size = inner2_size if inner2_size else max(self.max_threshold + 1,
+                                                               self.inner1_size // 2)  # TODO: 128
 
         self.fc = nn.Sequential(  # TODO: maybe try with just two layers
             nn.Linear(self.n, self.inner1_size),
@@ -39,10 +40,11 @@ class FullTwoThinningOneHotNet(nn.Module):
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.inner1_size = inner1_size if inner1_size else max(self.max_threshold+1,
-                                                               (self.n//2)*(self.max_possible_load+1)//2)  # TODO: 256
-        self.inner2_size = inner2_size if inner2_size else max(self.max_threshold+1,
-                                                               self.inner1_size//4)  # TODO: 128
+        self.inner1_size = inner1_size if inner1_size else max(self.max_threshold + 1,
+                                                               (self.n // 2) * (
+                                                                       self.max_possible_load + 1) // 2)  # TODO: 256
+        self.inner2_size = inner2_size if inner2_size else max(self.max_threshold + 1,
+                                                               self.inner1_size // 4)  # TODO: 128
 
         self.fc = nn.Sequential(  # TODO: maybe try with just two layers
             nn.Linear(self.n * (self.max_possible_load + 1), self.inner1_size),
@@ -56,6 +58,30 @@ class FullTwoThinningOneHotNet(nn.Module):
 
     def forward(self, x):
         x = F.one_hot(x.sort()[0], num_classes=self.max_possible_load + 1).view(-1, self.n * (
-                    self.max_possible_load + 1)).double().to(self.device)
+                self.max_possible_load + 1)).double().to(self.device)
         res = self.fc(x)
         return res
+
+
+class FullTwoThinningRecurrentNet(nn.Module):
+
+    def __init__(self, n, max_threshold, max_possible_load, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+        super(FullTwoThinningRecurrentNet, self).__init__()
+        self.n = n
+        self.max_possible_load = max_possible_load
+        self.max_threshold = max_threshold
+        self.device = device
+        self.hidden_size = 128
+
+        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.max_threshold+1, batch_first=True
+                          )# ,nonlinearity='relu')  # ,dropout=0.5)
+        # self.relu = nn.ReLU(), TODO: check if needed or not after RNN
+        # self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
+
+        self.to(self.device).double()
+
+    def forward(self, x):
+        x = F.one_hot(x.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
+        x = self.rnn(x)[0][:, -1, :].squeeze(1)
+        # x = self.lin(x)
+        return x
