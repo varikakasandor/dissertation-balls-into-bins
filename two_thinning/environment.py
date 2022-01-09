@@ -1,18 +1,20 @@
 import random
 from math import sqrt, log, floor, ceil
 
-from two_thinning.other_strategies.always_accept import AlwaysAcceptStrategy
-from two_thinning.other_strategies.the_threshold_strategy import TheThresholdStrategy
-from two_thinning.other_strategies.the_relative_threshold_strategy import TheRelativeThresholdStrategy
-from two_thinning.other_strategies.drift_strategy import DriftStrategy
-from two_thinning.other_strategies.multi_stage_threshold_strategy import MultiStageThresholdStrategy
+from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
+from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
+from two_thinning.strategies.the_relative_threshold_strategy import TheRelativeThresholdStrategy
+from two_thinning.strategies.drift_strategy import DriftStrategy
+from two_thinning.strategies.multi_stage_threshold_strategy import MultiStageThresholdStrategy
+from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
-N = 100
-M = 500
+N = 30
+M = 150
 LIMIT = sqrt((2 * log(N)) / log(log(N)))  # According to the "The power of thinning in balanced allocation paper"
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max
-RUNS = 1000
+RUNS = 20
+PRINT_BEHAVIOUR = True
 
 K = floor(log(log(N)) / (3 * log(log(log(N)))))
 T = ceil(M / N)  # TODO: ceil might not be needed
@@ -25,15 +27,19 @@ L = (log(N)) ** BETA_K
 L_0 = 0
 
 
-def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD):
+def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
     loads = [0] * n
     for i in range(m):
         first_choice = random.randrange(n)
+        if print_behaviour:
+            print(f"Ball number {i}, first choice load {loads[first_choice]}", end=": ")
         if strategy.decide(first_choice):
-            print(f"Bin {first_choice} accepted.")
+            if print_behaviour:
+                print(f"ACCEPTED")
             final_choice = first_choice
         else:
-            print(f"Bin {first_choice} rejected.")
+            if print_behaviour:
+                print(f"REJECTED")
             final_choice = random.randrange(n)
 
         strategy.note(final_choice)
@@ -44,10 +50,10 @@ def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD):
     return score
 
 
-def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD):
+def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
     scores = []
     for _ in range(runs):
-        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward)
+        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
         scores.append(score)
         strategy.reset()
     avg_score = sum(scores) / runs
@@ -55,6 +61,5 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(
-        strategy=MultiStageThresholdStrategy(n=N, m=M, T=T, L_0=L_0, l=L))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
     # whereas it runs fine
