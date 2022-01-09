@@ -64,7 +64,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    curr_weight = sqrt(min(steps_done,saturate_steps) / saturate_steps)/2 # Converges to 0.5 starting from 0
+    curr_weight = sqrt(min(steps_done,saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0
     expected_state_action_values = curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(
         batch.reward).to(device)  # TODO: remove weighting
 
@@ -114,7 +114,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             # max_load = max(max_load, loads[to_place])
 
             if continuous_reward:
-                reward = larger  # max_load_increase_reward if increased_max_load else 0
+                reward = larger / n  # max_load_increase_reward if increased_max_load else 0
             else:
                 reward = reward_fun(loads) if i == m - 1 else 0
             reward = torch.DoubleTensor([reward]).to(device)
@@ -124,7 +124,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, saturate_steps=10 * m,
+                               batch_size=batch_size, steps_done=steps_done, saturate_steps=50 * m,
                                device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
 
