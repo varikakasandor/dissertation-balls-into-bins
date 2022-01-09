@@ -1,8 +1,9 @@
 from math import sqrt
-from two_thinning.full_knowledge.RL.DQN.neural_network import *
+from k_thinning.full_knowledge.RL.DQN.neural_network import *
 
-N = 100
-M = 100
+N = 10
+M = 20
+K = 3
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
@@ -21,7 +22,7 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
 MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
-NN_MODEL = FullTwoThinningRecurrentNet
+NN_MODEL = FullKThinningRecurrentNet
 NN_TYPE = "rnn"
 
 

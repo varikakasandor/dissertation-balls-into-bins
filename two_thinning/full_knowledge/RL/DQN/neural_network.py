@@ -71,9 +71,9 @@ class FullTwoThinningRecurrentNet(nn.Module):
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.hidden_size = 128
+        self.hidden_size = self.max_threshold+1
 
-        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.max_threshold+1, batch_first=True
+        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True
                           )# ,nonlinearity='relu')  # ,dropout=0.5)
         # self.relu = nn.ReLU(), TODO: check if needed or not after RNN
         # self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
