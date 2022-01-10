@@ -33,7 +33,7 @@ def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRI
         first_choice = random.randrange(n)
         if print_behaviour:
             print(f"Ball number {i}, first choice load {loads[first_choice]}", end=": ")
-        if strategy.decide(first_choice):
+        if strategy.decide_(first_choice):
             if print_behaviour:
                 print(f"ACCEPTED")
             final_choice = first_choice
@@ -42,7 +42,7 @@ def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRI
                 print(f"REJECTED")
             final_choice = random.randrange(n)
 
-        strategy.note(final_choice)
+        strategy.note_(final_choice)
         loads[final_choice] += 1
 
     score = reward(loads)
@@ -55,7 +55,7 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
     for _ in range(runs):
         score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
         scores.append(score)
-        strategy.reset()
+        strategy.reset_()
     avg_score = sum(scores) / runs
     print(f"The average score of this strategy is {avg_score}")
 

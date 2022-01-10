@@ -37,7 +37,6 @@ class MultiStageThresholdStrategy(StrategyBase):
 
     def note(self, bin):
         self.round += 1
-        self.loads[bin] += 1
         if self.round >= self.n * self.t[self.stage]:  # TODO: ==, but I am afraid of rounding issues leading to missing t_1
             self.primary_accepted = [0] * self.n
             became_too_high = [i for i in range(self.n) if (not self.H_was[i]) and (

@@ -25,7 +25,7 @@ def epsilon_greedy(policy_net, loads, max_threshold, steps_done, eps_start, eps_
 def greedy(policy_net, loads):
     with torch.no_grad():
         options = policy_net(torch.tensor(loads).unsqueeze(0)).squeeze(0)
-        return options.max(0)[1].type(dtype=torch.int64)  # TODO: instead torch.argmax (?)
+        return options.max(0)[1].type(dtype=torch.int64).item()  # TODO: instead torch.argmax (?)
 
 
 def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN, print_behaviour=PRINT_BEHAVIOUR):

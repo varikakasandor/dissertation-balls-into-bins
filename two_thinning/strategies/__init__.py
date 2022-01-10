@@ -1,1 +1,1 @@
-from two_thinning.constant_threshold import *
+from two_thinning.strategies import *

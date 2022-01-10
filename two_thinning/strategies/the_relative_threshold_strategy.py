@@ -21,9 +21,7 @@ class TheRelativeThresholdStrategy(StrategyBase):
 
     def note(self, bin):
         self.round += 1
-        self.loads[bin] += 1
 
     def reset(self):
-        self.loads = [0] * self.n
         self.primary_count = [0] * self.n
         self.round = 0

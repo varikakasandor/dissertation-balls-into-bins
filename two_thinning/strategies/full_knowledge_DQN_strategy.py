@@ -13,14 +13,13 @@ class FullKnowledgeDQNStrategy(StrategyBase):
                 self.model = train(n=n, m=m)
         else:
             self.model = train(n=n, m=m)
-        self.loads = [0] * self.n
 
     def decide(self, bin):
         a = greedy(self.model, self.loads)
-        return self.loads[bin] <= a.item()
+        return self.loads[bin] <= a
 
     def note(self, bin):
-        self.loads[bin] += 1
+        pass
 
     def reset(self):
-        self.loads = [0] * self.n
+        pass
