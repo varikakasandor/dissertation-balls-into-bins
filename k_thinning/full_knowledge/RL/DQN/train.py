@@ -28,9 +28,9 @@ def greedy(policy_net, loads, choices_left):
         return options.max(0)[1].type(dtype=torch.int64).item()  # TODO: instead torch.argmax (?)
 
 
+
 def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                      print_behaviour=PRINT_BEHAVIOUR):
-    # TODO: remove, instead use the environment
+                      print_behaviour=PRINT_BEHAVIOUR): # TODO: do fast version as for two_choice
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):

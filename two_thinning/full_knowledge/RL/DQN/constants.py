@@ -1,8 +1,8 @@
 from math import sqrt
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 
-N = 100
-M = 100
+N = 10
+M = 30
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
@@ -14,7 +14,8 @@ TRAIN_EPISODES = 1000
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 10 * BATCH_SIZE
 EVAL_RUNS_TRAIN = 5
-EVAL_RUNS_EVAL = 100
+EVAL_RUNS_EVAL = 10
+EVAL_PARALLEL_BATCH_SIZE = 32
 PATIENCE = 200
 MAX_LOAD_INCREASE_REWARD = -1
 PRINT_BEHAVIOUR = False
