@@ -57,7 +57,7 @@ def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPA
     if os.path.exists(get_best_model_path(n=n, m=m, nn_type=nn_type)):
         best_model = load_best_model(n=n, m=m, device=device)
         best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval, eval_parallel_batch_size=eval_parallel_batch_size)
-        print(f"The average maximum load of the best model is {best_model_performance}.")
+        print(f"The average score/maximum load of the best model is {best_model_performance}.")
         if current_model_performance > best_model_performance:
             torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m, nn_type=nn_type))
             print(f"The best model has been updated to the current model.")

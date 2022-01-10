@@ -28,9 +28,8 @@ def greedy(policy_net, loads, choices_left):
         return options.max(0)[1].type(dtype=torch.int64).item()  # TODO: instead torch.argmax (?)
 
 
-
 def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                      print_behaviour=PRINT_BEHAVIOUR): # TODO: do fast version as for two_choice
+                      print_behaviour=PRINT_BEHAVIOUR):  # TODO: do fast version as for two_choice
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
@@ -66,7 +65,6 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool).to(
         device)
     non_final_next_states = torch.tensor([s for s in batch.next_state if s is not None])
-
 
     state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,

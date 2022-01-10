@@ -131,7 +131,6 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     for ep in range(num_episodes):
         loads = [0] * n
-        max_load = 0
         for i in range(m):
             threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
                                        steps_done=steps_done,
@@ -188,7 +187,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 
 
