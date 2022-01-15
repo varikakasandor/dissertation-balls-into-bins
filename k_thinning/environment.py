@@ -5,7 +5,7 @@ from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNSt
 
 N = 10
 M = 20
-K = 3
+K = 2
 STRATEGY = AlwaysAcceptStrategy(N, M, K)
 REWARD = max
 RUNS = 20

@@ -22,7 +22,7 @@ class StrategyBase(metaclass=ABCMeta):
 
     def note_(self, bin):
         self.loads[bin] += 1
-        self.decide(bin)
+        self.note(bin)
 
     def reset_(self):
         self.loads = [0] * self.n
