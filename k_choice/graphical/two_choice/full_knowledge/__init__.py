@@ -1,0 +1,1 @@
+from k_choice.graphical.two_choice.full_knowledge import *
