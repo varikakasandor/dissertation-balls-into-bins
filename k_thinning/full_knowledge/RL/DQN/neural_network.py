@@ -27,5 +27,5 @@ class FullKThinningRecurrentNet(nn.Module):
         loads_one_hot = F.one_hot(loads.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
         choices_left_one_hot = F.one_hot(choices_left-2, num_classes=self.k - 1).double().to(self.device)
         after_rnn = self.rnn(loads_one_hot)[0][:, -1, :].squeeze(1)
-        res = self.lin(torch.cat([after_rnn,choices_left_one_hot], axis=1))
+        res = self.lin(torch.cat([after_rnn,choices_left_one_hot], dim=1))
         return res

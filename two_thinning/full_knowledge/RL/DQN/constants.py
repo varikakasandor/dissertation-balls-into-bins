@@ -1,8 +1,8 @@
 from math import sqrt
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 
-N = 10
-M = 30
+N = 30
+M = 50
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64

@@ -110,7 +110,6 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
 
     for ep in range(num_episodes):
         loads = [0] * n
-        max_load = 0
         for i in range(m):
             to_place = None
             threshold = None
@@ -138,13 +137,13 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 to_place = random.randrange(n)
                 choices_left += 1
 
-            larger = len([j for j in range(n) if loads[j] > loads[to_place]])
+            larger = sum([load for load in loads if load > loads[to_place]])
             curr_state = loads + [choices_left]
             loads[to_place] += 1
             next_state = (loads + [k]) if i != m - 1 else None
 
             if continuous_reward:
-                reward = larger / n  # max_load_increase_reward if increased_max_load else 0
+                reward = larger / max(sum(loads), 1)  # max_load_increase_reward if increased_max_load else 0
             else:
                 reward = reward_fun(loads) if i == m - 1 else 0
             reward = torch.DoubleTensor([reward]).to(device)

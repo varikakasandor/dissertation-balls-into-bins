@@ -1,8 +1,8 @@
 from math import sqrt
 from k_thinning.full_knowledge.RL.DQN.neural_network import *
 
-N = 200
-M = 300
+N = 3
+M = 5
 K = 3
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

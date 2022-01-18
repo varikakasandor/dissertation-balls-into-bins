@@ -137,16 +137,18 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
-            larger = len([j for j in range(n) if loads[j] > loads[to_place]])
+            larger = sum([load for load in loads if load > loads[to_place]])
             curr_state = copy.deepcopy(loads)
-            loads[to_place] += 1
-            next_state = copy.deepcopy(loads) if i != m - 1 else None
 
             if continuous_reward:
-                reward = larger / n  # max_load_increase_reward if increased_max_load else 0
+                reward = larger / max(sum(loads), 1)  # avoid division by 0
             else:
                 reward = reward_fun(loads) if i == m - 1 else 0
             reward = torch.DoubleTensor([reward]).to(device)
+
+            loads[to_place] += 1
+            next_state = copy.deepcopy(loads) if i != m - 1 else None
+
             memory.push(curr_state, threshold, next_state, reward)
 
             steps_done += 1
