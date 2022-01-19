@@ -1,10 +1,9 @@
 import os
 
-from two_thinning.full_knowledge.RL.DQN.constants import *
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningOneHotNet, FullTwoThinningNet, \
-    FullTwoThinningRecurrentNet
-from two_thinning.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster, evaluate_q_values
-
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import FullGraphicalTwoChoiceRecurrentNet
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster, evaluate_q_values
+from k_choice.graphical.two_choice.graph_base import GraphBase
 
 def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
     nn_type_str = f"{nn_type}_" if nn_type is not None else ""
@@ -14,21 +13,17 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 
 
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
-        FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
+    model = FullGraphicalTwoChoiceRecurrentNet #FullTwoThinningOneHotNet if nn_type == "one_hot" else (
+        #FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
 
-    for max_threshold in range(m + 1):
-        try:
-            best_model = model(n=n, max_threshold=max_threshold, max_possible_load=m,
-                               device=device)
-            best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
-            best_model.eval()
-            return best_model
-        except:
-            continue
-
-    print("ERROR: trained model not found with any max_threshold")
-    return None
+    try:
+        best_model = model(n=n, max_possible_load=m, device=device)
+        best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
+        best_model.eval()
+        return best_model
+    except:
+        print("ERROR: trained model not found with these parameters")
+        return None
 
 
 def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE):
@@ -37,16 +32,17 @@ def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL
     return avg_score
 
 
-def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
+def compare(n=N, graph: GraphBase = GRAPH, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
             eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE,
             optimise_freq=OPTIMISE_FREQ, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
-            target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD, max_threshold=MAX_THRESHOLD,
+            target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD,
             eval_runs_train=EVAL_RUNS_TRAIN, eval_runs_eval=EVAL_RUNS_EVAL, patience=PATIENCE,
             print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL,
             nn_type=NN_TYPE):
-    current_model = train(n=n, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
+    assert graph.n == n
+    current_model = train(n=n, graph=graph, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
-                          continuous_reward=continuous_reward, max_threshold=max_threshold, optimise_freq=optimise_freq,
+                          continuous_reward=continuous_reward, optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
                           patience=patience, print_progress=print_progress, nn_model=nn_model,
                           device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)
