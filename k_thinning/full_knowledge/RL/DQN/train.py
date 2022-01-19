@@ -137,7 +137,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 to_place = random.randrange(n)
                 choices_left += 1
 
-            larger = len([j for j in range(loads) if loads[j] > loads[to_place]])
+            larger = len([j for j in range(len(loads)) if loads[j] > loads[to_place]])
             curr_state = loads + [choices_left]
             loads[to_place] += 1
             next_state = (loads + [k]) if i != m - 1 else None

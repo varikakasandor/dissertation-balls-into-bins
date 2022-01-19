@@ -137,7 +137,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
-            larger = len([j for j in range(loads) if loads[j] > loads[to_place]])
+            larger = len([j for j in range(len(loads)) if loads[j] > loads[to_place]])
             curr_state = copy.deepcopy(loads)
 
             if continuous_reward:
