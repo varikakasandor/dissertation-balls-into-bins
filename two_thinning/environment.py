@@ -9,7 +9,7 @@ from two_thinning.strategies.multi_stage_threshold_strategy import MultiStageThr
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
 N = 10
-M = 20
+M = 30
 LIMIT = sqrt((2 * log(N)) / log(log(N)))  # According to the "The power of thinning in balanced allocation paper"
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max

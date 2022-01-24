@@ -3,9 +3,9 @@ import random
 from k_thinning.strategies.always_accept import AlwaysAcceptStrategy
 from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
-N = 10
-M = 20
-K = 2
+N = 3
+M = 5
+K = 3
 STRATEGY = AlwaysAcceptStrategy(N, M, K)
 REWARD = max
 RUNS = 20
@@ -49,7 +49,10 @@ def run_strategy_multiple_times(n=N, m=M, k=K, runs=RUNS, strategy=STRATEGY, rew
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
-    print(f"The average score of this strategy is {avg_score}")
+    if print_behaviour:
+        print(f"The average max load of this strategy is {avg_score}.")
+        print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
+    return avg_score
 
 
 if __name__ == "__main__":
