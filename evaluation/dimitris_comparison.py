@@ -6,7 +6,7 @@ from two_thinning.environment import run_strategy_multiple_times as run_strategy
 from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
-def create_comparison(ns=[10, 20, 50, 100], runs=50):  # ms=ns
+def create_comparison(ns=[10, 20, 50, 100], runs=10):  # ms=ns
     df = pd.DataFrame(columns=["strategy"] + list(map(str, ns)))
 
     one_choice_vals = {str(n): one_choice_simulate_many_runs(runs=runs, n=n, m=n, print_behaviour=False) for n in ns}
@@ -33,7 +33,7 @@ def create_comparison(ns=[10, 20, 50, 100], runs=50):  # ms=ns
     df = df.append({**{"strategy": "three_thinning"}, **three_thinning_vals}, ignore_index=True)
 
     print(df)
-    df.to_csv('Dimitris_comparison_extended.csv', index=False)
+    df.to_csv('Dimitris_comparison_tmp.csv', index=False)
     return df
 
 

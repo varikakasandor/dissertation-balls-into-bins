@@ -8,8 +8,8 @@ from two_thinning.strategies.drift_strategy import DriftStrategy
 from two_thinning.strategies.multi_stage_threshold_strategy import MultiStageThresholdStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
-N = 10
-M = 30
+N = 100
+M = 100
 LIMIT = sqrt((2 * log(N)) / log(log(N)))  # According to the "The power of thinning in balanced allocation paper"
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max
@@ -64,5 +64,5 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=TheThresholdStrategy(n=N, m=M))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M, use_pre_trained=False))  # I don't understand why it shows yellow,
     # whereas it runs fine

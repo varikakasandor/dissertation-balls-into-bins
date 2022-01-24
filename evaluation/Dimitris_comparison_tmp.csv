@@ -1,0 +1,9 @@
+strategy,10,20,50,100
+one_choice,2.7,3.3,3.7,4.4
+two_choice,2.0,2.0,2.3,2.3
+two_thinning_fixed_limit_0,2.7,3.7,4.0,4.0
+two_thinning_fixed_limit_1,2.4,2.6,3.2,3.4
+two_thinning_fixed_limit_2,2.0,2.3,2.7,3.1
+two_thinning_fixed_limit_3,2.9,2.9,3.1,3.0
+two_thinning,2.1,2.3,2.5,3.1
+three_thinning,2.4,2.1,2.0,2.2
