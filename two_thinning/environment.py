@@ -57,9 +57,12 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
-    print(f"The average score of this strategy is {avg_score}")
+    if print_behaviour:
+        print(f"The average score of this strategy is {avg_score}")
+        print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
+    return avg_score
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=TheThresholdStrategy(n=N, m=M))  # I don't understand why it shows yellow,
     # whereas it runs fine

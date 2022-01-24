@@ -22,6 +22,7 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
 MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
+THRESHOLD_CHANGE_FREQ = 1
 NN_MODEL = FullTwoThinningRecurrentNet
 NN_TYPE = "rnn"
 

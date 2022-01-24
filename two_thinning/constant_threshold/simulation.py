@@ -8,14 +8,18 @@ reward = max
 runs = 100
 top = 10
 max_threshold = 5
+primary_only = False
 
 
-def simulate_one_run(threshold, reward=reward, n=n, m=m):
+def simulate_one_run(threshold, reward=reward, n=n, m=m, primary_only=primary_only):
     loads = [0] * n
+    primary = [0] * n
     for _ in range(m):
         chosen = random.randrange(n)
-        if loads[chosen] <= threshold:
+        based_on = primary if primary_only else loads
+        if based_on[chosen] <= threshold:
             loads[chosen] += 1
+            primary[chosen] += 1
         else:
             arbitrary = random.randrange(n)
             loads[arbitrary] += 1
