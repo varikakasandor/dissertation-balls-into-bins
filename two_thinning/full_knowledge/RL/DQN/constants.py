@@ -24,7 +24,7 @@ OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
 MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
 THRESHOLD_CHANGE_FREQ = int(sqrt(M))
 NN_MODEL = FullTwoThinningRecurrentNet
-NN_TYPE = "rnn_rare"
+NN_TYPE = "rnn"
 
 
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded

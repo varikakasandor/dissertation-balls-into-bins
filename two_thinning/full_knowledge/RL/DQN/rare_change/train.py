@@ -6,10 +6,35 @@ import torch.optim as optim
 
 from helper.replay_memory import ReplayMemory
 from two_thinning.full_knowledge.RL.DQN.constants import *
-from two_thinning.full_knowledge.RL.DQN.train import epsilon_greedy, optimize_model, evaluate_q_values_faster
+from two_thinning.full_knowledge.RL.DQN.train import epsilon_greedy, greedy, optimize_model
 
 
-def train_rare_change(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
+def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
+                             threshold_change_freq=THRESHOLD_CHANGE_FREQ, batch_size=EVAL_PARALLEL_BATCH_SIZE):
+    batches = [batch_size] * (eval_runs // batch_size)
+    if eval_runs % batch_size != 0:
+        batches.append(eval_runs % batch_size)
+
+    with torch.no_grad():
+        sum_loads = 0
+        for batch in batches:
+            loads = [[0] * n for _ in range(batch)]
+            for start_period in range(0, m, threshold_change_freq):
+                a = greedy(model, loads, batched=True)
+                for _ in range(start_period, min(start_period + threshold_change_freq, m)):
+                    first_choices = random.choices(range(n), k=batch)
+                    second_choices = random.choices(range(n), k=batch)
+                    for j in range(batch):  # TODO: speed up for loop
+                        if loads[j][first_choices[j]] <= a[j]:
+                            loads[j][first_choices[j]] += 1
+                        else:
+                            loads[j][second_choices[j]] += 1
+            sum_loads += sum([reward(l) for l in loads])
+        avg_score = sum_loads / eval_runs
+        return avg_score
+
+
+def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
           continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, threshold_change_freq=THRESHOLD_CHANGE_FREQ,
@@ -97,4 +122,4 @@ def train_rare_change(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TR
 
 
 if __name__ == "__main__":
-    train_rare_change()
+    train()

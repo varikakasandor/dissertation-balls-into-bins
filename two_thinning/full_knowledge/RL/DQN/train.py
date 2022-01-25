@@ -43,7 +43,7 @@ def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_
         sum_loads = 0
         for batch in batches:
             loads = [[0] * n for _ in range(batch)]
-            for i in range(m):
+            for _ in range(m):
                 a = greedy(model, loads, batched=True)
                 first_choices = random.choices(range(n), k=batch)
                 second_choices = random.choices(range(n), k=batch)
@@ -62,7 +62,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
         sum_loads = 0
         for _ in range(eval_runs):
             loads = [0] * n
-            for i in range(m):
+            for _ in range(m):
                 a = greedy(model, loads)
                 if print_behaviour:
                     print(f"With loads {loads} the trained model chose {a}")
