@@ -4,7 +4,9 @@ from k_choice.simulation import one_choice_simulate_many_runs, two_choice_simula
 from k_thinning.environment import run_strategy_multiple_times as run_strategy_multiple_times_k
 from two_thinning.environment import run_strategy_multiple_times as run_strategy_multiple_times_2
 from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
+from two_thinning.strategies.full_knowledge_rare_change_DQN_strategy import FullKnowledgeRareChangeDQNStrategy
 from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
+
 
 def create_comparison(ns=[10, 20, 50, 100], runs=10):  # ms=ns
     df = pd.DataFrame(columns=["strategy"] + list(map(str, ns)))
@@ -31,6 +33,12 @@ def create_comparison(ns=[10, 20, 50, 100], runs=10):  # ms=ns
         str(n): run_strategy_multiple_times_k(n=n, m=n, k=3, runs=runs, strategy=FullKnowledgeDQNStrategy(n=n, m=n, k=3),
                                        print_behaviour=False) for n in ns}
     df = df.append({**{"strategy": "three_thinning"}, **three_thinning_vals}, ignore_index=True)
+
+    two_thinning_rare_change_vals = {
+        str(n): run_strategy_multiple_times_2(n=n, m=n, runs=runs,
+                                              strategy=FullKnowledgeRareChangeDQNStrategy(n=n, m=n),
+                                              print_behaviour=False) for n in ns}
+    df = df.append({**{"strategy": "two_thinning_rare_change"}, **two_thinning_rare_change_vals}, ignore_index=True)
 
     print(df)
     df.to_csv('Dimitris_comparison_tmp.csv', index=False)
