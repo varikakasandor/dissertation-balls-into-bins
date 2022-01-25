@@ -23,6 +23,7 @@ class FullKnowledgeDQNStrategy(StrategyBase):
 
     def decide(self, bin):
         a = greedy(self.model, self.loads)
+        self.curr_thresholds.append(a)
         return self.loads[bin] <= a
 
     def note(self, bin):
@@ -30,3 +31,9 @@ class FullKnowledgeDQNStrategy(StrategyBase):
 
     def reset(self):
         pass
+
+    def create_analyses(self, save_path):
+        self.create_plot(save_path)
+
+    def create_summary(self, save_path):
+        self.create_summary_plot(save_path)

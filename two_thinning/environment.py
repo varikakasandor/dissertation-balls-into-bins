@@ -1,33 +1,20 @@
 import random
-from math import sqrt, log, floor, ceil
+from datetime import datetime
+from os import mkdir
+from os.path import join, dirname, abspath
 
 from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
-from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
-from two_thinning.strategies.the_relative_threshold_strategy import TheRelativeThresholdStrategy
-from two_thinning.strategies.drift_strategy import DriftStrategy
-from two_thinning.strategies.multi_stage_threshold_strategy import MultiStageThresholdStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
 N = 100
 M = 100
-LIMIT = sqrt((2 * log(N)) / log(log(N)))  # According to the "The power of thinning in balanced allocation paper"
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max
-RUNS = 20
-PRINT_BEHAVIOUR = True
-
-K = floor(log(log(N)) / (3 * log(log(log(N)))))
-T = ceil(M / N)  # TODO: ceil might not be needed
-ALPHA = log(T) / (log(log(N)))
-ETA = 0
-BETA = ALPHA + ETA
-EPSILON = (2 * BETA - 1) / (2 * (K + 1))
-BETA_K = (2 * BETA - 1 - EPSILON) * K / (2 * K + 1)
-L = (log(N)) ** BETA_K
-L_0 = 0
+RUNS = 100
+PRINT_BEHAVIOUR = False
 
 
-def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
     loads = [0] * n
     for i in range(m):
         first_choice = random.randrange(n)
@@ -46,23 +33,27 @@ def run_strategy(n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRI
         loads[final_choice] += 1
 
     score = reward(loads)
-    # print(f"The score of this strategy on this run is {score}")
+    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, run_id)
+    strategy.create_analyses_(save_path=save_path)
     return score
 
 
 def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+    time_stamp = str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))
+    mkdir(join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp))
     scores = []
-    for _ in range(runs):
-        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
+    for i in range(runs):
+        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour, time_stamp=time_stamp, run_id=str(i))
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
-    if print_behaviour:
-        print(f"The average score of this strategy is {avg_score}")
-        print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
+    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, "summary")
+    strategy.create_summary_(save_path)
+    print(f"The average score of this strategy is {avg_score}")
+    print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
     return avg_score
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M, use_pre_trained=False))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
     # whereas it runs fine
