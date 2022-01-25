@@ -1,11 +1,9 @@
 import os
 
-from two_thinning.full_knowledge.RL.DQN.constants import *
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningOneHotNet, FullTwoThinningNet, \
-    FullTwoThinningRecurrentNet
+from two_thinning.full_knowledge.RL.DQN.rare_change.constants import *
+from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningRecurrentNet
 from two_thinning.full_knowledge.RL.DQN.rare_change.train import train, evaluate_q_values_faster
 
-NN_TYPE = "rnn_rare"
 
 def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
     nn_type_str = f"{nn_type}_" if nn_type is not None else ""
@@ -31,34 +29,40 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     return None
 
 
-def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL, threshold_change_freq=THRESHOLD_CHANGE_FREQ, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE):
+def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL,
+             threshold_change_freq=THRESHOLD_CHANGE_FREQ, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE):
     avg_score = evaluate_q_values_faster(trained_model, n=n, m=m, reward=reward_fun, eval_runs=eval_runs_eval,
-                                         threshold_change_freq=threshold_change_freq, batch_size=eval_parallel_batch_size)  # TODO: set back print_behaviour to True
+                                         threshold_change_freq=threshold_change_freq,
+                                         batch_size=eval_parallel_batch_size)  # TODO: set back print_behaviour to True
     return avg_score
 
 
 def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
             eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE,
             optimise_freq=OPTIMISE_FREQ, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
-            target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD, max_threshold=MAX_THRESHOLD,
+            target_update_freq=TARGET_UPDATE_FREQ, max_threshold=MAX_THRESHOLD,
             eval_runs_train=EVAL_RUNS_TRAIN, eval_runs_eval=EVAL_RUNS_EVAL, patience=PATIENCE,
-            print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL, threshold_change_freq=THRESHOLD_CHANGE_FREQ,
+            print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL,
+            threshold_change_freq=THRESHOLD_CHANGE_FREQ,
             nn_type=NN_TYPE):
     current_model = train(n=n, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
-                          continuous_reward=continuous_reward, max_threshold=max_threshold, optimise_freq=optimise_freq,
+                          max_threshold=max_threshold, optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
-                          patience=patience, print_progress=print_progress, nn_model=nn_model, threshold_change_freq=threshold_change_freq,
+                          patience=patience, print_progress=print_progress, nn_model=nn_model,
+                          threshold_change_freq=threshold_change_freq,
                           device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)
     current_model_performance = evaluate(current_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
-                                         eval_parallel_batch_size=eval_parallel_batch_size, threshold_change_freq=threshold_change_freq)
+                                         eval_parallel_batch_size=eval_parallel_batch_size,
+                                         threshold_change_freq=threshold_change_freq)
     print(
         f"With {m} balls and {n} bins the trained current DQN model has an average score/maximum load of {current_model_performance}.")
 
     if os.path.exists(get_best_model_path(n=n, m=m, nn_type=nn_type)):
         best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
         best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
-                                          threshold_change_freq=threshold_change_freq, eval_parallel_batch_size=eval_parallel_batch_size)
+                                          threshold_change_freq=threshold_change_freq,
+                                          eval_parallel_batch_size=eval_parallel_batch_size)
         print(f"The average score/maximum load of the best model is {best_model_performance}.")
         if current_model_performance > best_model_performance:
             torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m, nn_type=nn_type))
