@@ -5,13 +5,14 @@ from os.path import join, dirname, abspath
 
 from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
+from two_thinning.strategies.full_knowledge_rare_change_DQN_strategy import FullKnowledgeRareChangeDQNStrategy
 
-N = 100
-M = 100
+N = 30
+M = 50
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max
-RUNS = 100
-PRINT_BEHAVIOUR = False
+RUNS = 10
+PRINT_BEHAVIOUR = True
 
 
 def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
@@ -55,5 +56,5 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=FullKnowledgeRareChangeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
     # whereas it runs fine
