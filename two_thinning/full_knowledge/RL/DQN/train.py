@@ -82,8 +82,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     transitions = memory.sample(batch_size)
     batch = Transition(*zip(*transitions))
 
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool).to(device)
-    non_final_next_states = torch.tensor([s for s in batch.next_state if s is not None])
+    non_final_mask = torch.tensor(tuple(map(lambda s: not s, batch.done)), dtype=torch.bool).to(device)  # flip
+    non_final_next_states = torch.tensor([next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
 
     state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,
@@ -93,9 +93,9 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0
-    expected_state_action_values = curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(
-        batch.reward).to(device)  # TODO: remove weighting
+    expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
+    # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 # alternative
+    # curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  # alternative cnt'd
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
@@ -109,9 +109,9 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
 
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE,
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN,
           max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
@@ -137,19 +137,15 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
-            larger = len([j for j in range(len(loads)) if loads[j] > loads[to_place]])
             curr_state = copy.deepcopy(loads)
-
-            if continuous_reward:
-                reward = larger / n
-            else:
-                reward = reward_fun(loads) if i == m - 1 else 0
-            reward = torch.DoubleTensor([reward]).to(device)
-
             loads[to_place] += 1
-            next_state = copy.deepcopy(loads) if i != m - 1 else None
-
-            memory.push(curr_state, threshold, next_state, reward)
+            next_state = copy.deepcopy(loads)
+            if next_state is None:
+                print(curr_state, next_state)
+            reward = reward_fun(next_state) if i == m - 1 else 0  # "real" reward
+            reward += potential_fun(next_state) - potential_fun(curr_state)
+            reward = torch.DoubleTensor([reward]).to(device)
+            memory.push(curr_state, threshold, next_state, reward, i == m - 1)
 
             steps_done += 1
 

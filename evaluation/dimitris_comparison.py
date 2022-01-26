@@ -17,21 +17,24 @@ def create_comparison(ns=[10, 20, 50, 100], runs=10):  # ms=ns
     two_choice_vals = {str(n): two_choice_simulate_many_runs(runs=runs, n=n, m=n, print_behaviour=False) for n in ns}
     df = df.append({**{"strategy": "two_choice"}, **two_choice_vals}, ignore_index=True)
 
-    for limit in range(0,4):
+    for limit in range(0, 4):
         two_thinning_fixed_vals = {
             str(n): run_strategy_multiple_times_2(n=n, m=n, runs=runs,
                                                   strategy=TheThresholdStrategy(n=n, m=n, limit=limit),
                                                   print_behaviour=False) for n in ns}
-        df = df.append({**{"strategy": f"two_thinning_fixed_limit_{limit}"}, **two_thinning_fixed_vals}, ignore_index=True)
+        df = df.append({**{"strategy": f"two_thinning_fixed_limit_{limit}"}, **two_thinning_fixed_vals},
+                       ignore_index=True)
 
     two_thinning_vals = {
-        str(n): run_strategy_multiple_times_k(n=n, m=n, k=2, runs=runs, strategy=FullKnowledgeDQNStrategy(n=n, m=n, k=2),
-                                       print_behaviour=False) for n in ns}
+        str(n): run_strategy_multiple_times_k(n=n, m=n, k=2, runs=runs,
+                                              strategy=FullKnowledgeDQNStrategy(n=n, m=n, k=2),
+                                              print_behaviour=False) for n in ns}
     df = df.append({**{"strategy": "two_thinning"}, **two_thinning_vals}, ignore_index=True)
 
     three_thinning_vals = {
-        str(n): run_strategy_multiple_times_k(n=n, m=n, k=3, runs=runs, strategy=FullKnowledgeDQNStrategy(n=n, m=n, k=3),
-                                       print_behaviour=False) for n in ns}
+        str(n): run_strategy_multiple_times_k(n=n, m=n, k=3, runs=runs,
+                                              strategy=FullKnowledgeDQNStrategy(n=n, m=n, k=3),
+                                              print_behaviour=False) for n in ns}
     df = df.append({**{"strategy": "three_thinning"}, **three_thinning_vals}, ignore_index=True)
 
     two_thinning_rare_change_vals = {
