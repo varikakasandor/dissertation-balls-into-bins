@@ -5,7 +5,7 @@ import time
 import torch.optim as optim
 
 from helper.replay_memory import ReplayMemory
-from two_thinning.full_knowledge.RL.DQN.constants import *
+from two_thinning.full_knowledge.RL.DQN.rare_change.constants import *
 from two_thinning.full_knowledge.RL.DQN.train import epsilon_greedy, greedy, optimize_model
 
 
