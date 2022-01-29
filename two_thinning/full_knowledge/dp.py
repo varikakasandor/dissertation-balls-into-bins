@@ -4,7 +4,7 @@ import time
 from helper.helper import number_of_increasing_partitions
 
 N = 10
-M = 15
+M = 25
 REWARD = max
 
 
