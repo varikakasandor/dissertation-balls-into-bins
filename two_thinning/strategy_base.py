@@ -57,7 +57,7 @@ class StrategyBase(metaclass=ABCMeta):
         x = np.arange(self.m)
         plt.plot(x, np.array(self.curr_thresholds))
         plt.title("Threshold progression")
-        plt.xlabel("Bin")
+        plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")
         plt.savefig(save_path)
 
@@ -65,6 +65,6 @@ class StrategyBase(metaclass=ABCMeta):
         # threshold
         plt.plot(np.array(self.thresholds).T)
         plt.title("Threshold progression (multiple runs)")
-        plt.xlabel("Bin")
+        plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")
         plt.savefig(save_path)

@@ -65,13 +65,14 @@ class FullTwoThinningOneHotNet(nn.Module):
 
 class FullTwoThinningRecurrentNet(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, n, max_threshold, max_possible_load,
+                 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningRecurrentNet, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.hidden_size = self.max_threshold+1
+        self.hidden_size = self.max_threshold + 1
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
         self.to(self.device).double()
 
@@ -80,15 +81,18 @@ class FullTwoThinningRecurrentNet(nn.Module):
         x = self.rnn(x)[0][:, -1, :].squeeze(1)
         return x
 
+
 class FullTwoThinningRecurrentNetFC(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, n, max_threshold, max_possible_load,
+                 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningRecurrentNetFC, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.hidden_size = self.max_threshold+1
+        self.hidden_size = self.max_threshold + 1
+        # TODO: one extra layer converting one-hot to embedding (same for all loads)
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
         self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
         self.to(self.device).double()
@@ -98,4 +102,3 @@ class FullTwoThinningRecurrentNetFC(nn.Module):
         x = self.rnn(x)[0][:, -1, :].squeeze(1)
         x = self.lin(x)
         return x
-
