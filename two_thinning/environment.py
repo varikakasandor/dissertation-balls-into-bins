@@ -8,11 +8,11 @@ from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from two_thinning.strategies.full_knowledge_rare_change_DQN_strategy import FullKnowledgeRareChangeDQNStrategy
 
-N = 10
-M = 30
+N = 5
+M = 50
 STRATEGY = AlwaysAcceptStrategy(N, M)
 REWARD = max
-RUNS = 10
+RUNS = 30
 PRINT_BEHAVIOUR = True
 
 
@@ -57,5 +57,5 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=TheThresholdStrategy(n=N, m=M))  # I don't understand why it shows yellow,
+    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M))  # I don't understand why it shows yellow,
     # whereas it runs fine

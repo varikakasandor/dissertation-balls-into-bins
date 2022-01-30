@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class FullTwoThinningNet(nn.Module):
 
-    def __init__(self, n, max_threshold, inner1_size=None, inner2_size=None,
+    def __init__(self, n, max_threshold, inner1_size=None, inner2_size=None, hidden_size=64,
                  device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningNet, self).__init__()
         self.n = n
@@ -33,7 +33,7 @@ class FullTwoThinningNet(nn.Module):
 
 class FullTwoThinningOneHotNet(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load, inner1_size=None, inner2_size=None,
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64, inner1_size=None, inner2_size=None,
                  device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningOneHotNet, self).__init__()
         self.n = n
@@ -65,14 +65,14 @@ class FullTwoThinningOneHotNet(nn.Module):
 
 class FullTwoThinningRecurrentNet(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load,
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64,
                  device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningRecurrentNet, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.hidden_size = self.max_threshold + 1
+        self.hidden_size = hidden_size
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
         self.to(self.device).double()
 
@@ -84,14 +84,13 @@ class FullTwoThinningRecurrentNet(nn.Module):
 
 class FullTwoThinningRecurrentNetFC(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load,
-                 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullTwoThinningRecurrentNetFC, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.max_threshold = max_threshold
         self.device = device
-        self.hidden_size = self.max_threshold + 1
+        self.hidden_size = hidden_size  # self.max_threshold + 1
         # TODO: one extra layer converting one-hot to embedding (same for all loads)
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
         self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)

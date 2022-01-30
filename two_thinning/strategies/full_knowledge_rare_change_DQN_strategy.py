@@ -21,7 +21,7 @@ class FullKnowledgeRareChangeDQNStrategy(StrategyBase):
                 version = "_tmp"
             elif existing_model is None and use_pre_trained:
                 print("There is no trained model yet with the given parameters, so a new one will be trained now.")
-            self.model = train(n=n, m=m, optimise_freq=int(sqrt(m)), max_threshold=max(3, 2 * (m + m - 1) // m),
+            self.model = train(n=n, m=m, optimise_freq=int(sqrt(m)), max_threshold=max(3, 2 * (m + n - 1) // n),
                                threshold_change_freq=self.threshold_change_freq)
             torch.save(self.model.state_dict(), get_best_model_path(n=n, m=m)[:-4] + version + '.pth')
         else:

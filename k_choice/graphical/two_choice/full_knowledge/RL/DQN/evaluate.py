@@ -42,7 +42,7 @@ def compare(n=N, graph: GraphBase = GRAPH, m=M, train_episodes=TRAIN_EPISODES, m
     assert graph.n == n
     current_model = train(n=n, graph=graph, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
-                          continuous_reward=continuous_reward, optimise_freq=optimise_freq,
+                          optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
                           patience=patience, print_progress=print_progress, nn_model=nn_model,
                           device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)

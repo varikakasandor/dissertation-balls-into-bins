@@ -20,8 +20,7 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
 
     for max_threshold in range(m + 1):
         try:
-            best_model = model(n=n, max_threshold=max_threshold, max_possible_load=m,
-                               device=device)
+            best_model = model(n=n, max_threshold=max_threshold, max_possible_load=m, hidden_size=64, device=device)
             best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
             best_model.eval()
             return best_model
@@ -57,8 +56,8 @@ def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPA
     print(
         f"With {m} balls and {n} bins the trained current DQN model has an average score/maximum load of {current_model_performance}.")
 
-    if os.path.exists(get_best_model_path(n=n, m=m, nn_type=nn_type)):
-        best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
+    best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
+    if best_model is not None:
         best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
                                           eval_parallel_batch_size=eval_parallel_batch_size)
         print(f"The average score/maximum load of the best model is {best_model_performance}.")

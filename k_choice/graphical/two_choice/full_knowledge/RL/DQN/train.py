@@ -109,7 +109,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
 
 
 def train(n=N, graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
@@ -131,23 +131,20 @@ def train(n=N, graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, n
     for ep in range(num_episodes):
         loads = [0] * n
         for i in range(m):
-            threshold = epsilon_greedy(policy_net=policy_net, loads=loads, steps_done=steps_done,
+            threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
+                                       steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
-            larger = sum([load for load in loads if load > loads[to_place]])
             curr_state = copy.deepcopy(loads)
-
-            if continuous_reward:
-                reward = larger / max(sum(loads), 1)  # avoid division by 0
-            else:
-                reward = reward_fun(loads) if i == m - 1 else 0
-            reward = torch.DoubleTensor([reward]).to(device)
-
             loads[to_place] += 1
-            next_state = copy.deepcopy(loads) if i != m - 1 else None
-
-            memory.push(curr_state, threshold, next_state, reward)
+            next_state = copy.deepcopy(loads)
+            if next_state is None:
+                print(curr_state, next_state)
+            reward = reward_fun(next_state) if i == m - 1 else 0  # "real" reward
+            reward += potential_fun(next_state) - potential_fun(curr_state)
+            reward = torch.DoubleTensor([reward]).to(device)
+            memory.push(curr_state, threshold, next_state, reward, i == m - 1)
 
             steps_done += 1
 
