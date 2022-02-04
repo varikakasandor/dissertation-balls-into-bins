@@ -17,7 +17,7 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
         #FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
 
     try:
-        best_model = model(n=n, max_possible_load=m, device=device)
+        best_model = model(n=n, device=device)
         best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
         best_model.eval()
         return best_model
@@ -40,7 +40,7 @@ def compare(n=N, graph: GraphBase = GRAPH, m=M, train_episodes=TRAIN_EPISODES, m
             print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL,
             nn_type=NN_TYPE):
     assert graph.n == n
-    current_model = train(n=n, graph=graph, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
+    current_model = train(graph=graph, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
                           optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,

@@ -19,7 +19,7 @@ def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_
     eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
         x, y = edge
-        with torch.no_grad:
+        with torch.no_grad():
             vals = policy_net(torch.as_tensor(loads)).detach()
             if vals[x] >= vals[y]:
                 return x
@@ -45,7 +45,7 @@ def greedy(policy_net, loads, edge, batched=False):
             pass  # TODO
         else:
             x, y = edge
-            with torch.no_grad:
+            with torch.no_grad():
                 vals = policy_net(torch.as_tensor(loads)).detach()
                 if vals[x] >= vals[y]:
                     return x
@@ -61,9 +61,10 @@ def greedy(policy_net, loads, edge, batched=False):
             return options.max(0)[1].type(dtype=torch.int64).item()"""
 
 
-"""def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
+def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
                              batch_size=EVAL_PARALLEL_BATCH_SIZE):
-    batches = [batch_size] * (eval_runs // batch_size)
+    pass
+    """batches = [batch_size] * (eval_runs // batch_size)
     if eval_runs % batch_size != 0:
         batches.append(eval_runs % batch_size)
 
@@ -110,21 +111,19 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     batch = Transition(*zip(*transitions))
 
     non_final_mask = torch.tensor(tuple(map(lambda s: not s, batch.done)), dtype=torch.bool).to(device)  # flip
-    non_final_next_states = torch.tensor(
-        [next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
+    non_final_next_loads = torch.tensor(
+        [next_state_loads for (done, (next_state_loads, _)) in zip(batch.done, batch.next_state) if not done])
+    non_final_next_edge = torch.tensor([list(next_state_edge) for (done, (_, next_state_edge)) in
+                                        zip(batch.done, batch.next_state) if not done]).to(device)
 
-    state_action_values = policy_net(torch.tensor([x for x in batch.state]))
-    state_action_values = state_action_values.gather(1,
-                                                     torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
+    state_action_values = policy_net(torch.tensor([loads for (loads, _) in batch.state]))
+    state_action_values = state_action_values.gather(1, torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
     next_state_values = torch.zeros(batch_size).double().to(device)
-    next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
-    # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
+    options = target_net(non_final_next_loads)
+    next_state_values[non_final_mask] = options.gather(1, non_final_next_edge).max(1)[0].detach()
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
-    # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 #
-    # alternative curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  #
-    # alternative cnt'd
+
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
@@ -164,12 +163,13 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
         for i in range(m):
             chosen = epsilon_greedy(policy_net=policy_net, loads=loads, edge=edge, steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
-            curr_state = (copy.deepcopy(loads), edge)
+            old_loads = copy.deepcopy(loads)
+            curr_state = (old_loads, edge)
             loads[chosen] += 1
             next_edge = random.choice(graph.edge_list)
             next_state = (copy.deepcopy(loads), next_edge)
             reward = reward_fun(loads) if i == m - 1 else 0  # might incorporate the edge as well
-            reward += potential_fun(next_state) - potential_fun(curr_state)
+            reward += potential_fun(loads) - potential_fun(old_loads)
             reward = torch.DoubleTensor([reward]).to(device)
             memory.push(curr_state, chosen, next_state, reward, i == m - 1)
 
