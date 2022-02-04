@@ -147,7 +147,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
 
     policy_net = nn_model(n=graph.n, device=device)
     target_net = nn_model(n=graph.n, device=device)
-    best_net = nn_model(n=graph., device=device)
+    best_net = nn_model(n=graph.n, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -168,7 +168,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
             loads[chosen] += 1
             next_edge = random.choice(graph.edge_list)
             next_state = (copy.deepcopy(loads), next_edge)
-            reward = reward_fun(next_state) if i == m - 1 else 0  # might incorporate the edge as well
+            reward = reward_fun(loads) if i == m - 1 else 0  # might incorporate the edge as well
             reward += potential_fun(next_state) - potential_fun(curr_state)
             reward = torch.DoubleTensor([reward]).to(device)
             memory.push(curr_state, chosen, next_state, reward, i == m - 1)
