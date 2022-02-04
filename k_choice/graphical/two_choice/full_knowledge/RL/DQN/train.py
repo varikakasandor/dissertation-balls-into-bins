@@ -19,16 +19,22 @@ def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_
     eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay)
     if sample > eps_threshold:
         x, y = edge
-        loads_x = copy.deepcopy(loads)
+        with torch.no_grad:
+            vals = policy_net(torch.as_tensor(loads)).detach()
+            if vals[x] >= vals[y]:
+                return x
+            else:
+                return y
+        """loads_x = copy.deepcopy(loads)
         loads_x[x] += 1
         loads_y = copy.deepcopy(loads)
         loads_y[y] += 1
         with torch.no_grad():
             combined = torch.stack([torch.as_tensor(loads_x), torch.as_tensor(loads_y)])
             options = policy_net(combined)
-            return options.max(0)[1].type(dtype=torch.int64)
+            return options.max(0)[1].type(dtype=torch.int64)"""
     else:
-        return torch.as_tensor(random.randrange(2), dtype=torch.int64).to(device)
+        return torch.tensor(random.choice(list(edge)))
 
 
 def greedy(policy_net, loads, edge, batched=False):
@@ -39,13 +45,20 @@ def greedy(policy_net, loads, edge, batched=False):
             pass  # TODO
         else:
             x, y = edge
+            with torch.no_grad:
+                vals = policy_net(torch.as_tensor(loads)).detach()
+                if vals[x] >= vals[y]:
+                    return x
+                else:
+                    return y
+            """x, y = edge
             loads_x = copy.deepcopy(loads)
             loads_x[x] += 1
             loads_y = copy.deepcopy(loads)
             loads_y[y] += 1
             combined = torch.stack([torch.as_tensor(loads_x), torch.as_tensor(loads_y)])
             options = policy_net(combined)
-            return options.max(0)[1].type(dtype=torch.int64).item()
+            return options.max(0)[1].type(dtype=torch.int64).item()"""
 
 
 """def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
@@ -72,16 +85,16 @@ def greedy(policy_net, loads, edge, batched=False):
         return avg_score
 """
 
-def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN, print_behaviour=PRINT_BEHAVIOUR):
+
+def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
+                      print_behaviour=PRINT_BEHAVIOUR):
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
             loads = [0] * graph.n
             for i in range(m):
                 edge = random.choice(graph.edge_list)
-                x, y = edge
-                a = greedy(model, loads, edge)
-                chosen = x if a == 0 else y
+                chosen = greedy(model, loads, edge)
                 if print_behaviour:
                     print(f"With loads {loads}, and edge {edge} the trained model chose {chosen}")
                 loads[chosen] += 1
@@ -90,7 +103,7 @@ def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_done, saturate_steps, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -109,8 +122,9 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
-    # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 # alternative
-    # curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  # alternative cnt'd
+    # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 #
+    # alternative curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  #
+    # alternative cnt'd
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
@@ -123,17 +137,17 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     optimizer.step()
 
 
-def train(n=N, graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,
-          reward_fun=REWARD_FUN,
+def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,
+          reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN,
           batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
 
-    policy_net = nn_model(n=n, max_possible_load=m, device=device)
-    target_net = nn_model(n=n, max_possible_load=m, device=device)
-    best_net = nn_model(n=n, max_possible_load=m, device=device)
+    policy_net = nn_model(n=graph.n, device=device)
+    target_net = nn_model(n=graph.n, device=device)
+    best_net = nn_model(n=graph., device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -145,35 +159,31 @@ def train(n=N, graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, n
     not_improved = 0
 
     for ep in range(num_episodes):
-        loads = [0] * n
+        loads = [0] * graph.n
+        edge = random.choice(graph.edge_list)
         for i in range(m):
-            threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
-                                       steps_done=steps_done,
+            chosen = epsilon_greedy(policy_net=policy_net, loads=loads, edge=edge, steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
-            randomly_selected = random.randrange(n)
-            to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
-            curr_state = copy.deepcopy(loads)
-            loads[to_place] += 1
-            next_state = copy.deepcopy(loads)
-            if next_state is None:
-                print(curr_state, next_state)
-            reward = reward_fun(next_state) if i == m - 1 else 0  # "real" reward
+            curr_state = (copy.deepcopy(loads), edge)
+            loads[chosen] += 1
+            next_edge = random.choice(graph.edge_list)
+            next_state = (copy.deepcopy(loads), next_edge)
+            reward = reward_fun(next_state) if i == m - 1 else 0  # might incorporate the edge as well
             reward += potential_fun(next_state) - potential_fun(curr_state)
             reward = torch.DoubleTensor([reward]).to(device)
-            memory.push(curr_state, threshold, next_state, reward, i == m - 1)
+            memory.push(curr_state, chosen, next_state, reward, i == m - 1)
 
+            edge = next_edge
             steps_done += 1
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, saturate_steps=50 * m,
+                               batch_size=batch_size,
                                device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
-        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
-                                                   batch_size=eval_parallel_batch_size)
+        curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs) # TODO: change back to ..._faster
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs,
-                                                       batch_size=eval_parallel_batch_size)  # only update the best if it is really better, so run more tests
+            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=5 * eval_runs)  # # TODO: change back to ..._faster
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())

@@ -5,20 +5,23 @@ import torch.nn.functional as F
 
 class FullGraphicalTwoChoiceRecurrentNet(nn.Module):
 
-    def __init__(self, n, max_possible_load, hidden_size=64, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, n, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(FullGraphicalTwoChoiceRecurrentNet, self).__init__()
         self.n = n
-        self.max_possible_load = max_possible_load
         self.device = device
-        self.hidden_size = hidden_size
+        self.hidden_size = self.n
 
-        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
-        self.lin = nn.Linear(self.hidden_size, 1)
+        self.fc = nn.Sequential(  # TODO: maybe try with just two layers
+            nn.Linear(self.n, self.hidden_size),
+            nn.ReLU(),
+            nn.Linear(self.hidden_size, self.hidden_size),
+            nn.ReLU(),
+            nn.Linear(self.hidden_size, self.n)
+        )
 
         self.to(self.device).double()
 
     def forward(self, x):
-        x = F.one_hot(x.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
-        x = self.rnn(x)[0][:, -1, :].squeeze(1)
-        x = self.lin(x).squeeze(-1)
+        x = x.double().to(self.device)
+        x = self.fc(x)
         return x

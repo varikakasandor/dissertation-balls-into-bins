@@ -27,5 +27,10 @@ NN_MODEL = FullGraphicalTwoChoiceRecurrentNet
 NN_TYPE = "rnn_cycle"
 
 
+
+def POTENTIAL_FUN(loads):
+    return -max(loads)  # TODO: take into account more bins
+
+
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
     return -max(x)
