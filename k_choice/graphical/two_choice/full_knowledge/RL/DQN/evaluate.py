@@ -13,11 +13,10 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 
 
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullGraphicalTwoChoiceFCNet #FullTwoThinningOneHotNet if nn_type == "one_hot" else (
-        #FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
+    model = FullGraphicalTwoChoiceFCNet if nn_type=="fc_cycle" else FullGraphicalTwoChoiceOneHotFCNet
 
     try:
-        best_model = model(n=n, device=device)
+        best_model = model(n=n, max_possible_load=m, device=device)
         best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
         best_model.eval()
         return best_model

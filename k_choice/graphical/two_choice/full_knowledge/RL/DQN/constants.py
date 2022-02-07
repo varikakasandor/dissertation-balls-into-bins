@@ -1,6 +1,7 @@
 from math import sqrt
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
+from k_choice.graphical.two_choice.graph_base import GraphBase
 
 N = 4
 GRAPH = Cycle(N)
@@ -27,11 +28,9 @@ NN_MODEL = FullGraphicalTwoChoiceOneHotFCNet
 NN_TYPE = "fc_one_hot_cycle"
 
 
-
-def POTENTIAL_FUN(loads): # Only works for the Cycle graph
-    n = len(loads)
-    adj_avgs = [(loads[i] + loads[(i + 1) % n])/2 for i in range(n)]
-    return -max(adj_avgs)  # TODO: take into account more bins, not just 2
+def POTENTIAL_FUN(graph: GraphBase, loads):
+    adj_sums = [(loads[i]+sum([loads[j] for j in graph.adjacency_list[i]])) for i in range(graph.n)]
+    return -max(adj_sums)  # TODO: take into account more bins, not just 2
 
 
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded

@@ -7,10 +7,10 @@ from k_choice.graphical.two_choice.graphs.cycle import Cycle
 N = 4
 GRAPH = Cycle(N)
 M = 11
-STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M) #, use_pre_trained=False) Greedy(GRAPH, M) #
+STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
 RUNS = 20
-PRINT_BEHAVIOUR = False #True
+PRINT_BEHAVIOUR = False  # True
 
 
 def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):

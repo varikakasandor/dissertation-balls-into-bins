@@ -169,7 +169,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
             next_edge = random.choice(graph.edge_list)
             next_state = (copy.deepcopy(loads), next_edge)
             reward = reward_fun(loads) if i == m - 1 else 0  # might incorporate the edge as well
-            reward += potential_fun(loads) - potential_fun(old_loads)
+            reward += potential_fun(graph, loads) - potential_fun(graph, old_loads)
             reward = torch.DoubleTensor([reward]).to(device)
             memory.push(curr_state, chosen, next_state, reward, i == m - 1)
 
