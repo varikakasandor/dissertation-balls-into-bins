@@ -2,9 +2,9 @@ from math import sqrt
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 
-N = 10
+N = 4
 GRAPH = Cycle(N)
-M = 20
+M = 11
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
@@ -28,8 +28,10 @@ NN_TYPE = "fc_one_hot_cycle"
 
 
 
-def POTENTIAL_FUN(loads):
-    return -max(loads)  # TODO: take into account more bins
+def POTENTIAL_FUN(loads): # Only works for the Cycle graph
+    n = len(loads)
+    adj_avgs = [(loads[i] + loads[(i + 1) % n])/2 for i in range(n)]
+    return -max(adj_avgs)  # TODO: take into account more bins, not just 2
 
 
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
