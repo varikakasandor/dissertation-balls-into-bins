@@ -4,13 +4,13 @@ from k_choice.graphical.two_choice.strategies.greedy import Greedy
 from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 
-N = 4
+N = 10
 GRAPH = Cycle(N)
-M = 40
-STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M)
+M = 20
+STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M) #, use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
 RUNS = 20
-PRINT_BEHAVIOUR = True
+PRINT_BEHAVIOUR = False #True
 
 
 def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
@@ -32,6 +32,9 @@ def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_
             chosen_bin = bin2
             if print_behaviour:
                 print(f"SECOND")
+
+        """if i < 8 and loads[chosen_bin] > loads[bin1]:
+            print(loads, (bin1, bin2))"""
 
         loads[chosen_bin] += 1
 

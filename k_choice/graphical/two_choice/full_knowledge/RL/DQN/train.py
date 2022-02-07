@@ -144,9 +144,9 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
 
-    policy_net = nn_model(n=graph.n, device=device)
-    target_net = nn_model(n=graph.n, device=device)
-    best_net = nn_model(n=graph.n, device=device)
+    policy_net = nn_model(n=graph.n, max_possible_load=m, device=device)
+    target_net = nn_model(n=graph.n, max_possible_load=m, device=device)
+    best_net = nn_model(n=graph.n, max_possible_load=m, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -182,9 +182,9 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
                                device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs) # TODO: change back to ..._faster
-        if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=5 * eval_runs)  # # TODO: change back to ..._faster
-        if best_eval_score is None or curr_eval_score > best_eval_score:
+        if best_eval_score is None or curr_eval_score >= best_eval_score:
+            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=10 * eval_runs)  # # TODO: change back to ..._faster
+        if best_eval_score is None or curr_eval_score >= best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
             not_improved = 0
