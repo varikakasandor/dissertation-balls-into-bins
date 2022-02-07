@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class FullGraphicalTwoChoiceRecurrentNet(nn.Module):
+class FullGraphicalTwoChoiceFCNet(nn.Module):
 
     def __init__(self, n, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
-        super(FullGraphicalTwoChoiceRecurrentNet, self).__init__()
+        super(FullGraphicalTwoChoiceFCNet, self).__init__()
         self.n = n
         self.device = device
         self.hidden_size = self.n

@@ -1,12 +1,13 @@
 import random
 
 from k_choice.graphical.two_choice.strategies.greedy import Greedy
+from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 
-N = 10
+N = 4
 GRAPH = Cycle(N)
-M = 20
-STRATEGY = Greedy(GRAPH, M)
+M = 40
+STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M)
 REWARD = max
 RUNS = 20
 PRINT_BEHAVIOUR = True

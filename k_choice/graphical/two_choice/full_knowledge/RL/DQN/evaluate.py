@@ -1,7 +1,7 @@
 import os
 
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
-from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import FullGraphicalTwoChoiceRecurrentNet
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import FullGraphicalTwoChoiceFCNet
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster, evaluate_q_values
 from k_choice.graphical.two_choice.graph_base import GraphBase
 
@@ -13,7 +13,7 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 
 
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullGraphicalTwoChoiceRecurrentNet #FullTwoThinningOneHotNet if nn_type == "one_hot" else (
+    model = FullGraphicalTwoChoiceFCNet #FullTwoThinningOneHotNet if nn_type == "one_hot" else (
         #FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
 
     try:
