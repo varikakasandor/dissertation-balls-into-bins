@@ -37,19 +37,17 @@ def evaluate(trained_model, n=N, m=M, k=K, reward_fun=REWARD_FUN, eval_runs_eval
 
 def compare(n=N, m=M, k=K, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPACITY, eps_start=EPS_START,
             eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN, batch_size=BATCH_SIZE,
-            optimise_freq=OPTIMISE_FREQ,
-            target_update_freq=TARGET_UPDATE_FREQ, continuous_reward=CONTINUOUS_REWARD, max_threshold=MAX_THRESHOLD,
+            optimise_freq=OPTIMISE_FREQ, potential_fun=POTENTIAL_FUN,
+            target_update_freq=TARGET_UPDATE_FREQ, max_threshold=MAX_THRESHOLD,
             eval_runs_train=EVAL_RUNS_TRAIN, eval_runs_eval=EVAL_RUNS_EVAL, patience=PATIENCE,
-            max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
             print_progress=PRINT_PROGRESS, print_behaviour=PRINT_BEHAVIOUR, device=DEVICE, nn_model=NN_MODEL,
             nn_type=NN_TYPE):
     current_model = train(n=n, m=m, k=k, memory_capacity=memory_capacity, num_episodes=train_episodes,
-                          reward_fun=reward_fun,
+                          reward_fun=reward_fun, potential_fun=potential_fun,
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
-                          continuous_reward=continuous_reward, max_threshold=max_threshold, optimise_freq=optimise_freq,
+                          max_threshold=max_threshold, optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
-                          patience=patience, max_load_increase_reward=max_load_increase_reward,
-                          print_behaviour=print_behaviour, print_progress=print_progress, nn_model=NN_MODEL,
+                          patience=patience, print_behaviour=print_behaviour, print_progress=print_progress, nn_model=NN_MODEL,
                           device=device)
     current_model_performance = evaluate(current_model, n=n, m=m, k=k, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval)
     print(

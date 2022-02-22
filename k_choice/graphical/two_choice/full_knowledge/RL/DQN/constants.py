@@ -23,14 +23,19 @@ PATIENCE = 1000
 MAX_LOAD_INCREASE_REWARD = -1
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
+OPTIMISE_FREQ = int(sqrt(M))
 NN_MODEL = FullGraphicalTwoChoiceOneHotFCNet
 NN_TYPE = "fc_one_hot_cycle"
 
 
-def POTENTIAL_FUN(graph: GraphBase, loads):
-    adj_sums = [(loads[i]+sum([loads[j] for j in graph.adjacency_list[i]])) for i in range(graph.n)]
-    return -max(adj_sums)  # TODO: take into account more bins, not just 2
+def POTENTIAL_FUN_GENERAL(graph: GraphBase, loads):
+    adj_sums = [(loads[i] + sum([loads[j] for j in graph.adjacency_list[i]])) for i in range(graph.n)]
+    return -max(adj_sums)
+
+
+def POTENTIAL_FUN(graph: GraphBase, loads):  # Only works for the Cycle graph, but seems to work better for that
+    adj_avgs = [(loads[i] + loads[(i + 1) % graph.n]) / 2 for i in range(graph.n)]
+    return -max(adj_avgs)  # TODO: take into account more bins, not just 2
 
 
 def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded

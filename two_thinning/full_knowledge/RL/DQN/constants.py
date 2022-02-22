@@ -28,5 +28,5 @@ def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins
 
 
-def REWARD_FUN(loads):  # TODO: Not yet used in training, it is hardcoded
+def REWARD_FUN(loads):
     return -max(loads)

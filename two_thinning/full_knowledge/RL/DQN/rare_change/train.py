@@ -82,8 +82,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, saturate_steps=50 * m,
-                               device=device)  # TODO: should I not call it after every step instead only after every
+                               batch_size=batch_size, device=device)  # TODO: should I not call it after every step instead only after every
                 # episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,

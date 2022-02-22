@@ -76,7 +76,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_done, saturate_steps, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -139,9 +139,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
             curr_state = copy.deepcopy(loads)
             loads[to_place] += 1
+
             next_state = copy.deepcopy(loads)
-            if next_state is None:
-                print(curr_state, next_state)
             reward = reward_fun(next_state) if i == m - 1 else 0  # "real" reward
             reward += potential_fun(next_state) - potential_fun(curr_state)
             reward = torch.DoubleTensor([reward]).to(device)
@@ -151,8 +150,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, saturate_steps=50 * m,
-                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               batch_size=batch_size, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size)

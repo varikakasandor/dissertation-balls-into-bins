@@ -56,15 +56,16 @@ def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RU
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_done, saturate_steps, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
     batch = Transition(*zip(*transitions))
 
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool).to(
-        device)
-    non_final_next_states = torch.tensor([s for s in batch.next_state if s is not None])
+    non_final_mask = torch.tensor(tuple(map(lambda s: not s, batch.done)), dtype=torch.bool).to(device)  # flip
+    non_final_next_states = torch.tensor(
+        [next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
+
 
     state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,
@@ -74,9 +75,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0
-    expected_state_action_values = curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(
-        batch.reward).to(device)  # TODO: remove weighting
+    expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
 
     criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
@@ -90,11 +89,10 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, steps_
 
 
 def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          continuous_reward=CONTINUOUS_REWARD, batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE,
-          max_threshold=MAX_THRESHOLD, max_load_increase_reward=MAX_LOAD_INCREASE_REWARD,
-          print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN,
+          max_threshold=MAX_THRESHOLD, print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     policy_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
     target_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
     best_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
@@ -128,7 +126,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                     next_state = loads + [choices_left - 1]
                     reward = 0
                     reward = torch.DoubleTensor([reward]).to(device)
-                    memory.push(curr_state, threshold, next_state, reward)
+                    memory.push(curr_state, threshold, next_state, reward, False)
                     steps_done += 1
 
                 choices_left -= 1
@@ -137,24 +135,20 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 to_place = random.randrange(n)
                 choices_left += 1
 
-            larger = len([j for j in range(len(loads)) if loads[j] > loads[to_place]])
             curr_state = loads + [choices_left]
             loads[to_place] += 1
-            next_state = (loads + [k]) if i != m - 1 else None
+            next_state = (loads + [k])
 
-            if continuous_reward:
-                reward = larger / n  # max_load_increase_reward if increased_max_load else 0
-            else:
-                reward = reward_fun(loads) if i == m - 1 else 0
+            reward = reward_fun(next_state[:-1]) if i == m - 1 else 0  # "real" reward
+            reward += potential_fun(next_state[:-1]) - potential_fun(curr_state[:-1])
             reward = torch.DoubleTensor([reward]).to(device)
-            memory.push(curr_state, threshold, next_state, reward)
+            memory.push(curr_state, threshold, next_state, reward, i == m - 1)
 
             steps_done += 1
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, steps_done=steps_done, saturate_steps=50 * m,
-                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               batch_size=batch_size, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, k=k, reward=reward_fun, eval_runs=eval_runs,
                                             print_behaviour=print_behaviour)
