@@ -14,3 +14,6 @@ evaluation/analyses/*
 experiment
 two_thinning/average_based/RL/invalid_RL/hyperparameter_optimization/individual_runs
 
+/progress_report/~$Progress Report Presentation.pptx
+/two_thinning/average_based/RL/DQN/experiment.ipynb
+/progress_report/Progress Report Presentation.pptx
