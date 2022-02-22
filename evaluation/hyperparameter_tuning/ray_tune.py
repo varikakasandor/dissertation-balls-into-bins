@@ -1,12 +1,18 @@
+import os
+from datetime import datetime
+
+import ray
 import torch
 from ray import tune
+from ray.tune.suggest import ConcurrencyLimiter
+from ray.tune.suggest.bayesopt import BayesOptSearch
 
 from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
 from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningRecurrentNetFC
 from two_thinning.full_knowledge.RL.DQN.train import train
 
-N = 3
-M = 5
+N = 5
+M = 30
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 EVAL_RUNS_EVAL = 100
 EVAL_PARALLEL_BATCH_SIZE = 32
@@ -53,6 +59,7 @@ def tuning_function(config):
 
 
 def analyse_hyperparameters():
+    ray.init(object_store_memory=78643200)
     config = {
         "batch_size": tune.randint(16, 64),
         "eps_start": tune.uniform(0.05, 0.5),
@@ -70,15 +77,27 @@ def analyse_hyperparameters():
     analysis = tune.run(
         tuning_function,
         config=config,
-        resources_per_trial={"cpu": 8, "gpu": 1},fail_fast="raise")
+        resources_per_trial={"cpu": 8, "gpu": 1},
+        metric="score",
+        mode="max",
+        #"""# Limit to two concurrent trials (otherwise we end up with random search)
+        #search_alg=ConcurrencyLimiter(
+        #    BayesOptSearch(random_search_steps=4),
+        #    max_concurrent=2),"""
+        num_samples=1000,
+        #stop={"training_iteration": 3},
+        verbose=2)
 
     print("Best config: ", analysis.get_best_config(
-        metric="score", mode="min"))
-
-    # Get a dataframe for analyzing trial results.
+        metric="score", mode="max"))
     df = analysis.results_df
-
     print(df)
+
+    time_stamp = str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))
+    df_save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "comparison_dataframes", f"{time_stamp}.csv")
+    df.to_csv(df_save_path)
+
+    ray.shutdown()
 
 
 if __name__ == "__main__":
