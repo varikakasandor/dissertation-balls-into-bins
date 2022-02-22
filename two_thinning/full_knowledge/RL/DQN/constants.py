@@ -29,6 +29,7 @@ def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins
     #return -std(loads)
 
-def REWARD_FUN(loads):
+def REWARD_FUN(loads, error_ratio=1.5):
     return -max(loads)
     #return -std(loads)
+    #return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
