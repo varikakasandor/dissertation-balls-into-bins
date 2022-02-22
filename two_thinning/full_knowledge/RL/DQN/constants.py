@@ -1,5 +1,6 @@
 from math import sqrt
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
+from helper.helper import std
 
 N = 3
 M = 5
@@ -26,7 +27,8 @@ NN_TYPE = "rnn_fc"
 
 def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins
-
+    #return -std(loads)
 
 def REWARD_FUN(loads):
     return -max(loads)
+    #return -std(loads)
