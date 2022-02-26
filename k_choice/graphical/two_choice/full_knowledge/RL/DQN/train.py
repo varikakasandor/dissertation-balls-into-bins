@@ -150,7 +150,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters())
+    optimizer = optim.Adam(policy_net.parameters())  # TODO: see if it sets learning rate automatically
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0

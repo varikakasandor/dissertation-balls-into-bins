@@ -3,7 +3,7 @@ from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graph_base import GraphBase
 
-N = 4
+N = 4  # TODO: for N=3 test if it converges to Greedy
 GRAPH = Cycle(N)
 M = 11
 
@@ -28,7 +28,8 @@ NN_MODEL = FullGraphicalTwoChoiceOneHotFCNet
 NN_TYPE = "fc_one_hot_cycle"
 
 
-def POTENTIAL_FUN_GENERAL(graph: GraphBase, loads):
+def POTENTIAL_FUN_GENERAL(graph: GraphBase, loads):  # TODO: try smoothing out
+    # TODO: look at further away bins too
     adj_sums = [(loads[i] + sum([loads[j] for j in graph.adjacency_list[i]])) for i in range(graph.n)]
     return -max(adj_sums)
 
@@ -38,5 +39,5 @@ def POTENTIAL_FUN(graph: GraphBase, loads):  # Only works for the Cycle graph, b
     return -max(adj_avgs)  # TODO: take into account more bins, not just 2
 
 
-def REWARD_FUN(x):  # TODO: Not yet used in training, it is hardcoded
+def REWARD_FUN(x):
     return -max(x)

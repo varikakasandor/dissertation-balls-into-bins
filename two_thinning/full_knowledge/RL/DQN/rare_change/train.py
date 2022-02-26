@@ -70,13 +70,14 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             loads = sorted(loads)
             reward = 0
             for i in range(n):
-                reward += (loads[i] - used_loads[i]) * i
+                reward -= (loads[i] - used_loads[i]) * i
 
             reward /= (n*threshold_change_freq)
             curr_state = used_loads
             reward = torch.DoubleTensor([reward]).to(device)
-            next_state = copy.deepcopy(loads) if start_period + threshold_change_freq < m-1 else None
-            memory.push(curr_state, threshold, next_state, reward)
+            next_state = copy.deepcopy(loads)
+            done = start_period + threshold_change_freq == m-1
+            memory.push(curr_state, threshold, next_state, reward, done)
 
             steps_done += 1
 

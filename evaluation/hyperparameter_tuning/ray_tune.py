@@ -32,22 +32,6 @@ def REWARD_FUN(loads, error_ratio=1.5):
     #return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-"""
-Tuneable hyperparameters:
-
-BATCH_SIZE = 64
-EPS_START = 0.2
-EPS_END = 0.05
-EPS_DECAY = 2000
-TRAIN_EPISODES = 3000
-TARGET_UPDATE_FREQ = 10
-MEMORY_CAPACITY = 10 * BATCH_SIZE
-EVAL_RUNS_TRAIN = 10
-PATIENCE = 1000
-OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
-MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
-"""
-
 def tuning_function(config):
     trained_model = train(n=N, m=M, memory_capacity=config["memory_capacity"], num_episodes=config["train_episodes"],
                   reward_fun=REWARD_FUN, batch_size=config["batch_size"], eps_start=config["eps_start"], eps_end=config["eps_end"],
@@ -72,7 +56,6 @@ def analyse_hyperparameters():
         "patience": tune.randint(30, 1000),
         "optimise_freq": tune.randint(1, M),
         "max_threshold": tune.randint(3, M),
-
     }
     analysis = tune.run(
         tuning_function,
