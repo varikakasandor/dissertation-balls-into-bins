@@ -8,19 +8,30 @@ RUNS = 100
 REWARD = max
 PRINT_BEHAVIOUR = True
 
-def simulate_one_run(choices, n=N, m=M, reward=REWARD):
+
+def sample_k_choice(choices, n=N, m=M):
     loads = [0] * n
     for _ in range(m):
         options = random.sample(range(n), choices)
         chosen = min(options, key=lambda x: loads[x])
         loads[chosen] += 1
+    return loads
+
+
+def sample_one_choice(n=N, m=M):
+    return sample_k_choice(1, n=n, m=m)
+
+
+def simulate_one_run(choices, n=N, m=M, reward=REWARD):
+    loads = sample_k_choice(choices, n=n, m=m)
     return reward(loads)
 
 
 def simulate_many_runs(choices, runs=RUNS, n=N, m=M, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
     avg = sum([simulate_one_run(choices, n=n, m=m, reward=reward) for _ in range(runs)]) / runs
     if print_behaviour:
-        print(f"With {m} balls and {n} bins {choices}-choice achieves on simulation approximately {avg} maximum load, {avg - m / n} normalised maximum load.")
+        print(
+            f"With {m} balls and {n} bins {choices}-choice achieves on simulation approximately {avg} maximum load, {avg - m / n} normalised maximum load.")
     return avg
 
 

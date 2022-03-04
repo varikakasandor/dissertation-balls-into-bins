@@ -90,7 +90,8 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
                                                      torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
     next_state_values = torch.zeros(batch_size).double().to(device)
-    next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
+    if torch.any(non_final_mask): # needed for curriculum learning, as at the start all entries can be final
+        next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
