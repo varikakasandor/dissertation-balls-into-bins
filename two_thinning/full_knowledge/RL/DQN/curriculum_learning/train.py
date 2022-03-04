@@ -11,8 +11,8 @@ from two_thinning.full_knowledge.RL.DQN.curriculum_learning.constants import *
 from two_thinning.full_knowledge.RL.DQN.train import epsilon_greedy, optimize_model, evaluate_q_values_faster
 
 
-def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, reward_fun=REWARD_FUN,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, pacing_fun=PACING_FUN,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN,
           max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
@@ -34,11 +34,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     best_eval_score = None
     not_improved = 0
 
-    def epochs_given_start_size(start_size):
-        return num_episodes // m
-
     for start_size in reversed(range(m)):
-        for ep in range(epochs_given_start_size(start_size)):
+        for ep in range(pacing_fun(start_size)):
             loads = sample_one_choice(n=n, m=start_size)
             for i in range(start_size, m):
                 threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
@@ -62,11 +59,11 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                    batch_size=batch_size,
                                    device=device)
 
-
             curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                                        batch_size=eval_parallel_batch_size)
             if best_eval_score is None or curr_eval_score > best_eval_score:
-                curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs,
+                curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun,
+                                                           eval_runs=5 * eval_runs,
                                                            batch_size=eval_parallel_batch_size)  # only update the best if it is really better, so run more tests
             if best_eval_score is None or curr_eval_score > best_eval_score:
                 best_eval_score = curr_eval_score
@@ -78,20 +75,12 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                 not_improved += 1
                 if print_progress:
                     print(f"At episode {ep} no improvement has happened ({curr_eval_score}).")
-            else:
+            """else:
                 if print_progress:
                     print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
-                break
+                break""" # TODO: add back, but only for start_size=0
 
             if ep % target_update_freq == 0:
-                """user_text, timed_out = timedInput(prompt="Press Y if you would like to stop the training now!\n", timeout=2)
-    
-                if not timed_out and user_text == "Y":
-                    print("Training has been stopped by the user.")
-                    return best_net
-                else:
-                    if not timed_out:
-                        print("You pressed the wrong button, it has no effect. Training continues.")"""
                 target_net.load_state_dict(policy_net.state_dict())
 
     print(f"--- {(time.time() - start_time)} seconds ---")

@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, log, ceil
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
@@ -20,7 +20,7 @@ PATIENCE = 1000
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
-MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
+MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))
 NN_MODEL = FullTwoThinningClippedRecurrentNetFC
 NN_TYPE = "rnn_clipped_fc"
 
