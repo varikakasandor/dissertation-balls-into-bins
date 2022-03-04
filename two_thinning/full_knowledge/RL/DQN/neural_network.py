@@ -101,3 +101,44 @@ class FullTwoThinningRecurrentNetFC(nn.Module):
         x = self.rnn(x)[0][:, -1, :].squeeze(1)
         x = self.lin(x)
         return x
+
+class FullTwoThinningGRUNetFC(nn.Module):
+
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+        super(FullTwoThinningGRUNetFC, self).__init__()
+        self.n = n
+        self.max_possible_load = max_possible_load
+        self.max_threshold = max_threshold
+        self.device = device
+        self.hidden_size = hidden_size  # self.max_threshold + 1
+        # TODO: one extra layer converting one-hot to embedding (same for all loads)
+        self.rnn = nn.GRU(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
+        self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
+        self.to(self.device).double()
+
+    def forward(self, x):
+        x = F.one_hot(x.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
+        x = self.rnn(x)[0][:, -1, :].squeeze(1)
+        x = self.lin(x)
+        return x
+
+
+class FullTwoThinningCroppedRecurrentNetFC(nn.Module):
+
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+        super(FullTwoThinningCroppedRecurrentNetFC, self).__init__()
+        self.n = n
+        self.max_possible_load = max_possible_load
+        self.max_threshold = max_threshold
+        self.device = device
+        self.hidden_size = hidden_size  # self.max_threshold + 1
+        # TODO: one extra layer converting one-hot to embedding (same for all loads)
+        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
+        self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
+        self.to(self.device).double()
+
+    def forward(self, x):
+        x = F.one_hot(x.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
+        x = self.rnn(x)[0][:, -1, :].squeeze(1)
+        x = self.lin(x)
+        return x
