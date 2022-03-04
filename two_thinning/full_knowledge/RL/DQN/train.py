@@ -1,7 +1,7 @@
 import time
 import copy
 import random
-from math import exp
+from math import exp, log, floor, ceil
 
 import torch.optim as optim
 
@@ -116,9 +116,9 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
 
-    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + 2, device=device)  # TODO: set back to m
-    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + 2, device=device)
-    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + 2, device=device)
+    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + ceil(sqrt(log(n))), device=device)  # based on the two-thinning paper, this can be achieved!
+    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + ceil(sqrt(log(n))), device=device)
+    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=m // n + ceil(sqrt(log(n))), device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
