@@ -16,16 +16,18 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
         FullTwoThinningRecurrentNet if nn_type == "rnn" else (
-            FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else FullTwoThinningNet))
+            FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
+                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else FullTwoThinningNet)))
 
     for max_threshold in range(m + 1):
-        try:
-            best_model = model(n=n, max_threshold=max_threshold, max_possible_load=m, hidden_size=64, device=device)
-            best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
-            best_model.eval()
-            return best_model
-        except:
-            continue
+        for max_possible_load in range(m+1):
+            try:
+                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, hidden_size=64, device=device)
+                best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
+                best_model.eval()
+                return best_model
+            except:
+                continue
 
     print("ERROR: trained model not found with any max_threshold")
     return None

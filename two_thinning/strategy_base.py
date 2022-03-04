@@ -11,6 +11,8 @@ class StrategyBase(metaclass=ABCMeta):
         self.n = n
         self.m = m
         self.curr_thresholds = []
+        self.max_loads = []
+        self.chosen_loads = []
         self.thresholds = []
 
     @abstractmethod
@@ -33,12 +35,16 @@ class StrategyBase(metaclass=ABCMeta):
 
     def note_(self, bin):
         self.loads[bin] += 1
+        self.max_loads.append(max(self.loads))
+        self.chosen_loads.append(self.loads[bin])
         self.note(bin)
 
     def reset_(self):
         self.loads = [0] * self.n
         self.thresholds.append(self.curr_thresholds)
         self.curr_thresholds = []
+        self.max_loads = []
+        self.chosen_loads = []
         self.reset()
 
     def decide_(self, bin):
@@ -55,10 +61,13 @@ class StrategyBase(metaclass=ABCMeta):
     def create_plot(self, save_path):  # Helper function for those strategies which decide based on a
         # threshold
         x = np.arange(self.m)
-        plt.plot(x, np.array(self.curr_thresholds))
+        plt.plot(x, np.array(self.curr_thresholds), label="threshold")
+        plt.plot(x, np.array(self.max_loads), label="max load")
+        plt.plot(x, np.array(self.chosen_loads), label="chosen load")
         plt.title("Threshold progression")
         plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")
+        plt.legend()
         plt.savefig(save_path)
 
     def create_summary_plot(self, save_path):  # Helper function for those strategies which decide based on a

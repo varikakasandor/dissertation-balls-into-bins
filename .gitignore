@@ -10,7 +10,7 @@
 *.idea
 
 proposal/main.pdf
-evaluation/analyses/*
+#evaluation/analyses/*
 experiment
 two_thinning/average_based/RL/invalid_RL/hyperparameter_optimization/individual_runs
 

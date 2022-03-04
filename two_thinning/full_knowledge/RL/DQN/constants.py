@@ -2,8 +2,8 @@ from math import sqrt
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 3
-M = 5
+N = 4
+M = 10
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
@@ -21,8 +21,8 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = int(sqrt(M))  # TODO: completely ad-hoc
 MAX_THRESHOLD = max(3, 2 * (M + N - 1) // N)
-NN_MODEL = FullTwoThinningRecurrentNetFC
-NN_TYPE = "rnn_fc"
+NN_MODEL = FullTwoThinningClippedRecurrentNetFC
+NN_TYPE = "rnn_clipped_fc"
 
 
 def POTENTIAL_FUN(loads):
