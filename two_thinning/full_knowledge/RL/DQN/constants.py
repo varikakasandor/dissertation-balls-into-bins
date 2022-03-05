@@ -2,8 +2,8 @@ from math import sqrt, log, ceil
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 4
-M = 10
+N = 5
+M = 25
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64

@@ -18,7 +18,7 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
         FullTwoThinningRecurrentNet if nn_type == "rnn" else (
             FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
-                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else FullTwoThinningNet)))
+                FullTwoThinningClippedRecurrentNetFC if nn_type in ["rnn_clipped_fc", "curriculum_rnn_clipped_fc"] else FullTwoThinningNet)))
 
     for max_threshold in range(m + 1):
         for max_possible_load in range(m+1):

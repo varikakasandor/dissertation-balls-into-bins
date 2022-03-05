@@ -2,14 +2,14 @@ from math import sqrt, log, ceil
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 30
-M = 150
+N = 5
+M = 25
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 EPS_START = 0.2
 EPS_END = 0.05
-EPS_DECAY = 2000
+EPS_DECAY = 1000
 TARGET_UPDATE_FREQ = 10
 MEMORY_CAPACITY = 10 * BATCH_SIZE
 EVAL_RUNS_TRAIN = 10
@@ -35,10 +35,11 @@ def REWARD_FUN(loads, error_ratio=1.5):
     # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-def PACING_FUN(start_size, n=N, m=M, all_epochs=1000):  # returns number of epochs to run for the given start size. Note that the exact
+def PACING_FUN(start_size, n=N, m=M,
+               all_epochs=1000):  # returns number of epochs to run for the given start size. Note that the exact
     # definition of "pacing function" is different
     # I assume we want linearly increasing pacing function, so we need to solve for x and that we start from n:
     # n + (n+x) + (n+2x) + ... + (n+(m-1)x) = all_epochs, that is
     # n*m + x*m*(m-1)/2 = all_epochs, giving (changing x to delta, adding max)
-    delta = max ((all_epochs - n * m) * 2 // (m * (m - 1)), 0)
+    delta = max((all_epochs - n * m) * 2 // (m * (m - 1)), 0)
     return n + ((m - 1) - start_size) * delta
