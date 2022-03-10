@@ -1,0 +1,1 @@
+{"batch_size": 50, "eps_start": 0.266153026568335, "eps_end": 0.07522133077068953, "eps_decay": 3753.2270638210002, "train_episodes": 819, "target_update_freq": 8, "memory_capacity": 600, "eval_runs_train": 12, "patience": 146, "optimise_freq": 2, "max_threshold": 18, "score": -6.06}
