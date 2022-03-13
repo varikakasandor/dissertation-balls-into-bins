@@ -1,9 +1,4 @@
-import functools
-import os
-from datetime import datetime
 import torch
-import random
-import json
 import wandb
 
 from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
@@ -33,81 +28,11 @@ def REWARD_FUN(loads, error_ratio=1.5):
     # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-###########################################################################
-wandb.login()
-
-sweep_config = {
-    'method': 'random'
-}
-metric = {
-    'name': 'score',
-    'goal': 'maximize'
-}
-sweep_config['metric'] = metric
-parameters_dict = {
-    'batch_size': {
-        'distribution': 'int_uniform',
-        'min': 16,
-        'max': 64
-    },
-    "eps_start": {
-        'distribution': 'uniform',
-        'min': 0.05,
-        'max': 0.5
-    },
-    "eps_end": {
-        'distribution': 'uniform',
-        'min': 0.01,
-        'max': 0.1
-    },
-    "eps_decay": {
-        'distribution': 'uniform',
-        'min': 100,
-        'max': 10000
-    },
-    "target_update_freq": {
-        'distribution': 'int_uniform',
-        'min': 1,
-        'max': 30
-    },
-    "memory_capacity": {
-        'distribution': 'int_uniform',
-        'min': 16,
-        'max': 1000
-    },
-    "eval_runs_train": {
-        'distribution': 'int_uniform',
-        'min': 1,
-        'max': 30
-    },
-    "patience": {
-        'distribution': 'int_uniform',
-        'min': 30,
-        'max': 1000,
-    },
-    "optimise_freq": {
-        'distribution': 'int_uniform',
-        'min': 1,
-        'max': M
-    },
-    "max_threshold": {
-        'distribution': 'int_uniform',
-        'min': 3,
-        'max': M
-    },
-}
-
-sweep_config['parameters'] = parameters_dict
-sweep_id = wandb.sweep(sweep_config, project="RL-meets-balls-into-bins")
-
-
-def tuning_function(config):
+def tuning_function(config=None):
     with wandb.init(config=config):
-        # If called by wandb.agent, as below,
-        # this config will be set by Sweep Controller
         config = wandb.config
         trained_model = train(n=N, m=M, memory_capacity=config["memory_capacity"],
-                              num_episodes=config["train_episodes"],
+                              num_episodes=TRAIN_EPISODES,
                               reward_fun=REWARD_FUN, batch_size=config["batch_size"], eps_start=config["eps_start"],
                               eps_end=config["eps_end"],
                               eps_decay=config["eps_decay"], optimise_freq=config["optimise_freq"],
@@ -115,10 +40,77 @@ def tuning_function(config):
                               eval_runs=config["eval_runs_train"], patience=config["patience"],
                               potential_fun=POTENTIAL_FUN, max_threshold=config["max_threshold"],
                               eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, print_progress=PRINT_PROGRESS,
-                              nn_model=NN_MODEL, device=DEVICE)
+                              nn_model=NN_MODEL, device=DEVICE, report_wandb=True)
         score = evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL,
                          eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)
         wandb.log({"score": score})
 
+if __name__=="__main__":
+    print(wandb)
+    wandb.login()
 
-wandb.agent(sweep_id, tuning_function, count=1)
+    sweep_config = {
+        'method': 'random'
+    }
+    metric = {
+        'name': 'score',
+        'goal': 'maximize'
+    }
+    sweep_config['metric'] = metric
+    parameters_dict = {
+        'batch_size': {
+            'distribution': 'int_uniform',
+            'min': 16,
+            'max': 64
+        },
+        "eps_start": {
+            'distribution': 'uniform',
+            'min': 0.05,
+            'max': 0.5
+        },
+        "eps_end": {
+            'distribution': 'uniform',
+            'min': 0.01,
+            'max': 0.1
+        },
+        "eps_decay": {
+            'distribution': 'uniform',
+            'min': 100,
+            'max': 10000
+        },
+        "target_update_freq": {
+            'distribution': 'int_uniform',
+            'min': 1,
+            'max': 30
+        },
+        "memory_capacity": {
+            'distribution': 'int_uniform',
+            'min': 16,
+            'max': 1000
+        },
+        "eval_runs_train": {
+            'distribution': 'int_uniform',
+            'min': 1,
+            'max': 30
+        },
+        "patience": {
+            'distribution': 'int_uniform',
+            'min': 30,
+            'max': 1000,
+        },
+        "optimise_freq": {
+            'distribution': 'int_uniform',
+            'min': 1,
+            'max': M
+        },
+        "max_threshold": {
+            'distribution': 'int_uniform',
+            'min': 3,
+            'max': M
+        },
+    }
+
+    sweep_config['parameters'] = parameters_dict
+    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
+
+    wandb.agent(sweep_id, tuning_function, count=5)
