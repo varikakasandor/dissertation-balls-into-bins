@@ -16,14 +16,13 @@ class FullKThinningRecurrentNet(nn.Module):
         self.hidden_size = self.max_threshold + 1
 
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)  # ,nonlinearity='relu')  # ,dropout=0.5)
-        # self.relu = nn.ReLU(), TODO: check if needed or not after RNN
         self.lin = nn.Linear(self.hidden_size + self.k - 1, self.max_threshold + 1)
-
         self.to(self.device).double()
 
     def forward(self, x):
         loads = x[:,:-1]
         choices_left = x[:,-1]
+        loads = loads.minimum(torch.tensor(self.max_possible_load))
         loads_one_hot = F.one_hot(loads.sort()[0], num_classes=self.max_possible_load + 1).double().to(self.device)
         choices_left_one_hot = F.one_hot(choices_left-2, num_classes=self.k - 1).double().to(self.device)
         after_rnn = self.rnn(loads_one_hot)[0][:, -1, :].squeeze(1)
