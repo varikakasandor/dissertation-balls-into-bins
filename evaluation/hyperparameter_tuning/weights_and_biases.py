@@ -5,8 +5,8 @@ from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
 from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningClippedRecurrentNetFC
 from two_thinning.full_knowledge.RL.DQN.train import train
 
-N = 5
-M = 26  # So that max load of 5 is achievable with higher probability
+N = 10
+M = 100  # So that max load of 5 is achievable with higher probability
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 TRAIN_EPISODES = 1000
 EVAL_RUNS_EVAL = 100
@@ -45,12 +45,13 @@ def tuning_function(config=None):
                          eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)
         wandb.log({"score": score})
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print(wandb)
     wandb.login()
 
     sweep_config = {
-        'method': 'random'
+        'method': 'random'  # TODO: set back to bayes
     }
     metric = {
         'name': 'score',
@@ -113,4 +114,4 @@ if __name__=="__main__":
     sweep_config['parameters'] = parameters_dict
     sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
 
-    wandb.agent(sweep_id, tuning_function, count=5)
+    wandb.agent(sweep_id, tuning_function, count=100)
