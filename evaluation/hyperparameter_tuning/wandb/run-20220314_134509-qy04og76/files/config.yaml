@@ -1,0 +1,55 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.12.11
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.7
+    start_time: 1647265511
+    t:
+      1:
+      - 1
+      - 30
+      2:
+      - 1
+      - 30
+      3:
+      - 2
+      4: 3.7.7
+      5: 0.12.11
+      8:
+      - 3
+      - 5
+batch_size:
+  desc: null
+  value: 46
+eps_decay:
+  desc: null
+  value: 8771.29783834588
+eps_end:
+  desc: null
+  value: 0.06244655878038434
+eps_start:
+  desc: null
+  value: 0.48144806138193486
+eval_runs_train:
+  desc: null
+  value: 10
+max_threshold:
+  desc: null
+  value: 24
+memory_capacity:
+  desc: null
+  value: 762
+optimise_freq:
+  desc: null
+  value: 62
+patience:
+  desc: null
+  value: 857
+target_update_freq:
+  desc: null
+  value: 29

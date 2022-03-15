@@ -47,11 +47,10 @@ def tuning_function(config=None):
 
 
 if __name__ == "__main__":
-    print(wandb)
     wandb.login()
 
     sweep_config = {
-        'method': 'random'  # TODO: set back to bayes
+        'method': 'bayes'
     }
     metric = {
         'name': 'score',
@@ -112,6 +111,6 @@ if __name__ == "__main__":
     }
 
     sweep_config['parameters'] = parameters_dict
-    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
+    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}_bayes")
 
     wandb.agent(sweep_id, tuning_function, count=100)

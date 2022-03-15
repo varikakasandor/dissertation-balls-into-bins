@@ -1,0 +1,22 @@
+wandb_version: 1
+
+batch_size:
+  value: 21
+eps_decay:
+  value: 3203.2683630802703
+eps_end:
+  value: 0.04717057638807757
+eps_start:
+  value: 0.2406372308148466
+eval_runs_train:
+  value: 9
+max_threshold:
+  value: 33
+memory_capacity:
+  value: 984
+optimise_freq:
+  value: 7
+patience:
+  value: 826
+target_update_freq:
+  value: 26

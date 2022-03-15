@@ -135,6 +135,7 @@ class FullTwoThinningClippedRecurrentNetFC(nn.Module):
         # TODO: one extra layer converting one-hot to embedding (same for all loads)
         self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)
         self.lin = nn.Linear(self.hidden_size, self.max_threshold + 1)
+        # TODO: add softmax, pass previous threshold as argument
         self.to(self.device).double()
 
     def forward(self, x):
