@@ -2,8 +2,8 @@ from math import sqrt, log, ceil
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 5
-M = 25
+N = 3
+M = 5
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
@@ -21,9 +21,13 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 5 * int(sqrt(M))  # TODO: 50 for N=10, M=100
 MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))
-NN_MODEL = FullTwoThinningClippedRecurrentNetFC
-NN_TYPE = "rnn_clipped_fc"
-
+NN_MODEL = GeneralNet
+NN_TYPE = "general_net"
+LOSS_FUCNTION = nn.SmoothL1Loss()
+LR = 0.001
+NN_HIDDEN_SIZE = 64
+NN_RNN_NUM_LAYERS = 1
+NN_NUM_LIN_LAYERS = 1
 
 def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins

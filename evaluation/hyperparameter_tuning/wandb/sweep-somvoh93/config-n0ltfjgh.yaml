@@ -1,0 +1,53 @@
+wandb_version: 1
+
+batch_size:
+  value: 55
+eps_decay:
+  value: 4996.007128284275
+eps_end:
+  value: 0.0606889389256574
+eps_start:
+  value: 0.2923945079827597
+eval_runs_train:
+  value: 4
+hidden_size:
+  value: 53
+loss_function:
+  value:
+    _backward_hooks:
+    - []
+    _buffers:
+    - []
+    _forward_hooks:
+    - []
+    _forward_pre_hooks:
+    - []
+    _is_full_backward_hook: null
+    _load_state_dict_pre_hooks:
+    - []
+    _modules:
+    - []
+    _non_persistent_buffers_set: {}
+    _parameters:
+    - []
+    _state_dict_hooks:
+    - []
+    beta: 1
+    reduction: mean
+    training: true
+lr:
+  value: 0.013674300566783737
+max_threshold:
+  value: 12
+memory_capacity:
+  value: 119
+num_lin_layers:
+  value: 4
+optimise_freq:
+  value: 89
+patience:
+  value: 151
+rnn_num_layers:
+  value: 3
+target_update_freq:
+  value: 14

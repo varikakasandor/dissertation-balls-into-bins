@@ -77,7 +77,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criterion, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -111,22 +111,29 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
 
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, report_wandb=False,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, report_wandb=False, lr=LR,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN,
+          nn_hidden_size=NN_HIDDEN_SIZE, nn_rnn_num_layers=NN_RNN_NUM_LAYERS, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN, loss_function=LOSS_FUCNTION,
           max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
 
-    max_possible_load = m // n + ceil(sqrt(log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m
+    max_possible_load = m // n + ceil(sqrt(log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m # based on the two-thinning paper, this can be achieved!
 
-    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, device=device)  # based on the two-thinning paper, this can be achieved!
-    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, device=device)
-    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, device=device)
+    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                          device=device)
+    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                          device=device)
+    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                          device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters())
+    optimizer = optim.Adam(policy_net.parameters(), lr=lr)
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
@@ -154,7 +161,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               batch_size=batch_size, criterion=loss_function, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size)

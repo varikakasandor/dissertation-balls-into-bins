@@ -1,0 +1,86 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.12.11
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.7
+    start_time: 1647310665
+    t:
+      1:
+      - 1
+      - 30
+      4: 3.7.7
+      5: 0.12.11
+      8:
+      - 3
+      - 5
+batch_size:
+  desc: null
+  value: 55
+eps_decay:
+  desc: null
+  value: 4996.007128284275
+eps_end:
+  desc: null
+  value: 0.0606889389256574
+eps_start:
+  desc: null
+  value: 0.2923945079827597
+eval_runs_train:
+  desc: null
+  value: 4
+hidden_size:
+  desc: null
+  value: 53
+loss_function:
+  desc: null
+  value:
+    _backward_hooks:
+    - []
+    _buffers:
+    - []
+    _forward_hooks:
+    - []
+    _forward_pre_hooks:
+    - []
+    _is_full_backward_hook: null
+    _load_state_dict_pre_hooks:
+    - []
+    _modules:
+    - []
+    _non_persistent_buffers_set: {}
+    _parameters:
+    - []
+    _state_dict_hooks:
+    - []
+    beta: 1
+    reduction: mean
+    training: true
+lr:
+  desc: null
+  value: 0.013674300566783737
+max_threshold:
+  desc: null
+  value: 12
+memory_capacity:
+  desc: null
+  value: 119
+num_lin_layers:
+  desc: null
+  value: 4
+optimise_freq:
+  desc: null
+  value: 89
+patience:
+  desc: null
+  value: 151
+rnn_num_layers:
+  desc: null
+  value: 3
+target_update_freq:
+  desc: null
+  value: 14
