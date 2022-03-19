@@ -1,0 +1,30 @@
+wandb_version: 1
+
+batch_size:
+  value: 62
+eps_decay:
+  value: 197.98622959108707
+eps_end:
+  value: 0.05136888099759874
+eps_start:
+  value: 0.18248449544077616
+eval_runs_train:
+  value: 2
+hidden_size:
+  value: 230
+loss_function:
+  value: SmoothL1Loss
+lr:
+  value: 0.00013088752491747347
+max_threshold:
+  value: 11
+memory_capacity:
+  value: 919
+num_lin_layers:
+  value: 1
+optimise_freq:
+  value: 31
+rnn_num_layers:
+  value: 2
+target_update_freq:
+  value: 30

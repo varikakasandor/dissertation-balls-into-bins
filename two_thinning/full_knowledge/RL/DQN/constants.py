@@ -19,7 +19,7 @@ EVAL_PARALLEL_BATCH_SIZE = 32
 PATIENCE = 400
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-OPTIMISE_FREQ = 5 * int(sqrt(M))  # TODO: 50 for N=10, M=100
+OPTIMISE_FREQ = 3 * int(sqrt(M))  # TODO: 50 for N=10, M=100
 MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"

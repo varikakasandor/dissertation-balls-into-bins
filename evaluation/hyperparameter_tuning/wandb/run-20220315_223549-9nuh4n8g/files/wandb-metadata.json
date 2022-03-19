@@ -1,0 +1,24 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.7.7",
+    "heartbeatAt": "2022-03-15T22:35:52.264460",
+    "startedAt": "2022-03-15T22:35:49.895445",
+    "docker": null,
+    "gpu": "GeForce MX150",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "C:/Users/varik/Documents/Cambridge/II/Individual-Project/dissertation-balls-into-bins/evaluation/hyperparameter_tuning/weights_and_biases.py",
+    "codePath": "evaluation\\hyperparameter_tuning\\weights_and_biases.py",
+    "git": {
+        "remote": "git@github.com:varikakasandor/dissertation-balls-into-bins.git",
+        "commit": "44d1e1b95284ad5c69f3fb12e457680f63b14d22"
+    },
+    "email": "varikakasandor@gmail.com",
+    "root": "C:/Users/varik/Documents/Cambridge/II/Individual-Project/dissertation-balls-into-bins",
+    "host": "LAPTOP-HOHBRLK7",
+    "username": "varik",
+    "executable": "C:\\Users\\varik\\anaconda3\\envs\\dissertation\\python.exe"
+}
