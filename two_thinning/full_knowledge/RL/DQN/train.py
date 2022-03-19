@@ -3,6 +3,8 @@ import copy
 import random
 from math import exp, log, floor, ceil
 from os import mkdir
+from sklearn.preprocessing import scale
+import numpy as np
 
 import wandb
 from matplotlib import pyplot as plt
@@ -172,6 +174,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     best_eval_score = None
     not_improved = 0
     threshold_jumps = []
+    eval_scores = []
 
     for ep in range(num_episodes):
         loads = [0] * n
@@ -201,11 +204,10 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
         if best_eval_score is None or curr_eval_score > best_eval_score:
             curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs,
                                                        batch_size=eval_parallel_batch_size)  # only update the best if it is really better, so run more tests
-            if report_wandb:
-                wandb.log({"score": curr_eval_score})
-        elif report_wandb:
+        if report_wandb:
             wandb.log({"score": curr_eval_score})
 
+        eval_scores.append(curr_eval_score)
         threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path))
 
         if best_eval_score is None or curr_eval_score > best_eval_score:
@@ -234,13 +236,17 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
+
+    scaled_threshold_jumps = scale(np.array(threshold_jumps))
+    scaled_eval_scores = scale(np.array(eval_scores))
+
     plt.clf()
-    plt.plot(list(range(num_episodes)), threshold_jumps)
-    plt.title(f"Threshold jumps")
+    plt.plot(list(range(num_episodes)), scaled_threshold_jumps, label="normalised number of threshold jumps")
+    plt.plot(list(range(num_episodes)), scaled_eval_scores, label="normalised evaluation scores")
+    plt.title(f"Training Progression")
     plt.xlabel("Epoch")
-    plt.ylabel("Number of sudden jumps")
-    plt.title("Progression of number of sudden jumps")
-    plt.savefig(join(save_path, "jumps_progression"))
+    plt.legend()
+    plt.savefig(join(save_path, "training_progression"))
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 
