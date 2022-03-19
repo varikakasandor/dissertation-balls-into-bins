@@ -2,9 +2,12 @@ import time
 import copy
 import random
 from math import exp, log, floor, ceil
-import wandb
+from os import mkdir
 
+import wandb
+from matplotlib import pyplot as plt
 import torch.optim as optim
+
 
 from helper.replay_memory import ReplayMemory, Transition
 from two_thinning.full_knowledge.RL.DQN.constants import *
@@ -77,6 +80,34 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
         return avg_score
 
 
+def calc_number_of_jumps(thresholds, delta=4):
+    num_jumps = 0
+    for i in range(len(thresholds)-1):
+        if abs(thresholds[i]-thresholds[i+1]) >= delta:
+            num_jumps += 1
+    return num_jumps
+
+
+def analyse_threshold_progression(model, ep, save_folder, n=N, m=M):
+    with torch.no_grad():
+        loads = [0] * n
+        thresholds = []
+        for _ in range(m):
+            a = greedy(model, loads)
+            thresholds.append(a)
+            randomly_selected = random.randrange(n)
+            if loads[randomly_selected] <= a:
+                loads[randomly_selected] += 1
+            else:
+                loads[random.randrange(n)] += 1
+        plt.clf()
+        plt.plot(list(range(m)), thresholds)
+        plt.xlabel("Index of ball")
+        plt.ylabel("Chosen threshold")
+        plt.title(f"Epoch {ep}")
+        plt.savefig(join(save_folder, f"Epoch {ep}"))
+        return calc_number_of_jumps(thresholds)
+
 def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criterion, device):
     if len(memory) < batch_size:
         return
@@ -99,7 +130,6 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
     # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 # alternative
     # curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  # alternative cnt'd
 
-    criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
 
     # Optimize the model
@@ -115,9 +145,11 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
           nn_hidden_size=NN_HIDDEN_SIZE, nn_rnn_num_layers=NN_RNN_NUM_LAYERS, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN, loss_function=LOSS_FUCNTION,
-          max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
+          max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, save_path=SAVE_PATH,
           print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
     start_time = time.time()
+
+    mkdir(save_path)
 
     max_possible_load = m // n + ceil(sqrt(log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m # based on the two-thinning paper, this can be achieved!
 
@@ -139,6 +171,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     steps_done = 0
     best_eval_score = None
     not_improved = 0
+    threshold_jumps = []
 
     for ep in range(num_episodes):
         loads = [0] * n
@@ -172,6 +205,9 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                 wandb.log({"score": curr_eval_score})
         elif report_wandb:
             wandb.log({"score": curr_eval_score})
+
+        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path))
+
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
@@ -198,6 +234,13 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
+    plt.clf()
+    plt.plot(list(range(num_episodes)), threshold_jumps)
+    plt.title(f"Threshold jumps")
+    plt.xlabel("Epoch")
+    plt.ylabel("Number of sudden jumps")
+    plt.title("Progression of number of sudden jumps")
+    plt.savefig(join(save_path, "jumps_progression"))
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 

@@ -1,4 +1,6 @@
 import wandb
+from os.path import join, dirname, abspath
+from datetime import datetime
 
 from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
@@ -11,6 +13,7 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
+SAVE_PATH = join((dirname(dirname(abspath(__file__)))), "training_progression", f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 
 
 def POTENTIAL_FUN(loads):
@@ -43,7 +46,7 @@ def tuning_function(config=None):
                               eval_runs=config["eval_runs_train"], patience=config["patience"],
                               potential_fun=POTENTIAL_FUN, max_threshold=config["max_threshold"],
                               eval_parallel_batch_size=config["eval_parallel_batch_size"], print_progress=PRINT_PROGRESS,
-                              nn_model=NN_MODEL, device=DEVICE, report_wandb=True)
+                              nn_model=NN_MODEL, device=DEVICE, report_wandb=True, save_path=SAVE_PATH)
         score = evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=config["eval_runs_eval"],
                          eval_parallel_batch_size=config["eval_parallel_batch_size"])
         wandb.log({"score": score})

@@ -1,16 +1,19 @@
 from math import sqrt, log, ceil
+from os.path import join, dirname, abspath
+from datetime import datetime
+
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 3
-M = 5
+N = 10
+M = 100
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
 EPS_START = 0.2
 EPS_END = 0.07
 EPS_DECAY = 5000
-TRAIN_EPISODES = 3000
+TRAIN_EPISODES = 500
 TARGET_UPDATE_FREQ = 20
 MEMORY_CAPACITY = 10 * BATCH_SIZE
 EVAL_RUNS_TRAIN = 32
@@ -28,6 +31,7 @@ LR = 0.001
 NN_HIDDEN_SIZE = 64
 NN_RNN_NUM_LAYERS = 1
 NN_NUM_LIN_LAYERS = 1
+SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression", f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 
 def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins
