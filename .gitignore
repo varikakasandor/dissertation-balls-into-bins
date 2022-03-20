@@ -9,6 +9,7 @@
 *.gz
 *.idea
 
+*conda-environment.yaml
 proposal/main.pdf
 #evaluation/analyses/*
 experiment
