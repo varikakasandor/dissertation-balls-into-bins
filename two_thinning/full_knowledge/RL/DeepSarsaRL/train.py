@@ -72,7 +72,7 @@ def train(n=N, m=M, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
                     _, next_val = epsilon_greedy(model=model, loads=loads, max_threshold=max_threshold,
                                        steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
-                    #new_val += next_val
+                    new_val += next_val
 
             loss = loss_function(old_val, new_val)
             optimizer.zero_grad()
