@@ -1,0 +1,23 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.7.7",
+    "heartbeatAt": "2022-03-20T05:05:06.044629",
+    "startedAt": "2022-03-20T05:04:58.924713",
+    "docker": null,
+    "gpu": "GeForce MX150",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "-m two_thinning.full_knowledge.RL.DQN.train",
+    "git": {
+        "remote": "git@github.com:varikakasandor/dissertation-balls-into-bins.git",
+        "commit": "29a2bb49e7d68b07e279394d22685762eb93e8d8"
+    },
+    "email": "varikakasandor@gmail.com",
+    "root": "C:/Users/varik/Documents/Cambridge/II/Individual-Project/dissertation-balls-into-bins",
+    "host": "LAPTOP-HOHBRLK7",
+    "username": "varik",
+    "executable": "C:\\Users\\varik\\anaconda3\\envs\\dissertation\\python.exe"
+}

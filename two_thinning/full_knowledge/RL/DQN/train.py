@@ -10,10 +10,8 @@ import wandb
 from matplotlib import pyplot as plt
 import torch.optim as optim
 
-
 from helper.replay_memory import ReplayMemory, Transition
 from two_thinning.full_knowledge.RL.DQN.constants import *
-
 
 # from pytimedinput import timedInput # Works only with interactive interpreter
 
@@ -84,13 +82,13 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
 
 def calc_number_of_jumps(thresholds, delta=4):
     num_jumps = 0
-    for i in range(len(thresholds)-1):
-        if abs(thresholds[i]-thresholds[i+1]) >= delta:
+    for i in range(len(thresholds) - 1):
+        if abs(thresholds[i] - thresholds[i + 1]) >= delta:
             num_jumps += 1
     return num_jumps
 
 
-def analyse_threshold_progression(model, ep, save_folder, n=N, m=M):
+def analyse_threshold_progression(model, ep, save_folder, delta, n=N, m=M):
     with torch.no_grad():
         loads = [0] * n
         thresholds = []
@@ -107,8 +105,9 @@ def analyse_threshold_progression(model, ep, save_folder, n=N, m=M):
         plt.xlabel("Index of ball")
         plt.ylabel("Chosen threshold")
         plt.title(f"Epoch {ep}")
-        plt.savefig(join(save_folder, f"Epoch {ep}"))
-        return calc_number_of_jumps(thresholds)
+        plt.savefig(join(save_folder, f"Epoch {ep}.png"))
+        return calc_number_of_jumps(thresholds, delta=delta)
+
 
 def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criterion, device):
     if len(memory) < batch_size:
@@ -117,22 +116,18 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
     batch = Transition(*zip(*transitions))
 
     non_final_mask = torch.tensor(tuple(map(lambda s: not s, batch.done)), dtype=torch.bool).to(device)  # flip
-    non_final_next_states = torch.tensor([next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
+    non_final_next_states = torch.tensor(
+        [next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
 
     state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,
                                                      torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
     next_state_values = torch.zeros(batch_size).double().to(device)
-    if torch.any(non_final_mask): # needed for curriculum learning, as at the start all entries can be final
+    if torch.any(non_final_mask):  # needed for curriculum learning, as at the start all entries can be final
         next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    # argmax = target_net(non_final_next_states).max(1)[1].detach() # TODO: double Q learning
-    # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
-    expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
-    # curr_weight = sqrt(min(steps_done, saturate_steps) / saturate_steps) / 2  # Converges to 1 starting from 0 # alternative
-    # curr_weight * next_state_values + (1 - curr_weight) * torch.as_tensor(batch.reward).to(device)  # alternative cnt'd
-
-    loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
+    expected_state_action_values =torch.as_tensor(batch.reward).to(device) + next_state_values
+    loss = criterion(state_action_values, expected_state_action_values)
 
     # Optimize the model
     optimizer.zero_grad()
@@ -153,17 +148,20 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     mkdir(save_path)
 
-    max_possible_load = m // n + ceil(sqrt(log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m # based on the two-thinning paper, this can be achieved!
+    max_possible_load = m // n + ceil(sqrt(
+        log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m  # based on the two-thinning paper, this can be achieved!
 
     policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
-                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
+                          num_lin_layers=nn_num_lin_layers,
                           device=device)
     target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
-                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
+                          num_lin_layers=nn_num_lin_layers,
                           device=device)
     best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
-                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
-                          device=device)
+                        hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                        device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -197,7 +195,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, criterion=loss_function, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               batch_size=batch_size, criterion=loss_function,
+                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
 
         curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size)
@@ -208,7 +207,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             wandb.log({"score": curr_eval_score})
 
         eval_scores.append(curr_eval_score)
-        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path))
+        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path, delta=max_threshold // 2))
 
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
@@ -236,17 +235,16 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
-
     scaled_threshold_jumps = scale(np.array(threshold_jumps))
     scaled_eval_scores = scale(np.array(eval_scores))
 
     plt.clf()
-    plt.plot(list(range(num_episodes)), scaled_threshold_jumps, label="normalised number of threshold jumps")
-    plt.plot(list(range(num_episodes)), scaled_eval_scores, label="normalised evaluation scores")
+    plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps, label="normalised number of threshold jumps")
+    plt.plot(list(range(len(scaled_eval_scores))), scaled_eval_scores, label="normalised evaluation scores")
     plt.title(f"Training Progression")
     plt.xlabel("Epoch")
     plt.legend()
-    plt.savefig(join(save_path, "training_progression"))
+    plt.savefig(join(save_path, "training_progression.png"))
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 

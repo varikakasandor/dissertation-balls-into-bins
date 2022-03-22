@@ -13,8 +13,6 @@ PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
-SAVE_PATH = join((dirname(dirname(abspath(__file__)))), "training_progression", f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
-
 
 def POTENTIAL_FUN(loads):
     return -max(loads)  # TODO: take into account more bins
@@ -35,6 +33,8 @@ def tuning_function(config=None):
         "L1Loss": nn.L1Loss()
     }
     with wandb.init(config=config):
+        SAVE_PATH = join((dirname(dirname(abspath(__file__)))), "training_progression",
+                         f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}') # recreate for every run with fresh timestamp
         config = wandb.config
         trained_model = train(n=N, m=M, memory_capacity=config["memory_capacity"],
                               num_episodes=config["train_episodes"], loss_function=loss_mapping[config["loss_function"]], lr=config["lr"],

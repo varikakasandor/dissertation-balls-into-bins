@@ -1,14 +1,14 @@
 import functools
 import time
 
-from two_thinning.constant_threshold.maths_results import optimal_threshold
-from helper.helper import number_of_increasing_partitions, argmin
+from helper.helper import argmin
 
 n = 10
 m = 20
 reward = max
 
-@functools.lru_cache(maxsize=400000) # n * m * number_of_increasing_partitions(m, n))
+
+@functools.lru_cache(maxsize=400000)  # n * m * number_of_increasing_partitions(m, n))
 def dp(loads_tuple, chosen, threshold, n=n, m=m, reward=reward):
     loads = list(loads_tuple)
     if sum(loads) == m:
@@ -52,13 +52,15 @@ def dp_simpler_state(loads_tuple, threshold, n=n, m=m, reward=reward):
                 res += subres / n
         return res / n
 
+
 def find_best_constant_threshold(n=n, m=m, reward=reward):
-    options=[dp(tuple([0] * n), 0, threshold, n=n, m=m, reward=reward) for threshold in range(m+1)]
-    best=argmin(options)
-    print(f"With {m} balls and {n} bins the best constant threshold is {best}, its expected maximum load is {options[best]}")
+    options = [dp(tuple([0] * n), 0, threshold, n=n, m=m, reward=reward) for threshold in range(m + 1)]
+    best = argmin(options)
+    print(
+        f"With {m} balls and {n} bins the best constant threshold is {best}, its expected maximum load is {options[best]}")
+
 
 if __name__ == "__main__":
     start_time = time.time()
     find_best_constant_threshold()
-    print(f"According to the mathematical bounds the optimal constant threshold should be around {optimal_threshold(n)}")
     print("--- %s seconds ---" % (time.time() - start_time))

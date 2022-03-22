@@ -1,80 +1,80 @@
-import torch
-import numpy as np
 import os
 
-from two_thinning.full_knowledge.RL.DeepSarsaRL.neural_network import FullTwoThinningNet
-from two_thinning.full_knowledge.RL.DeepSarsaRL.train import train
-
-n = 10
-m = 20
-epsilon = 0.1  # TODO: set (exponential) decay
+from two_thinning.full_knowledge.RL.DeepSarsaRL.constants import *
+from two_thinning.full_knowledge.RL.DeepSarsaRL.neural_network import *
+from two_thinning.full_knowledge.RL.DeepSarsaRL.train import train, evaluate_q_values_faster
 
 
-def reward(x):
-    return -np.max(x)
-
-
-train_episodes = 30000
-runs = 300
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def get_best_model_path(n=n, m=m):
-    best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models", f"best_{n}_{m}.pth")
+def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
+    nn_type_str = f"{nn_type}_" if nn_type is not None else ""
+    best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_models",
+                                   f"best_{nn_type_str}{n}_{m}.pth")
     return best_model_path
 
 
-def evaluate(model, n=n, m=m, reward=reward, runs=runs):
-    max_loads = []
-    for _ in range(runs):
-        loads = np.zeros(n)
-        for i in range(m):
-            options = model(torch.from_numpy(loads))
-            print(f"The options are: {options}")
-            a = torch.argmax(options)
-            print(f"With load vector {loads}, the model chooses a threshold {a}")
-            randomly_selected = np.random.randint(n)
-            if loads[randomly_selected] <= a:
-                loads[randomly_selected] += 1
-            else:
-                loads[np.random.randint(n)] += 1
-        max_loads.append(-reward(loads))
-
-    avg_max_load = sum(max_loads) / len(max_loads)
-    return avg_max_load
+def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
+    model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
+        FullTwoThinningRecurrentNet if nn_type == "rnn" else (
+            FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
+                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else (
+                    GeneralNet if nn_type =="general_net" else FullTwoThinningNet))))
 
 
-def load_best_model(n=n, m=m, device=device):
-    best_model = FullTwoThinningNet(n, m, device=device)
-    best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m)))
-    best_model.eval()
-    return best_model
+    for max_threshold in range(m + 1):
+        for max_possible_load in range(m+1):
+            try:
+                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, hidden_size=64, device=device)
+                best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
+                best_model.eval()
+                return best_model
+            except:
+                continue
+
+    print("ERROR: trained model not found with any max_threshold")
+    return None
 
 
-def evaluate_best(n=n, m=m, reward=reward, device=device, runs=runs):
-    avg_load = -evaluate(load_best_model(n=n, m=m, device=device), n=n, m=m, reward=reward, runs=runs)
+def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL,
+             eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE):
+    avg_score = evaluate_q_values_faster(trained_model, n=n, m=m, reward=reward_fun, eval_runs=eval_runs_eval,
+                                         batch_size=eval_parallel_batch_size)  # TODO: set back print_behaviour to True
+    return avg_score
+
+
+def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, eps_start=EPS_START,
+            eps_end=EPS_END, eps_decay=EPS_DECAY, reward_fun=REWARD_FUN,
+            eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
+            max_threshold=MAX_THRESHOLD, lr=LR, loss_function=LOSS_FUCNTION,
+            nn_hidden_size=NN_HIDDEN_SIZE, nn_rnn_num_layers=NN_RNN_NUM_LAYERS, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
+            eval_runs_train=EVAL_RUNS_TRAIN, eval_runs_eval=EVAL_RUNS_EVAL, patience=PATIENCE,
+            print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL, potential_fun=POTENTIAL_FUN,
+            nn_type=NN_TYPE, save_path=SAVE_PATH):
+    current_model = train(n=n, m=m, num_episodes=train_episodes, reward_fun=reward_fun,
+                          eps_start=eps_start, eps_end=eps_end, lr=lr, loss_function=loss_function,
+                          max_threshold=max_threshold, potential_fun=potential_fun,
+                          eps_decay=eps_decay, eval_runs=eval_runs_train,
+                          patience=patience, print_progress=print_progress, nn_model=nn_model,
+                          nn_hidden_size=nn_hidden_size, nn_rnn_num_layers=nn_rnn_num_layers, nn_num_lin_layers=nn_num_lin_layers,
+                          device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, save_path=save_path)
+    current_model_performance = evaluate(current_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
+                                         eval_parallel_batch_size=eval_parallel_batch_size)
     print(
-        f"With {m} balls and {n} bins the average maximum load of the derived full knowledge greedy policy is {avg_load}")
-    return avg_load
+        f"With {m} balls and {n} bins the trained current DQN model has an average score/maximum load of {current_model_performance}.")
 
-
-def compare(n=n, m=m, epsilon=epsilon, reward=reward, train_episodes=train_episodes, device=device):
-    current_model = train(n=n, m=m, epsilon=epsilon, reward=reward, episodes=train_episodes, device=device)
-    current_model_performance = evaluate(current_model, n=n, m=m, reward=reward, runs=runs)
-    print(f"The average maximum load of the current model is {current_model_performance}.")
-
-    if os.path.exists(get_best_model_path(n=n, m=m)):
-        best_model = load_best_model()
-        best_model_performance = evaluate(best_model, n=n, m=m, reward=reward, runs=runs)
-        print(f"The average maximum load of the best model is {best_model_performance}.")
-        if current_model_performance < best_model_performance:
-            torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m))
+    best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
+    if best_model is not None:
+        best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
+                                          eval_parallel_batch_size=eval_parallel_batch_size)
+        print(f"The average score/maximum load of the best model is {best_model_performance}.")
+        if current_model_performance > best_model_performance:
+            torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m, nn_type=nn_type))
             print(f"The best model has been updated to the current model.")
+        else:
+            print(f"The best model had better performance than the current one, so it is not updated.")
     else:
-        torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m))
+        torch.save(current_model.state_dict(), get_best_model_path(n=n, m=m, nn_type=nn_type))
         print(f"This is the first model trained with these parameters. This trained model is now saved.")
 
 
-if __name__ == '__main__':
-    compare(n=10, m=20)
+if __name__ == "__main__":
+    compare()

@@ -27,7 +27,6 @@ class FullGraphicalTwoChoiceFCNet(nn.Module):
         return x
 
 
-
 class FullGraphicalTwoChoiceOneHotFCNet(nn.Module):
 
     def __init__(self, n, max_possible_load, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
@@ -48,6 +47,6 @@ class FullGraphicalTwoChoiceOneHotFCNet(nn.Module):
         self.to(self.device).double()
 
     def forward(self, x):
-        x = F.one_hot(x, num_classes=self.max_possible_load + 1).flatten(-2,-1).double().to(self.device)
+        x = F.one_hot(x, num_classes=self.max_possible_load + 1).flatten(-2, -1).double().to(self.device)
         x = self.fc(x)
         return x

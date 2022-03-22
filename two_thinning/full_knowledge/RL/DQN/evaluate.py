@@ -1,8 +1,7 @@
 import os
 
 from two_thinning.full_knowledge.RL.DQN.constants import *
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningOneHotNet, FullTwoThinningNet, \
-    FullTwoThinningRecurrentNet
+from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from two_thinning.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster
 
 
@@ -17,7 +16,9 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
         FullTwoThinningRecurrentNet if nn_type == "rnn" else (
             FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
-                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else FullTwoThinningNet)))
+                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else (
+                    GeneralNet if nn_type =="general_net" else FullTwoThinningNet))))
+
 
     for max_threshold in range(m + 1):
         for max_possible_load in range(m+1):

@@ -135,7 +135,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 to_place = random.randrange(n)
                 choices_left += 1
 
-            curr_state = loads + [choices_left]
+            curr_state = loads + [choices_left] # in a format that can directly go into the neural network
             loads[to_place] += 1
             next_state = (loads + [k])
 

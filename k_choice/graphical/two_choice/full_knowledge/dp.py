@@ -3,13 +3,15 @@ import time
 import random
 
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
+from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
+
 
 from helper.helper import number_of_increasing_partitions
 
-N = 4
-M = 6
+N = 8
+M = 11
 REWARD = max
-GRAPH = Cycle(N)
+GRAPH = HyperCube(N)
 
 strategy = {}
 
@@ -61,7 +63,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Create strategy
-    dp(graph=GRAPH, reward=REWARD, m=M)
+    print(dp(graph=GRAPH, reward=REWARD, m=M))
 
     for ((loads, (x, y)), decision) in strategy.items():
         if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):

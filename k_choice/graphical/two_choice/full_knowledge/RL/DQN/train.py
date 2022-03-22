@@ -25,16 +25,8 @@ def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_
                 return x
             else:
                 return y
-        """loads_x = copy.deepcopy(loads)
-        loads_x[x] += 1
-        loads_y = copy.deepcopy(loads)
-        loads_y[y] += 1
-        with torch.no_grad():
-            combined = torch.stack([torch.as_tensor(loads_x), torch.as_tensor(loads_y)])
-            options = policy_net(combined)
-            return options.max(0)[1].type(dtype=torch.int64)"""
     else:
-        return torch.tensor(random.choice(list(edge)))
+        return torch.tensor(random.choice(list(edge))).to(device)
 
 
 def greedy(policy_net, loads, edge, batched=False):
@@ -51,14 +43,6 @@ def greedy(policy_net, loads, edge, batched=False):
                     return x
                 else:
                     return y
-            """x, y = edge
-            loads_x = copy.deepcopy(loads)
-            loads_x[x] += 1
-            loads_y = copy.deepcopy(loads)
-            loads_y[y] += 1
-            combined = torch.stack([torch.as_tensor(loads_x), torch.as_tensor(loads_y)])
-            options = policy_net(combined)
-            return options.max(0)[1].type(dtype=torch.int64).item()"""
 
 
 def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,

@@ -1,6 +1,6 @@
 import random
 
-from two_thinning.constant_threshold.maths_results import optimal_threshold
+from two_thinning.quasi_constant_threshold.maths_results import optimal_threshold
 
 n = 10  # It is just at n=5000 that the optimal constant threshold moves from 1 to 2
 m = 20
