@@ -1,14 +1,10 @@
 import random
-from datetime import datetime
 from os import mkdir
-from os.path import join, dirname, abspath
+import numpy as np
 
-from two_thinning.full_knowledge.RL.DQN.neural_network import FullTwoThinningGRUNetFC, FullTwoThinningClippedRecurrentNetFC
+from two_thinning.full_knowledge.RL.DQN.constants import *
 from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
-from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
-from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
-from two_thinning.strategies.full_knowledge_rare_change_DQN_strategy import FullKnowledgeRareChangeDQNStrategy
-from two_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
+from two_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
 
 N = 10
 M = 100
@@ -59,5 +55,6 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=TheThresholdStrategy(n=N, m=M, limit=10))  # I don't understand why it shows yellow,
-    # whereas it runs fine
+    run_strategy_multiple_times(strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=5)))  # I don't understand why it shows
+    # yellow, whereas it runs fine
+    #scores = {alpha: run_strategy_multiple_times(strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)), print_behaviour=False) for alpha in np.linspace(0, 2, 10)}

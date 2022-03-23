@@ -1,5 +1,7 @@
 import functools
+import numpy as np
 from math import *
+
 
 n = 8
 m = 20
@@ -25,13 +27,11 @@ def argmin(l):
 
 
 def variance(loads):
-    mean = sum(loads) / len(loads)
-    variance = sum([(x - mean) ** 2 for x in loads]) / len(loads)
-    return variance
+    return np.var(np.array(loads))
 
 
 def std(loads):
-    return sqrt(variance(loads))
+    return np.std(np.array(loads))
 
 
 if __name__ == "__main__":

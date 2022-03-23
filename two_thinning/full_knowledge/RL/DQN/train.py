@@ -126,7 +126,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
     next_state_values = torch.zeros(batch_size).double().to(device)
     if torch.any(non_final_mask):  # needed for curriculum learning, as at the start all entries can be final
         next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    expected_state_action_values =torch.as_tensor(batch.reward).to(device) + next_state_values
+    expected_state_action_values = torch.as_tensor(batch.reward).to(device) + next_state_values
     loss = criterion(state_action_values, expected_state_action_values)
 
     # Optimize the model
@@ -184,11 +184,14 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
             curr_state = copy.deepcopy(loads)
             loads[to_place] += 1
-
             next_state = copy.deepcopy(loads)
-            reward = reward_fun(next_state) if i == m - 1 else 0  # "real" reward
-            reward += potential_fun(next_state) - potential_fun(curr_state)
+
+            if i == m - 1:
+                reward = reward_fun(next_state) - potential_fun(curr_state)  # assumes potential_fun(final_states)=0
+            else:
+                reward = potential_fun(next_state) - potential_fun(curr_state)
             reward = torch.DoubleTensor([reward]).to(device)
+
             memory.push(curr_state, threshold, next_state, reward, i == m - 1)
 
             steps_done += 1
@@ -196,7 +199,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
                                batch_size=batch_size, criterion=loss_function,
-                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               device=device)
 
         curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size)
