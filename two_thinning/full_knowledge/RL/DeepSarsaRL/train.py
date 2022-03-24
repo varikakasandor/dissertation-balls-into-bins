@@ -4,7 +4,6 @@ import time
 from math import *
 from os import mkdir
 
-import torch
 import wandb
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import scale

@@ -17,24 +17,19 @@ def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
 
 
 def STD_POTENTIAL(loads):
-    # return -max(loads)  # TODO: take into account more bins
     return -std(loads)
 
 
-def MAX_LOAD_REWARD(loads, error_ratio=1.5):
+def MAX_LOAD_POTENTIAL(loads):
     return -max(loads)
-    # return -std(loads)
-    # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-def PACING_FUN(start_size, n=N, m=M,
-               all_epochs=1000):  # returns number of epochs to run for the given start size. Note that the exact
-    # definition of "pacing function" is different
-    # I assume we want linearly increasing pacing function, so we need to solve for x and that we start from n:
-    # n + (n+x) + (n+2x) + ... + (n+(m-1)x) = all_epochs, that is
-    # n*m + x*m*(m-1)/2 = all_epochs, giving (changing x to delta, adding max)
-    delta = max((all_epochs - n * m) * 2 // (m * (m - 1)), 0)
-    return n + ((m - 1) - start_size) * delta
+def MAX_LOAD_REWARD(loads):
+    return -max(loads)
+
+
+def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
+    return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -52,7 +47,7 @@ PATIENCE = 400
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 3 * int(sqrt(M))  # TODO: 50 for N=10, M=100
-MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))
+MAX_THRESHOLD = max(3, ceil(sqrt(log(N))))  # Normalised!
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
 LOSS_FUCNTION = nn.SmoothL1Loss()
@@ -63,4 +58,4 @@ NN_NUM_LIN_LAYERS = 1
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(dirname(abspath(__file__))))))), "evaluation", "training_progression",
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 REWARD_FUN = MAX_LOAD_REWARD
-POTENTIAL_FUN = STD_POTENTIAL
+POTENTIAL_FUN = MAX_LOAD_POTENTIAL

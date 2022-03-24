@@ -9,7 +9,7 @@ N = 10
 M = 100
 
 
-def EXPONENTIAL_POTENTIAL(loads, alpha=5):
+def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
     t = sum(loads)
     n = len(loads)
     potential = sum([exp(alpha * (x - t / n)) for x in loads])
@@ -17,14 +17,19 @@ def EXPONENTIAL_POTENTIAL(loads, alpha=5):
 
 
 def STD_POTENTIAL(loads):
-    # return -max(loads)  # TODO: take into account more bins
     return -std(loads)
 
 
-def MAX_LOAD_REWARD(loads, error_ratio=1.5):
+def MAX_LOAD_POTENTIAL(loads):
     return -max(loads)
-    # return -std(loads)
-    # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
+
+
+def MAX_LOAD_REWARD(loads):
+    return -max(loads)
+
+
+def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
+    return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -53,4 +58,4 @@ NN_NUM_LIN_LAYERS = 1
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression",
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 REWARD_FUN = MAX_LOAD_REWARD
-POTENTIAL_FUN = STD_POTENTIAL
+POTENTIAL_FUN = MAX_LOAD_POTENTIAL

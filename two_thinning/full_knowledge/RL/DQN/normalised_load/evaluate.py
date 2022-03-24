@@ -17,13 +17,13 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
         FullTwoThinningRecurrentNet if nn_type == "rnn" else (
             FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
                 FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else (
-                    GeneralNet if nn_type =="general_net" else FullTwoThinningNet))))
-
+                    GeneralNet if nn_type == "general_net" else FullTwoThinningNet))))
 
     for max_threshold in range(m + 1):
-        for max_possible_load in range(m+1):
+        for max_possible_load in range(m + 1):
             try:
-                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, hidden_size=64, device=device)
+                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+                                   hidden_size=64, device=device)
                 best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
                 best_model.eval()
                 return best_model
@@ -50,11 +50,13 @@ def compare(n=N, m=M, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY_CAPA
             print_progress=PRINT_PROGRESS, device=DEVICE, nn_model=NN_MODEL, potential_fun=POTENTIAL_FUN,
             nn_type=NN_TYPE, save_path=SAVE_PATH):
     current_model = train(n=n, m=m, memory_capacity=memory_capacity, num_episodes=train_episodes, reward_fun=reward_fun,
-                          batch_size=batch_size, eps_start=eps_start, eps_end=eps_end, lr=lr, loss_function=loss_function,
+                          batch_size=batch_size, eps_start=eps_start, eps_end=eps_end, lr=lr,
+                          loss_function=loss_function,
                           max_threshold=max_threshold, optimise_freq=optimise_freq, potential_fun=potential_fun,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
                           patience=patience, print_progress=print_progress, nn_model=nn_model,
-                          nn_hidden_size=nn_hidden_size, nn_rnn_num_layers=nn_rnn_num_layers, nn_num_lin_layers=nn_num_lin_layers,
+                          nn_hidden_size=nn_hidden_size, nn_rnn_num_layers=nn_rnn_num_layers,
+                          nn_num_lin_layers=nn_num_lin_layers,
                           device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, save_path=save_path)
     current_model_performance = evaluate(current_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
                                          eval_parallel_batch_size=eval_parallel_batch_size)

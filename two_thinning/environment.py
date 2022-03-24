@@ -43,7 +43,8 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
     mkdir(join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp))
     scores = []
     for i in range(runs):
-        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour, time_stamp=time_stamp, run_id=str(i))
+        score = run_strategy(n=n, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour,
+                             time_stamp=time_stamp, run_id=str(i))
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
@@ -55,6 +56,10 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=5)))  # I don't understand why it shows
+    run_strategy_multiple_times(strategy=LocalRewardOptimiserStrategy(n=N, m=M,
+                                                                      potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x,
+                                                                                                                    alpha=5)))  # I don't understand why it shows
     # yellow, whereas it runs fine
-    #scores = {alpha: run_strategy_multiple_times(strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)), print_behaviour=False) for alpha in np.linspace(0, 2, 10)}
+    # scores = {alpha: run_strategy_multiple_times(
+    # strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)),
+    # print_behaviour=False) for alpha in np.linspace(0, 2, 10)}
