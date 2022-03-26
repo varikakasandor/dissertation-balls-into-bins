@@ -11,7 +11,8 @@ class TheRelativeThresholdStrategy(StrategyBase):
         self.round = 0
 
     def decide(self, bin):
-        few_primary = self.primary_count[bin] < (self.limit + (self.round-1)/self.n) # Note: it is a bit strange that for self.round=0 it has (-1)/self.n, but according to the formula this is correct
+        few_primary = self.primary_count[bin] < (self.limit + (self.round-1)/self.n) # Note: it is a bit strange that
+        # for self.round=0 it has (-1)/self.n, but according to the formula this is correct
         small_load = (self.loads[bin]-self.round/self.n) < log(self.n)
         if few_primary or small_load:
             self.primary_count[bin] += 1

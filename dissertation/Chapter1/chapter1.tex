@@ -6,3 +6,25 @@
     \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
 \fi
 
+
+\section{Motivation}
+
+Load balancing has been an important topic for many years, and it has gained even more attention recently e.g. cloud computing \cite{mishra2020cloud}. In the usual setup, there are some servers, and whenever a job arrives, the goal is to allocate it to one of the servers such that no server is overloaded (which at high burden often also means that no server is underloaded). At first glance, it might seem an easy problem to solve: always allocate the job greedily to the currently least loaded server. Or even simpler, in the case of homogeneous jobs: apply round-robin scheduling to the servers, using each of them in a cyclic way. 
+
+The problem with these approaches is that they require a centralised load balancer. That central load balancer would be a single of failure, reducing the robustness of the whole system, and potentially decreasing performance. An alternative is to use randomised load balancing! The idea is too allocate the jobs according to random protocol - the simplest being choosing a server randomly - that can be run independently on each client (requesting the job), without a central load balancer. The obvious question is how to shape this random protocol such that a good balance is achieved. The groundbreaking result in this topic was presented in \cite{azar1999twochoice}. They showed that the \textsc{Two-Choice} protocol, which always randomly queries the load of two independent servers, and allocates the job into the lesser loaded of the two, achieves a maximum load of $\frac{ln(ln(n))}{ln(2)} + O(1)$ after $n$ jobs, with high probability (meaning that as $n$ goes to infinity, the probability converges to $1$). This result led to extensive further study of the topic (see e.g. \cite{richa2001surveytwochoice}), and even large companies, such as Twitter started using this idea (often called ``The power of Two-Choices'') \cite{anderson2019twitter}.
+
+
+There are various versions of the load balancing problem (e.g. homogeneity of the jobs, random protocol used), and so for consistency reasons, the research community adapted the following standard terminology from mathematics: the servers are bins, and the jobs are balls. This is what I will use in my dissertation as well from now on. This has the further advantage, that random protocols such as \textsc{Two-Choice} have proved to be useful outside the field of load balancing too, e.g. hashing \cite{azar1999twochoice}. I will provide a more rigorous definition of the balls into bins abstraction in Chapter \ref{preparation}.
+
+
+Where does Reinforcement Learning (RL) come into play? There are other random protocols suggested, that are more realistic, or more efficient than \textsc{Two-Choice} in some circumstances. For example, we can see that if both of the bins queried by \textsc{Two-Choice} have very low load, then, it was unnecessary to do so (e.g. communication overhead, slows down servers), and only one of them would be enough. \textsc{One-Choice}, however, which simply allocates the ball randomly (``takes 1 sample and accepts that'') has been shown to have exponentially worse maximum load (see e.g. the Randomised Algorithms course), so it is not sufficient. Something in the middle is \textsc{Two-Thinning} \cite{feldheim2021thinning}, which samples one bin (``primary bin''), and either accepts that, or concludes that is has too high load, in which case the ball is allocated randomly into one of the bins. This, on average, requires less than $2$ queries per ball, but it is a parametric protocol: it depends on when it decides to accept a primary bin, and when it rejects it \NOTE{A}{How to be more clear about what parametric means, concisely?}. This dissertation is about optimising such free parameters in parametric protocols, like \textsc{Two-Thinning}.
+
+
+\section{My approach}
+
+
+\section{Related work}
+
+
+
+\section{Outline}

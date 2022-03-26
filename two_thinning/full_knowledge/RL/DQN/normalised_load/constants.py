@@ -5,8 +5,8 @@ from datetime import datetime
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 10
-M = 100
+N = 5
+M = 125
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):

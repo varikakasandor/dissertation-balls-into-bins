@@ -1,5 +1,5 @@
-\documentclass[a4paper,12pt,times,authoryear,oneside,print,index,custommargin]{Classes/PhDThesisPSnPDF}
-
+\documentclass[a4paper,12pt,times,oneside,print,index,custommargin]{Classes/PhDThesisPSnPDF}
+\usepackage{styling}
 \input{Preamble/preamble}
 \input{thesis-info}
 \ifdefineAbstract
@@ -44,7 +44,10 @@
 
 \begin{spacing}{0.9}
 
-\bibliographystyle{apalike}
+
+\bibliographystyle{plain}
+%\bibliographystyle{abbrv}
+%\bibliographystyle{apalike}
 %\bibliographystyle{authoryear}
 %\bibliographystyle{unsrt} % Use for unsorted references  
 %\bibliographystyle{plainnat} % use this to have URLs listed in References
@@ -67,6 +70,6 @@
 \end{appendices}
 
 % *************************************** Index ********************************
-\printthesisindex % If index is present
+\printthesisindex
 
 \end{document}
