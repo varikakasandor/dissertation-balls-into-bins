@@ -1,38 +1,21 @@
-import functools
 import time
-import random
 
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 
-
 from helper.helper import number_of_increasing_partitions
 
-N = 8
-M = 11
+N = 4
+M = 15
 REWARD = max
-GRAPH = HyperCube(N)
-
-strategy = {}
-
-
-def cached(func):
-    func.cache = {}
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func.cache[args]
-        except KeyError:
-            func.cache[args] = result = func(*args)
-            return result
-
-    return wrapper
+GRAPH = Cycle(N)
+DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 
 
-# @functools.lru_cache(maxsize=400000)  # m * n * number_of_increasing_partitions(m, n))
-@cached
-def dp_helper(loads_tuple, chosen_edge, graph=GRAPH, m=M, reward=REWARD):
+def dp_helper(loads_tuple, chosen_edge, strategy, graph=GRAPH, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
+    if (loads_tuple, chosen_edge) in strategy:
+        val, _ = strategy[(loads_tuple, chosen_edge)]
+        return val
     loads = list(loads_tuple)
     if sum(loads) == m:
         return reward(loads)
@@ -42,30 +25,33 @@ def dp_helper(loads_tuple, chosen_edge, graph=GRAPH, m=M, reward=REWARD):
         loads[node] += 1
         avg = 0
         for edge in graph.edge_list:
-            avg += dp_helper(tuple(loads), edge, reward=reward, graph=graph, m=m)
+            avg += dp_helper(tuple(loads), edge, strategy, reward=reward, graph=graph, m=m)
         avg /= graph.e
         options.append(avg)
         loads[node] -= 1
 
-    global strategy
-    strategy[(loads_tuple, chosen_edge)] = -1 if (options[0] < options[1]) else (1 if options[1] < options[0] else 0)
-    return min(options)
+    val = min(options)
+    if len(strategy) < dict_limit:
+        decision = -1 if (options[0] < options[1]) else (1 if options[1] < options[0] else 0)
+        strategy[(loads_tuple, chosen_edge)] = (val, decision)
+    return val
 
 
 def dp(graph=GRAPH, m=M, reward=REWARD):
     avg = 0
+    strategy = {}
     for edge in graph.edge_list:
-        avg += dp_helper(tuple([0] * graph.n), edge, reward=reward, graph=graph, m=m)
-    return avg / graph.e
+        avg += dp_helper(tuple([0] * graph.n), edge, strategy, reward=reward, graph=graph, m=m)
+    return avg / graph.e, strategy
 
 
 if __name__ == "__main__":
     start_time = time.time()
 
-    # Create strategy
-    print(dp(graph=GRAPH, reward=REWARD, m=M))
+    score, strategy = dp()
+    print(score)
 
-    for ((loads, (x, y)), decision) in strategy.items():
+    for ((loads, (x, y)), (val, decision)) in strategy.items():
         if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):
             print(loads, (x, y), decision)
 

@@ -3,18 +3,28 @@ import time
 
 from helper.helper import number_of_increasing_partitions
 
-N = 20
-M = 20
+N = 10
+M = 10
 REWARD = max
+DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 
 
-@functools.lru_cache(maxsize=400000)  # m * n * number_of_increasing_partitions(m, n))
-def dp(loads_tuple, chosen, n=N, m=M, reward=REWARD):
-    if chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
+def find_earliest(loads_tuple, chosen):
+    while chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen - 1]:
         chosen -= 1
-        while chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
-            chosen -= 1
-        return dp(loads_tuple, chosen, n=n, m=m, reward=reward)
+    return chosen
+
+
+def dp(loads_tuple, chosen, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
+    if (loads_tuple, chosen) in strategy:
+        val, _ = strategy[(loads_tuple, chosen)]
+        return val
+
+    earliest_occurence = find_earliest(loads_tuple, chosen)
+    if earliest_occurence != chosen:
+        return dp(loads_tuple, earliest_occurence, strategy, n=n, m=m, reward=reward)
+
+
     loads = list(loads_tuple)
     if sum(loads) == m:
         return reward(loads)
@@ -23,7 +33,7 @@ def dp(loads_tuple, chosen, n=N, m=M, reward=REWARD):
     loads[chosen] += 1
     loads_sorted = sorted(loads)
     for i in range(n):
-        accept += dp(tuple(loads_sorted), i, n, m, reward)
+        accept += dp(tuple(loads_sorted), i, strategy, n=n, m=m, reward=reward)
     loads[chosen] -= 1
     accept /= n
 
@@ -32,21 +42,28 @@ def dp(loads_tuple, chosen, n=N, m=M, reward=REWARD):
         loads[i] += 1
         loads_sorted = sorted(loads)
         for j in range(n):
-            reject += dp(tuple(loads_sorted), j, n, m, reward)
+            reject += dp(tuple(loads_sorted), j, strategy, n=n, m=m, reward=reward)
         loads[i] -= 1
     reject /= (n * n)
 
-    return min(accept, reject)
+    val = min(accept, reject)
+    if len(strategy) < dict_limit:
+        decision = -1 if (accept < reject) else (1 if reject < accept else 0)
+        strategy[(loads_tuple, chosen)] = (val, decision)
+
+    return val
 
 
 def find_best_thresholds(n=N, m=M, reward=REWARD):
+    strategy = {}
     print(
-        f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
+        f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, strategy, n=n, m=m, reward=reward)}")
+    return strategy
 
 
 if __name__ == "__main__":
     start_time = time.time()
 
-    print(f"With {M} balls and {N} bins the best achievable expected maximum load is {dp(tuple([0] * N), 0)}")
-
+    strategy = find_best_thresholds()
+    print(strategy)
     print("--- %s seconds ---" % (time.time() - start_time))
