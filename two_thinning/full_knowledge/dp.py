@@ -2,54 +2,53 @@ import functools
 import time
 
 from helper.helper import number_of_increasing_partitions
+from collections import Counter
 
-N = 10
-M = 10
+N = 5
+M = 40
 REWARD = max
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 
 
-def find_earliest(loads_tuple, chosen):
-    while chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen - 1]:
-        chosen -= 1
-    return chosen
+def rindex(l, elem):
+    return len(l) - next(i for i, v in enumerate(reversed(l), 1) if v == elem)
 
 
-def dp(loads_tuple, chosen, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
-    if (loads_tuple, chosen) in strategy:
-        val, _ = strategy[(loads_tuple, chosen)]
+def dp(loads_tuple, chosen_load, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
+    if (loads_tuple, chosen_load) in strategy:
+        val, _ = strategy[(loads_tuple, chosen_load)]
         return val
-
-    earliest_occurence = find_earliest(loads_tuple, chosen)
-    if earliest_occurence != chosen:
-        return dp(loads_tuple, earliest_occurence, strategy, n=n, m=m, reward=reward)
-
 
     loads = list(loads_tuple)
     if sum(loads) == m:
         return reward(loads)
 
+    last_occurence = rindex(loads, chosen_load)
+
     accept = 0
-    loads[chosen] += 1
-    loads_sorted = sorted(loads)
-    for i in range(n):
-        accept += dp(tuple(loads_sorted), i, strategy, n=n, m=m, reward=reward)
-    loads[chosen] -= 1
+    loads[last_occurence] += 1
+    loads_cnt = dict(Counter(loads))
+    for val, cnt in loads_cnt.items():
+        accept += cnt * dp(tuple(loads), val, strategy, n=n, m=m, reward=reward)
+    loads[last_occurence] -= 1
     accept /= n
 
+
     reject = 0
-    for i in range(n):
-        loads[i] += 1
-        loads_sorted = sorted(loads)
-        for j in range(n):
-            reject += dp(tuple(loads_sorted), j, strategy, n=n, m=m, reward=reward)
-        loads[i] -= 1
+    loads_cnt1 = dict(Counter(loads))
+    for val1, cnt1 in loads_cnt1.items():
+        last_occurence = rindex(loads, val1)
+        loads[last_occurence] += 1
+        loads_cnt2 = dict(Counter(loads))
+        for val2, cnt2 in loads_cnt2.items():
+            reject += cnt1 * cnt2 * dp(tuple(loads), val2, strategy, n=n, m=m, reward=reward)
+        loads[last_occurence] -= 1
     reject /= (n * n)
 
     val = min(accept, reject)
     if len(strategy) < dict_limit:
-        decision = -1 if (accept < reject) else (1 if reject < accept else 0)
-        strategy[(loads_tuple, chosen)] = (val, decision)
+        decision = -1 if (accept > reject) else (1 if reject > accept else 0)
+        strategy[(loads_tuple, chosen_load)] = (val, decision)
 
     return val
 
@@ -65,5 +64,5 @@ if __name__ == "__main__":
     start_time = time.time()
 
     strategy = find_best_thresholds()
-    print(strategy)
+    # print(strategy)
     print("--- %s seconds ---" % (time.time() - start_time))
