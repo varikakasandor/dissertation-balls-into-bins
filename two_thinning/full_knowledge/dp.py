@@ -3,13 +3,18 @@ import time
 
 from helper.helper import number_of_increasing_partitions
 
-N = 10
-M = 10
+N = 20
+M = 20
 REWARD = max
 
 
 @functools.lru_cache(maxsize=400000)  # m * n * number_of_increasing_partitions(m, n))
 def dp(loads_tuple, chosen, n=N, m=M, reward=REWARD):
+    if chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
+        chosen -= 1
+        while chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
+            chosen -= 1
+        return dp(loads_tuple, chosen, n=n, m=m, reward=reward)
     loads = list(loads_tuple)
     if sum(loads) == m:
         return reward(loads)
@@ -35,7 +40,9 @@ def dp(loads_tuple, chosen, n=N, m=M, reward=REWARD):
 
 
 def find_best_thresholds(n=N, m=M, reward=REWARD):
-    print(f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
+    print(
+        f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, n=n, m=m, reward=reward)}")
+
 
 if __name__ == "__main__":
     start_time = time.time()

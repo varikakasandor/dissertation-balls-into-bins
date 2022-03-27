@@ -3,13 +3,19 @@ import time
 
 from helper.helper import argmin
 
-n = 10
+n = 20
 m = 20
 reward = max
 
 
 @functools.lru_cache(maxsize=400000)  # n * m * number_of_increasing_partitions(m, n))
 def dp(loads_tuple, chosen, threshold, n=n, m=m, reward=reward):
+    if chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
+        chosen -= 1
+        while chosen > 0 and loads_tuple[chosen] == loads_tuple[chosen-1]:
+            chosen -= 1
+        return dp(loads_tuple, chosen, threshold=threshold, n=n, m=m, reward=reward)
+    loads = list(loads_tuple)
     loads = list(loads_tuple)
     if sum(loads) == m:
         return reward(loads)
