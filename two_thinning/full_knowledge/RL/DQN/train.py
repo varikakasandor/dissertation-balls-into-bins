@@ -177,6 +177,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     for ep in range(num_episodes):
         loads = [0] * n
         for i in range(m):
+            torch.cuda.empty_cache()
             threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
                                        steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)

@@ -1,13 +1,36 @@
+from datetime import datetime
 from math import sqrt, log, ceil
 from os.path import join, dirname, abspath
-from datetime import datetime
-import numpy as np
 
-from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
+from two_thinning.full_knowledge.RL.DQN.neural_network import *
 
-N = 10
-M = 100
+N = 1000
+M = 1000
+
+
+def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
+    t = sum(loads)
+    n = len(loads)
+    potential = sum([exp(alpha * (x - t / n)) for x in loads])
+    return -potential
+
+
+def STD_POTENTIAL(loads):
+    return -std(loads)
+
+
+def MAX_LOAD_POTENTIAL(loads):
+    return -max(loads)
+
+
+def MAX_LOAD_REWARD(loads):
+    return -max(loads)
+
+
+def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
+    return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
+
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 EPS_START = 0.2
@@ -30,15 +53,5 @@ NN_RNN_NUM_LAYERS = 1
 NN_NUM_LIN_LAYERS = 1
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression",
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
-
-
-def POTENTIAL_FUN(loads):
-    return -max(loads)  # TODO: take into account more bins
-    # return -std(loads)
-
-
-def REWARD_FUN(loads):
-    return -max(loads)
-
-    # return -std(loads)
-    # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
+REWARD_FUN = MAX_LOAD_REWARD
+POTENTIAL_FUN = MAX_LOAD_POTENTIAL

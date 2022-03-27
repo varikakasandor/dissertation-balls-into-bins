@@ -1,8 +1,8 @@
 import os
 
-from two_thinning.full_knowledge.RL.DQN.normalised_load.constants import *
+from two_thinning.full_knowledge.RL.DQN.constants import *
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
-from two_thinning.full_knowledge.RL.DQN.normalised_load.train import train, evaluate_q_values_faster
+from two_thinning.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster
 
 
 def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):

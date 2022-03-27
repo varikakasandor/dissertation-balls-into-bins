@@ -3,7 +3,7 @@ import numpy as np
 from math import *
 
 
-n = 8
+n = 20
 m = 20
 
 

@@ -5,8 +5,8 @@ from datetime import datetime
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 5
-M = 125
+N = 1000
+M = 1000
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
@@ -33,17 +33,17 @@ def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 64
+BATCH_SIZE = 16  # 64
 EPS_START = 0.2
 EPS_END = 0.04
 EPS_DECAY = 4200
-TRAIN_EPISODES = 3000
+TRAIN_EPISODES = 10000
 TARGET_UPDATE_FREQ = 20
 MEMORY_CAPACITY = 800
-EVAL_RUNS_TRAIN = 32
+EVAL_RUNS_TRAIN = 1  # 5
 EVAL_RUNS_EVAL = 100
-EVAL_PARALLEL_BATCH_SIZE = 32
-PATIENCE = 400
+EVAL_PARALLEL_BATCH_SIZE = 16 # 64
+PATIENCE = 5000
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 3 * int(sqrt(M))  # TODO: 50 for N=10, M=100
