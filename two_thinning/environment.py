@@ -6,16 +6,19 @@ from two_thinning.full_knowledge.RL.DQN.constants import *
 from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
 from two_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
+from two_thinning.strategies.dp_strategy import DPStrategy
 
 N = 5
-M = 125
+M = 40
 STRATEGY = AlwaysAcceptStrategy(N, M)
-REWARD = max
 RUNS = 30
-PRINT_BEHAVIOUR = True
+PRINT_BEHAVIOUR = False
+
+def REWARD_FUN(loads):
+    return -max(loads)
 
 
-def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD_FUN, print_behaviour=PRINT_BEHAVIOUR):
     loads = [0] * n
     for i in range(m):
         first_choice = random.randrange(n)
@@ -39,7 +42,7 @@ def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD,
     return score
 
 
-def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD_FUN, print_behaviour=PRINT_BEHAVIOUR):
     time_stamp = str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))
     mkdir(join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp))
     scores = []
@@ -52,12 +55,12 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
     save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, "summary")
     strategy.create_summary_(save_path)
     print(f"The average score of this strategy is {avg_score}")
-    print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
+    print(f"The average normalised max load of this strategy is {-avg_score - m / n}.")
     return avg_score
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M, use_normalised_load=True, use_pre_trained=False))  # I don't understand why it shows
+    run_strategy_multiple_times(strategy=DPStrategy(n=N, m=M, reward_fun=REWARD_FUN))  # I don't understand why it shows
     # yellow, whereas it runs fine
     # scores = {alpha: run_strategy_multiple_times(
     # strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)),
