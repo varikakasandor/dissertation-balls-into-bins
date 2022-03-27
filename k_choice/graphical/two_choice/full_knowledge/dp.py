@@ -70,7 +70,7 @@ if __name__ == "__main__":
     print(dp_helper((0, 1, 0, 2), (2, 3)))"""
 
     """print(
-        f"With {M} balls and {N} bins on a cycle, the best achievable expected maximum load is {dp(graph=GRAPH, reward=REWARD, m=M)}")
+        f"With {M} balls and {N} bins on a cycle, the best achievable expected maximum load is {dp(graph=GRAPH, reward=REWARD_FUN, m=M)}")
 
 
     print(strategy)"""
