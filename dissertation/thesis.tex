@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt,times,oneside,print,index,custommargin]{Classes/PhDThesisPSnPDF}
 \usepackage{styling}
+
 \input{Preamble/preamble}
 \input{thesis-info}
 \ifdefineAbstract
@@ -9,6 +10,9 @@
 \ifdefineChapter
  \includeonly{Chapter3/chapter3}
 \fi
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
 
 \begin{document}
 \frontmatter
