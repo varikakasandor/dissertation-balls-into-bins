@@ -20,7 +20,6 @@ class DPStrategy(StrategyBase):
             else:
                 break
         self.curr_thresholds.append(threshold)
-
         return self.loads[bin] <= threshold  # either accept is better (-1) or it doesn't matter (0)
 
     def note(self, bin):

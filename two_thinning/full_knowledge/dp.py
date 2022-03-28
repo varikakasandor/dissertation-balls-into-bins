@@ -1,12 +1,12 @@
-import functools
 import time
 
 from helper.helper import number_of_increasing_partitions
 from collections import Counter
 
 N = 5
-M = 40
+M = 20
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
+PRINT_BEHAVIOUR = True
 
 
 def REWARD(loads):
@@ -55,14 +55,16 @@ def dp(loads_tuple, chosen_load, strategy, n=N, m=M, reward=REWARD, dict_limit=D
     return val
 
 
-def find_best_thresholds(n=N, m=M, reward=REWARD):
+def find_best_thresholds(n=N, m=M, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
     strategy = {}
-    print(
-        f"With {m} balls and {n} bins the best achievable expected maximum load with two-thinning is {dp(tuple([0] * n), 0, strategy, n=n, m=m, reward=reward)}")
+    best_expected_score = dp(tuple([0] * n), 0, strategy, n=n, m=m, reward=reward)
+    if print_behaviour:
+        print(
+            f"With {n} bins and {m} balls the best achievable expected maximum score with two-thinning is {best_expected_score}")
     return strategy
 
 
-def assert_monotonicity(strategy):
+def assert_threshold_logic(strategy):
     for ((loads, val), (_, decision)) in strategy.items():
         if decision != 1:
             continue
@@ -75,9 +77,37 @@ def assert_monotonicity(strategy):
     return True, None
 
 
+def strict_subset(l1, l2):
+    not_equal = False
+    for (x, y) in zip(l1, l2):
+        if x > y:
+            return False
+        if x < y:
+            not_equal = True
+    return not_equal
+
+
+def assert_monotonicity(strategy):
+    for ((loads, val), (_, decision)) in strategy.items():
+        if decision != -1:
+            continue
+        for ((other_loads, other_val), (_, other_decision)) in strategy.items():
+            if other_decision != -1 and other_val <= val and strict_subset(loads, other_loads):
+                return False, ((loads, val, decision), (other_loads, other_val, other_decision))
+    return True, None
+
+
 if __name__ == "__main__":
     start_time = time.time()
 
-    strategy = find_best_thresholds()
-    print(assert_monotonicity(strategy))
+    """for m in range(1, M):
+        strategy = find_best_thresholds(n=3, m=m, reward=REWARD, print_behaviour=False)
+        threshold_logic = assert_threshold_logic(strategy)
+        monotone = assert_monotonicity(strategy)
+        if not threshold_logic or not monotone:
+            print(3, m)"""
+    strategy = find_best_thresholds(n=N, m=M, reward=REWARD)
+    for ((loads, val), (_, decision)) in strategy.items():
+        if decision == 0:
+            print(loads, val)
     print("--- %s seconds ---" % (time.time() - start_time))

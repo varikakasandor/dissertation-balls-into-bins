@@ -7,9 +7,10 @@ from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
 from two_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from two_thinning.strategies.dp_strategy import DPStrategy
+from two_thinning.strategies.random_strategy import RandomStrategy
 
 N = 5
-M = 40
+M = 10
 STRATEGY = AlwaysAcceptStrategy(N, M)
 RUNS = 30
 PRINT_BEHAVIOUR = False
