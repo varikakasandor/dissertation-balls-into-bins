@@ -3,8 +3,8 @@ import time
 from helper.helper import number_of_increasing_partitions
 from collections import Counter
 
-N = 5
-M = 20
+N = 30
+M = 30
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -55,9 +55,46 @@ def dp(loads_tuple, chosen_load, strategy, n=N, m=M, reward=REWARD, dict_limit=D
     return val
 
 
-def find_best_thresholds(n=N, m=M, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def threshold_dp(loads_tuple, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
+    if loads_tuple in strategy:
+        best_expected_score, _ = strategy[loads_tuple]
+        return best_expected_score
+
+    loads = list(loads_tuple)
+    if sum(loads) == m:
+        return reward(loads)
+
+    avg = 0
+    results = []
+    loads_cnt = dict(Counter(loads))
+    for val, cnt in loads_cnt.items():
+        last_occurrence = rindex(loads, val)
+        loads[last_occurrence] += 1
+        res = threshold_dp(tuple(loads), strategy, n=n, m=m, reward=reward, dict_limit=dict_limit)
+        avg += res * cnt
+        results.append((val, cnt, res))
+        loads[last_occurrence] -= 1
+    avg /= n
+
+    pref_score = 0
+    pref_cnt = 0
+    for (val, cnt, res) in (results):
+        pref_score += res * cnt
+        pref_cnt += cnt
+        if res >= avg:
+            best_threshold = val
+            best_expected_score = pref_score / n + (n - pref_cnt) / n * avg
+
+    if len(strategy) < dict_limit:
+        strategy[loads_tuple] = (best_expected_score, best_threshold)
+
+    return best_expected_score
+
+
+def find_best_thresholds(n=N, m=M, reward=REWARD, use_threshold_dp=True, print_behaviour=PRINT_BEHAVIOUR):
     strategy = {}
-    best_expected_score = dp(tuple([0] * n), 0, strategy, n=n, m=m, reward=reward)
+    best_expected_score = threshold_dp(tuple([0] * n), strategy, n=n, m=m, reward=reward) if use_threshold_dp \
+        else dp(tuple([0] * n), 0, strategy, n=n, m=m, reward=reward)
     if print_behaviour:
         print(
             f"With {n} bins and {m} balls the best achievable expected maximum score with two-thinning is {best_expected_score}")
@@ -99,15 +136,7 @@ def assert_monotonicity(strategy):
 
 if __name__ == "__main__":
     start_time = time.time()
-
-    """for m in range(1, M):
-        strategy = find_best_thresholds(n=3, m=m, reward=REWARD, print_behaviour=False)
-        threshold_logic = assert_threshold_logic(strategy)
-        monotone = assert_monotonicity(strategy)
-        if not threshold_logic or not monotone:
-            print(3, m)"""
-    strategy = find_best_thresholds(n=N, m=M, reward=REWARD)
-    for ((loads, val), (_, decision)) in strategy.items():
-        if decision == 0:
-            print(loads, val)
+    find_best_thresholds()
     print("--- %s seconds ---" % (time.time() - start_time))
+
+
