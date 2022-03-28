@@ -10,7 +10,7 @@ def compare_settings(n=20, m=20, runs=100, reward=max, episodes=100000, epsilon=
     two_thinning.constant_threshold.dp.find_best_constant_threshold(n=n,m=m,reward=reward)
     two_thinning.constant_threshold.RL.evaluate.evaluate(n=n, m=m, episodes=episodes, epsilon=epsilon, runs=runs, reward=reward)
     two_thinning.average_based.RL.evaluate.evaluate(n=n, m=m, episodes=episodes, epsilon=epsilon, runs=runs, reward=reward, alpha=alpha,version=version)
-    two_thinning.full_knowledge.dp.find_best_thresholds(n=n, m=m, reward=reward)
+    two_thinning.full_knowledge.dp.find_best_strategy(n=n, m=m, reward=reward)
     two_thinning.full_knowledge.RL.evaluate.evaluate_best(n=n, m=m, reward=reward, runs=runs)
 
 if __name__=="__main__":
