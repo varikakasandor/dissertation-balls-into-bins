@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 5
-M = 25
+N = 20
+M = 38
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -201,8 +201,8 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     final_probs_entropy = entropy(final_probs, base=2)
     print(f"The entropy of the final load vectors is {final_probs_entropy}")
 
-    all_probs = list(reach_probabilities.values())
     if include_intermediate_states:
+        all_probs = list(reach_probabilities.values())
         plt.hist(all_probs, bins=100)
     else:
         plt.hist(final_probs, bins=100)
