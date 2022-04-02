@@ -11,14 +11,104 @@
 \section{Balls into Bins}
 
 
+The simplest Balls into Bins models have been introduced as a probability theory problem under several different names in the 20th century (see e.g. \cite{kolchin1978coined}). A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for Balls into Bins models turned out to be useful in the analysis of several other (randomised) algorithms (see e.g. \cite{edmonds2006cakecutting}). It is still an emerging field gaining much attention, and in particular, the main model I will study has been first analysed in 2019 \cite{dwivedi2019firstthinning}.
+
+
 \subsection{Definitions and Assumptions}
+
+
+
+The real-world load balancing problem is very complex, and the exact characteristics differ between cases. For example, the servers might (or might not) be different (e.g. they serve different types of requests, or they just have different speed), the arrival rate of the jobs might be unknown (or maybe a model is possible), servers might crash, etc. Building a theoretical model that is completely general and can still be analysed effectively seems infeasible. Hence, most of the Balls into Bins models capture one or a few characteristics of load balancing, and therefore they are very diverse. There are however some common assumptions that all of models that I study make. Next I present a sufficiently general definition of the Balls into Bins abstraction, and state its assumptions. 
+
+
+In the Balls into Bins problems, there are $n$ bins, and there are $m$ balls arriving sequentially. Whenever a ball arrives, it is placed in one of the bins according to a randomised protocol. \NOTE{A}{Use some LaTex definition/lemma/etc. framework, idk how.}
+
+
+The (randomised) protocol is assessed according to some objective function, which is - unless I explicitly state otherwise in later chapters - the maximum load of the bins at the end of the process, and the smaller it is the better it is.\\
+
+
+Assumptions:
+\NOTE{A}{Explain better why I do actually make some assumptions, and not use the most general model possible.}
+
+
+\begin{itemize}
+    \item
+    Balls never leave the bins. This corresponds to the real-world assumption that jobs are never completed. Having this simplifying assumption, it doesn't realistically model the actual server load of most real-world systems (where jobs usually end), but it can provide a good local approximation \NOTE{A}{explain} to that, and perfectly model the overall work completed by a server in a time period. There are nevertheless some Balls into Bins settings that also have deletion of the balls (see e.g. \cite{azar1999twochoice}, but I will not consider those in this dissertation.
+    \item
+    $m$ is known in advance. It is much easier to find good protocols when $m$ is known, e.g. as shown in \cite{feldheim2021longtermthinning}. In practice, even if $m$ is unknown, it might be estimated based on samples from previous runs (e.g. days).
+    \item
+    The balls and the bins are homogeneous. This assumes that there is just a single type of job, and all the servers are of the same quality. The more general case of heterogeneous balls and bins has also been analysed, see e.g. \cite{berenbrink2008weighted}.
+\end{itemize}
+
+
+
+
+
+
+\NOTE{A}{Maybe I shouldn't even try introducing it from the point of view of real world applications, and just simply say that researchers found many exciting and fun protocols to analyse?}
+
+\NOTE{D}{The best thing would be to mention the assumptions that you think are unrealistic and propose how to address them.}
+
+
+
+
 
 
 \subsection{Settings}
 
+In this section I will define the randomised protocols that I will study in later chapters. Note that in the literature when they discuss a protocol, such as \textsc{One-Choice}, they often use the term (\textsc{One-Choice}) ``setting'', referring to the protocol being studied, and I will also use this terminology.
 
+
+The general pattern in the protocols below is that they are more robust and are easier to implement than deterministic protocols (as discussed in \ref{introduction}), and some of them still provide sufficient guarantees on the objective function (maximum load). The theoretical analysis of the protocols according to the objective function is deferred until Chapter \ref{evaluation}.
+
+
+\paragraph{\textsc{One-Choice}}
+
+This is the simplest randomised algorithm. The arriving ball is allocated uniformly at random into one of the bins.
+
+\paragraph{\textsc{Two-Choice}}
+
+In this setting, two bins are chosen uniformly at random (possibly the same two bins \NOTE{A}{Double check this}), and the ball is placed in the lesser loaded of the two bins. In case of a tie, the ball is allocated uniformly at random into one of the two bins (note that in a version of \textsc{Two-Choice} that partitions the bins into $2$ groups and chooses one bin from each group, uniform tie-breaking is interestingly no longer optimal \cite{vocking2003tiebreaking}). In a real-world application of \textsc{Two-Choice}, choosing two bins uniformly at random and comparing their loads is a little bit more complicated. It can be achieved by choosing two servers uniformly at random (assuming that all the clients are aware of all the servers), sending a query request to the servers (independently to the two) about their load, then the servers interrupt their currently running processes and send back their load values to the client.
+
+A generalisation of \textsc{Two-Choice} is \textsc{K-Choice}, where not $2$, but $k$ bins are compared - I do not discuss it any further, since it has been shown to provide only minor improvement over \textsc{Two-Choice} \cite{azar1999twochoice}.
+
+
+\paragraph{\textsc{Two-Thinning}}
+
+
+This is the main setting I will focus on. Here I present the main interpretation of this protocol, but in section \ref{alternative} I present another way to look at this setting. An important difference between this protocol, and \textsc{K-Choice} is that this protocol additionally requires a decision function, a free parameter of the protocol. When a ball arrives, a (primary) bin is chosen uniformly at random, and the according to the decision function, the primary bin is accepted, and the ball is placed into that bin, or it is rejected, and the ball is placed into a (secondary) bin chosen again uniformly at random. The motivation for this interpretation of \textsc{Two-Thinning} is that unlike for \textsc{Two-Thinning} where always $2$ servers are interrupted by a query, here if the primary load is accepted by the decision function, than only $1$ server is interrupted. A subtlety is that the secondary and primary bins can in fact be the same, while in a real-world application, the client would probably avoid the primary bin if it has been rejected.
+
+
+\paragraph{\textsc{K-Thinning}}
+
+
+\textsc{K-Thinning} is a generalisation of \textsc{Two-Thinning}, just like \textsc{K-Choice} for \textsc{Two-Choice}. Whenever a ball arrives, bin samples are taken uniformly at random until one of them is accepted by the decision function, and that is the bin where the ball is placed. Unlike for the \textsc{K-Choice} generalisation, this generalisation does provide a major improvement \cite{feldheim2020dthinning}.
+
+
+\paragraph{\textsc{Graphical Two-Choice}}
+
+This setting is similar to \textsc{Two-Choice} (which samples two bins uniformly at random), but not all pairs are equally likely. In particular, some pairs have the same probability, while others have a $0$ probability. Hence, treating each bin as a node of a graph, and pairs with nonzero probability as edges, the protocol becomes sampling an edge uniformly at random, and allocating the ball into the bin at one of the endpoints of the edge, \textbf{according to a decision function}. Note that remarkably, the greedy decision function, that allocates the ball into the lesser loaded of the two bins is not optimal, and hence this setting is also a parametric one, where a good decision function (``free parameter'') is required. A simple counterexample for why greedy is not optimal will be presented in Chapter \ref{evaluation}. It is often assumed that the graph is regular (i.e. all nodes have the same degree), otherwise the usual objective function (minimising final maximum load) is (even) less reasonable - take the star graph as an example of a highly unbalanced graph. The real-world motivation for this setting stems from the geographical locality of the servers. One possible interpretation is the client chooses an area uniformly at random, and a higher level server responsible for that area queries $2$ server there locally. In this case the edges correspond to nearby servers, different underlying graphs are also possible \cite{peres2015oneplusbeta}. In Section \ref{alternative} I discuss an alternative formulation of this setting with arguably stronger real-world motivation.
+
+Analogously, \textsc{Graphical Two-Thinning} is a reasonable protocol, but I chose to focus on \textsc{Graphical Two-Choice}, since there is more literature available on that, and hence a more thorough evaluation is possible. 
+
+
+
+\subsection{Background Reading}
+
+
+Explain what I had to understand!
+Read papers, have asymptotic optimality results
+one-choice, two-choice, two-thinning, graphical
+difficulty is finding the constant factor
+Poisson random processes
+there are only few papers on this topic!
+Two-thinning is very new
+All analysis is asimptotical
 
 \section{Reinforcement Learning}
+
+
+Distinguish algorithm vs protocol!
 
 
 \subsection{Finite Markov Decision Process (MDP)}
@@ -31,6 +121,15 @@
 
 
 \subsection{Deep Q-Learning}
+
+
+\section{Real World VS Balls into Bins} \label{alternative}
+
+
+Mention how full-knowledge can still be reasonable (Dimitris example)
+For this we need the new interpretation, that servers communicate between themselves in the second round.
+Also mention constant threshold, average threshold as using less information.
+Mention the batched setting where the full-knowledge idea is even more applicable.
 
 
 \section{Requirements Analysis}
