@@ -146,13 +146,66 @@ Mention the batched setting where the full-knowledge idea is even more applicabl
 \section{Requirements Analysis}
 
 
-\subsection{Starting Point}
+\NOTE{A}{Add something about how the goal of the project has been shaped during the year.}
+
+\NOTE{A}{Have to add a section about Starting Point? But it is already discuss in the Proforma and in the Proposal...}
 
 
 \subsection{Software and Hardware}
+
+For the project I chose to use Python as the programming language, for several reasons. The project has a large experimental part, trying out slight modifications quickly, writing a short script to test a hypothesis, etc., and Python is very convenient for such experimentation due to its compact syntax, and extensive library support (e.g. numpy, matplotlib). This library support comes with thorough documentation and a strong community, making it fairly easy to fix errors. I also used Python's object-oriented features for implementing the flexible evaluation environment. Perhaps the most important reason for choosing Python is its support for Deep Learning which I used in the Deep Q-Learning algorithm. For this, I chose Pytorch \cite{ketkar2021pytorch}, which is flexible, and increasingly popular deep learning library, supporting easy experimentation.
+
+
+I used Pycharm as the IDE, for several reasons. It has a very easy-to-use and versatile debugger, which combined with the clarity of Pytorch tensors made finding out why some models don't work as desired more convenient. Also, it is very straightforward to run several experiments in parallel in Pycharm, which was also useful for experimentation. Finally, I already used Intellij in previous courses, making Pycharm and its Git and testing features already familiar.
+
+
+I used my laptop for running all my code - its details are: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz, 1992 Mhz, 4 Core(s), 8 Logical Processor(s), NVIDIA GeForce MX150 GPU. Gaining the expected speedup from GPUs for RL is not an easy problem, due to the difficulty of batching in the interactive MDP \cite{stooke2018gpudeepRL}. I will investigate further my approaches to exploit GPU in later chapters, here I just note that for the largest values I used ($n,m\leq 150$) training took a few (around $6$) hours and I didn't find it very instructive to increase $n$ and $m$ any further, so my laptop's resources were enough.
 
 
 \subsection{Project Management}
 
 
+I used Git for version control - it served as my primary backup, and also provides an easy-to-follow progression of my project via the commits. I additionally used Google Drive as a secondary backup, taking monthly copies. 
+
+I used the work plan in my project proposal as the target schedule, and while my project has been on track throughout the whole year, it turned out to be beneficial to interleave evaluation and implementation work packages to gain better insights into what parts of the implementation to improve on. I also maintained a logbook, noting down all the todos and a summary of the work that has been completed. This logbook served as the baseline for my dissertation.
+
+We had biweekly, and sometimes weekly meetings with my supervisors where we carefully assessed the progress of the project, and brainstormed several possible ideas for improvement and extension - some of which I didn't have time to implement and I mention in Chapter \ref{conclusion}.
+
+I used LaTex for the dissertation, due to its support for custom formatting, references, and mathematical notation. I have written the dissertation in Overleaf, an online LaTex editor, due to its collaborative features, that made it easy to exchange comments with my supervisors. I also included the dissertation in the Git repository, regularly updating from Overleaf.
+
+\NOTE{A}{Maybe risk saying some fancy Spiral methodology?}
+
+
 \subsection{Risk Assessment}
+
+Now I present the risk assessment of the project, which helped me prioritise components.
+
+\begin{itemize}
+    \item Background Reading
+    
+    Low risk, Medium difficulty
+    
+    I had no previous knowledge at all about RL, or Balls into Bins, so I had to do extensive background reading in both. Coming with a strong mathematical, and algorithms background I was confident that I will succeed in understanding both topics. Background reading was successful, I gained a deep understanding of the Balls into Bins literature, and explore the relevant parts of RL. The largest challenge was understanding the proofs in Balls into Bins papers, but I considered it as an extension, and I eventually succeeded and gained valuable insights.
+    \item Implementing Deep Reinforcement Learning
+    
+    High risk, High difficulty
+    
+    The main risk involved in this main component was the uncertainty whether RL, being a novel approach, will actually work in optimising free parameters of Balls into Bins protocols. However, I want to emphasize that the goal of the project was to investigate how applicable it is, not showing that it is applicable. Eventually, RL was successfully applied, but some questions remain about its usefulness, as discussed in Chapter \ref{conclusion}.
+    
+    
+    The main difficulty in the component was discovering which parts of the complex Deep Q-Learning need to be improved for better results, and exploring many possible optimisation ideas, as discussed in Section \ref{improvementideas}.
+    
+    \item Implementing classical algorithms
+    
+    Low risk, Low difficulty
+    
+    Having done much competitive programming, I was confident in my algorithmic knowledge, so I could efficiently develop and implement algorithms, such as Dynamic Programming.
+    
+    \item Evaluation
+    
+    Medium risk, Medium difficulty
+    
+    The hardest part about evaluation is finding the right metrics to use for comparing, and analysing algorithms and protocols. The medium risk stemmed from the possibility of not finding very instructive results, and the time it takes to run all the algorithms on various settings, getting acceptable confidence intervals.
+    
+    
+\end{itemize}
