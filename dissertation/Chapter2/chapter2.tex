@@ -238,7 +238,7 @@ Even with these equations, finding the optimal policy is not trivial. The two ma
 The main theme in these RL algorithms is the exploitation-exploration trade-off \cite{kaelbling1996explorationexploitation}. Since due to the size of the state space it is not possible to fully explore it and find the optimal policy, the algorithms have to choose where to explore more. It has to explore new ideas, i.e. take actions that it hasn't tried or favoured before, but it also has to exploit its knowledge and check if its top choice actions really are the best ones by exploring them further. (Note that this trade-off is even more general when performance matters during the training phase as well). A closely related idea is that the evaluation of the current policy and the process of improving it has to be done at least to some extent in parallel.
 
 
-The most common approach for dealing with the exploitation-exploration trade-off is the $\epsilon$-greedy technique. During the training phase when playing the game several times, the next action is chosen to be the action with the highest currently estimated cumulative reward with probability $1-\epsilon$ (exploitation) and it is chosen uniformly at random with probability $\epsilon$ (exploration).
+The most common approach for dealing with the exploitation-exploration trade-off is the $\epsilon$-greedy technique. During the training phase when playing the game several times, the next action is chosen to be the action with the highest currently estimated cumulative reward with probability $1-\epsilon$ (exploitation) and it is chosen uniformly at random with probability $\epsilon$ (exploration). It is important to note that after the training phase, always the greedy technique is used instead of the $\epsilon$-greedy, that is, always the action with the highest estimated cumulative reward is chosen.
 
 
 
@@ -265,11 +265,11 @@ Since with neural networks it is not possible to update $Q_w(s, a)$ in isolation
 $$\frac{\partial (( r_t + \max_{a'} Q_w(s_{t+1}, a')) - Q_w(s_t,a_t))^2}{\partial w}$$
 
 
-In practice, due to stability reasons \NOTE{A}{Explain, and understand better!} a semi-gradient is used instead, which essentially treats $Q_w(s_{t+1}, a')$ independent of $w$ for the purpose of the differentiation. This yields the final update rule:
+In practice, due to stability reasons \NOTE{A}{Explain, and understand better!} a semi-gradient is used instead, which essentially treats $Q_{\mathbf{w_t}}(s_{t+1}, a')$ independent of $w$ for the purpose of the differentiation. This yields the final update rule:
 
 
 \begin{equation} \label{eq:deep-q-learning-update-with-semi-gradient}
-\mathbf{w}_{t+1} = \mathbf{w}_t + \alpha[( r_{t+1}+ \max_{a'} Q(s_{t+1}, a', \mathbf{w}_t)) - Q(s_t,a_t)]\nabla Q(s_{t}, a_t, \mathbf{w_t})
+\mathbf{w}_{t+1} = \mathbf{w}_t + \alpha[( r_{t+1}+ \max_{a'} Q_{\mathbf{w_t}}(s_{t+1}, a') - Q_{\mathbf{w}_t}(s_t,a_t)]\nabla Q_{\mathbf{w_t}}(s_{t}, a_t)
 \end{equation}\\
 
 
