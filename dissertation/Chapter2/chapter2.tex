@@ -255,7 +255,7 @@ Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + \max_{a'} Q(s_{t+1}, a'))
 Intuitively, this changes the current estimate based on a new estimate, by a (small) step-size parameter $\alpha$.
 
 
-\subsubsection{Deep Q-Learning}
+\subsubsection{Deep Q-Learning} \label{deepq-learning}
 
 
 Q-Learning, and its iterative method is a good choice for moderately sized state spaces, where more direct methods are infeasible. Nevertheless, for state spaces as large as in our settings (e.g. the number of $m$ balls can be placed in $n$ bins is exponentially large) Q-Learning is not enough, in particular, it is infeasible even to store the Q-table in memory. The idea introduced in \cite{mnih2013DQN} is to exchange the Q-table with a function approximation. The function should have feasible number of parameters, much less than the number of entries in the Q-table. Taking ideas from supervised learning, the function space is often modelled by artificial neural networks. Therefore, Deep Q-Learning is basically Q-Learning with a neural network $Q_w$ with weights $w$.
@@ -307,6 +307,19 @@ Policy gradient methods are in contrast with the methods outlined above because 
 
 
 From the several policy gradient approaches, I implemented the so-called Actor-Critic policy gradient method and it didn't provide superior results to Deep Q-Learning or Sarsa-Learning. As explained in \cite{bhandari2019policygradientconvergence}, policy gradient methods might converge to a local maximum, not the global optimum policy, and they might requires more time to converge. Policy gradient methods are still an active area of research, and while their usecase in unknown environments with state aliasing (where a stochastic strategy is desired) is clear, they are not yet widely used in full-knowledge scenarios like ours.
+
+
+\subsection{Recurrent Neural Networks}
+
+
+As discussed in Section \ref{deepq-learning}, Deep Q-Learning requires a neural network (NN) to represent the Q-table as a function approximation. I tried several NN architectures, and here I introduce those that were not covered in the IB Artificial Intelligence course, and I will explain their advantages and disadvantages in Section \ref{DQN}. 
+
+Apart from fully-convolutional NNs covered in IB Artificial Intelligence, I implemented recurrent neural networks (RNN) \cite{hopfield1982RNNoriginal}. The idea behind RNNs is that they process sequential information. There is a hidden state, and whenever a new input comes, the hidden state is updated according to a common update weight matrix. RNNs can be used in several ways (e.g. translation), but I will use only the hidden state after processing all the input, which contains a condensed summary of the data.
+
+
+\NOTE{A}{Add some equations? It is a bit too complicated though, maybe just a fancy image?}
+
+There are versions of RNNs that can remember earlier inputs more than vanilla RNNs. The general idea is to use some kind of gating mechanism (these are also differentiable arithmetic operations) that controls the extent to which the hidden state is overwritten on each input symbol. The two most notable such architectures are GRU and LSTM (see \cite{shewalkar2019rnngrulstm} for a throrough comparison).
 
 
 \section{Real World and Balls into Bins} \label{alternative}

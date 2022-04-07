@@ -14,7 +14,38 @@
 \subsection{Deep Q-Learning Implementation}
 
 
-\subsubsection{Deep Q-Network (DQN)}
+Unlike for many supervised learning problems, there is no library for RL that provides one-liner solutions to my settings. While there are some libraries for RL (e.g. Stable Baselines, Pyqlearning), they are usually very hard to customize, and for example the format of the state space is very unique RL problems. Also, implementing the basic RL logic is not too long, so I made the decision to implement the RL logic myself, and use Pytorch for the NNs.
+
+
+\NOTE{A}{At this point I expect the reader to understand Deep Q-Learning in enough detail, so that I just have to note some implementation details.}
+
+
+\subsubsection{Deep Q-Network (DQN)} \label{DQN}
+
+
+The NN used in Deep Q-Learning is often referred to as Deep Q-Network (DQN). 
+
+
+There are two ways to formulate the \textsc{Two-Thinning} setting as a MDP. One is to treat (load vector, primary bin) pairs as states, and accept/reject as actions. The other is to treat load vectors as states, and thresholds for accepting/rejecting as actions. The latter implicitly makes use of a very important (also intuitive) property of an optimal policy:
+
+
+\begin{lemma} \label{lemma: thresholdproperty}
+At a load vector $v$, the optimal policy doesn't reject a primary bin with load $x$, if it would accept a primary bin with load $y>x$. That is, the optimal strategy is always a threshold strategy, that rejects above a load value $z$ and accepts otherwise.
+\end{lemma}
+
+
+\NOTE{A}{Add proof, or say something about it.}
+
+Since this lemma holds, I chose the second formulation, which using this lemma, restricts the space in which the algorithm has to search for the optimal policy. We will see later that this lemma is useful in optimising the dynamic programming approach as well.
+
+
+Therefore the input to the DQN is a load vector $v$, and the output is an estimate of $Q(v, a)$ for each possible thresholds. There is no point in using non-integer thresholds, since the load of the primary bin is always a non-negative integer. Also, there is no benefit in using a threshold larger than the current maximum load, as setting the threshold to that instead achieves the same (accepting everything). Similarly, as a consequence of Lemma \ref{lemma: thresholdproperty} \NOTE{A}{Is it a corollary strictly speaking?}, the best possible load primary bin load is $0$, therefore it never makes sense to reject it (or in general reject a bin with minimum load). So theoretically, the possible thresholds should be from $0$ to $m$, that is, the output of the DQN should have size $m+1$. Even though it is possible that a load of $m$ is reached during execution, it has a very small probability (more details in Chapter \ref{evaluation}), so I decided to restrict the maximum threshold available for the algorithm. The optimal maximum threshold should depend on $n$ and $m$, and together with other hyperparameters, I provide their final values and their importance in later sections. 
+
+
+Now that the output of the DQN is fixed, the other question is how to represent the input to the DQN, which is a load vector $v$. First of all, I always sort the load vector before feeding it into the network. This is possible because the order of the bins doesn't matter in \textsc{Two-Thinning}, unlike in \textsc{Graphical Two-Choice}. This sorting makes the function that the network has to learn easier (it doesn't have to learn permutation invariance), and it will be important when using RNN as the architecture. Then, I one-hot encode each load value independently. The motivation for this is that NNs often can't learn well with ordinal data - they would think that the load values are on a continuous scale, but in fact, the real difference between e.g. load $0$ and $1$ is much smaller than the real difference between load e.g. $m-1$ and $m$. \NOTE{A}{https://stats.stackexchange.com/questions/423820/do-ordinal-variables-require-one-hot-encoding}. The natural range of one-hot encoding for the load values is from $0$ to $m$, but to condense the input to the network (and hence reduces the number of weights to train) I tried collapsing the very high load values with very small probability, into one ``outlier'' class. This didn't provide better results, so I do not discuss it any further.
+
+
+Now that the input and output format is laid down, I turn to the discussion of the architecture of the DQN. From the load values in a load vector, the highest ones are much more important, since we care about minimising the maximum load. On the extreme, if the bin with the maximum load had one more ball in it, that would be more significant than if an average bin had one more ball in it. Hence, my idea was to process the load vector in increasing order of the loads, that is, in increasing order of importance. For this, using an RNN is a perfect choice. It is used for processing sequential input, and what is more, by the end it forgets the earlier inputs to some extent, and therefore focuses more on the final (in our case most important) inputs, as desired. As mentioned in Chapter \ref{preparation}, there are more complex versions of RNNs, whose main advantage is that they forget less. However, as this forgetting property is desirable in our case, this advantage is not really an advantage. On the other hand, they are less susceptible to the vanishing/exploding gradient problems \cite{noh2021rnnvanishinggradient}, so they are sometimes easier to train, therefore I tried GRU and LSTM as well, but they didn't provide additional benefits, so I will stick to the vanilla RNN. After the last input, we can extract the hidden state of the RNN, whose exact size I will discuss in the hyperparameters section. To get the output, the estimated $q(v,a)$ values for each possible threshold $a$, I call some fully convolutional (linear) layers on the final hidden state of the RNN. These linear layers not only bring the output to the correct shape, they also transforms from the internal representation of the RNN to the space of the action-values. \NOTE{A}{Explain some more.}
 
 
 \subsubsection{Stabilising Training}
@@ -82,7 +113,7 @@ On the other hand, for smaller instances we can use the dynamic programming base
 \subsection{Weights and Biases tool}
 
 
-\section{Code Structure}
+\section{Repository Overview}
 
 
 \subsection{Extensibility}
