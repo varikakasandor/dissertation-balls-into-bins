@@ -127,22 +127,25 @@ def train(n=N, m=M, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN, batch_si
             curr_state_value = critic_net(torch.tensor(curr_state).unsqueeze(0)).squeeze(0)
             next_state_value = critic_net(torch.tensor(next_state).unsqueeze(0)).squeeze(0).detach() if i < m - 1 else torch.tensor(0.0, dtype=torch.float64)
             new_curr_state_value = reward + next_state_value
-            delta = curr_state_value - new_curr_state_value  # minus of what is in the book, but I use built in optimiser which does grad. descent not grad. ascent
             critic_loss = loss_function(curr_state_value, new_curr_state_value)
             critic_optimizer.zero_grad()
             critic_loss.backward()
             critic_optimizer.step()
 
-            to_diff = delta.detach().item() * (probs.log())[threshold]
+            delta = (curr_state_value - new_curr_state_value).detach().item()  # minus of what is in the book, but I
+            # use built in optimiser which does grad. descent not grad. ascent
+            to_diff = delta * (probs.log())[threshold]
             actor_optimizer.zero_grad()
             to_diff.backward()
             actor_optimizer.step()
 
             steps_done += 1
 
-        curr_eval_score = evaluate_q_values(actor_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs)  # TODO: set back to faster version
+        curr_eval_score = evaluate_q_values(actor_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs)  # TODO: set
+        # back to faster version
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values(actor_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs)  # only update the best if it is really better, so run more tests
+            curr_eval_score = evaluate_q_values(actor_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs)  #
+            # only update the best if it is really better, so run more tests
         if report_wandb:
             wandb.log({"score": curr_eval_score})
 
