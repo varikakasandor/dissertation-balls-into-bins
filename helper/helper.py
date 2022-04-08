@@ -1,19 +1,18 @@
 import functools
+
 import numpy as np
-from math import *
 
-
-n = 20
-m = 20
+N = 100
+M = 150
 
 
 @functools.lru_cache()
-def number_of_increasing_partitions(n, k):
-    if n == 0 or k == 1:
+def number_of_increasing_partitions(m=M, n=N):
+    if m == 0 or n == 1:
         return 1
-    if n >= k:
-        return number_of_increasing_partitions(n, k - 1) + number_of_increasing_partitions(n - k, k)
-    return number_of_increasing_partitions(n, k - 1)
+    if m >= n:
+        return number_of_increasing_partitions(m, n - 1) + number_of_increasing_partitions(m - n, n)
+    return number_of_increasing_partitions(m, n - 1)
 
 
 def argmax(l):
@@ -35,4 +34,9 @@ def std(loads):
 
 
 if __name__ == "__main__":
-    print(number_of_increasing_partitions(m, n))
+    num_states = 0
+    for i in range(M + 1):
+        num_states += number_of_increasing_partitions(m=i, n=N)
+    num_steps = num_states * N
+    num_seconds = num_steps / (10 ** 8)
+    print(num_seconds)

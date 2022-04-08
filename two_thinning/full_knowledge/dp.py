@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 20
-M = 38
+N = 25
+M = 25
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -193,7 +193,6 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
 
     print(
         f"The maximum likelihood final load vector is {max_likelihood_final_load} with probability {max_likelihood_final_prob}")
-    value, counts = np.unique(final_probs, return_counts=True)
 
     print(
         f"There are {len(final_probs)} reachable final load vectors, its base 2 logarithm is {log2(len(final_probs))}")

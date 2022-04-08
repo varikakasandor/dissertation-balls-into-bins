@@ -88,7 +88,7 @@ There are plenty of more ideas in the literature to improve the training of DQN,
 In this section I outline ideas independent of DQN that I used to improve the performance of my RL algorithm. Some of these are well-known general ideas in RL, while others are specific to the \textsc{Two-Thinning} Balls into Bins setting. I will highlight why each of the ideas were worth considering for this setting.
 
 
-\subsubsection{Reward Shaping}
+\subsubsection{Reward Shaping} \label{rewardshaping}
 
 
 As discussed in Chapter \ref{preparation}, the most direct way to formulate the \textsc{Two-Thinning} setting as a MDP is to only give reward after a final state, i.e. when all the balls have been placed. The problem with this is that rewards are very sparse - concretely, the agent only receives one reward per execution. It is problematic because until the final rewards propagate back to earlier states (that is, load vectors with few balls), the updates at earlier states are not justified - they use a zero reward and a randomly initialised next state to update the current state. Hence, the idea is to inject additional rewards into the MDP, while maintaining correctness: the optimal policy for the new modified MDP has to be optimal for the original one as well, and hence for \textsc{Two-Thinning} too. There is a very neat results proved in \cite{ng1999rewardshaping} about exactly what extra rewards can be used while maintaining the correctness property: the extra reward, when moving from state $s$ to state $s'$ using action $a$ has to be in the form $\Phi(s')-\Phi(s)$, i.e. the difference of the so-called potential functions of the two states. Intuitively, the potential function should denote an estimate of how good a state is with respect to the original (in our case final) rewards. I experimented with several candidate potential functions, and here I present the most promising ones, while I compare them numerically in the hyperparameter optimisation section \NOTE{A}{I write this sentence too many times...}.
@@ -100,22 +100,96 @@ As discussed in Chapter \ref{preparation}, the most direct way to formulate the 
     \item
     $\Phi(v)=-std(v)$, where $std(v)$ is the standard deviation of the load vector. This is an extension of the previous idea, which differentiates between cases when the max load hasn't increased - it is much better if the ball is allocated in the most underloaded bin than if in the second most overloaded.
     \item
-    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - sum(v) / n)}$, where $\alpha$ is a hyperparameter. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for Balls into Bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}. As a relevant example, if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.
+    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - avg(v))}$, where $\alpha$ is a hyperparameter. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for Balls into Bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}. As a relevant example, if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.
 \end{itemize}
 
 
 \subsubsection{Curriculum Learning}
 
 
+
+The idea of curriculum learning \cite{bengio2009curriculumoriginal} is to first provide easier problems to the agent, and just gradually increase the difficulty up to the original problem - just like how humans learn using a curriculum. Without curriculum learning, the agent cannot learn as much as desired from the hard problems initially \NOTE{A}{Explain some more?}. For \textsc{Two-Thinning}, I implemented curriculum learning by first starting from $m-1$ balls already being allocated, then starting from $m-2$ balls already being allocated, and so on until starting from the original empty bins. To choose the training samples on level $k$ (i.e. how to place the initial balls), I had to find which load vectors with sum $m-k$ are ``relevant'' - there are exponentially many ways to place $m-k$ balls into $n$ bins, so it is not feasible to give each of them to the agent. I decided to run the vanilla \textsc{One-Choice} protocol with $m=m-k$ balls, and it provides training samples distributed according to their occurrence when running \textsc{One-Choice}, which is a good approximation to the relevant load vectors for \textsc{Two-Thinning}. I decided to run the same amount of iterations on each level, since though there are many more different load vectors with sum $m-1$ than with sum $0$, running from the empty bins will also reach sum of loads $m-1$ but not vice versa. It is important to note that curriculum learning can serve as a pretraining phase as well. This is exactly what I did - I ran curriculum learning, and then I ran the normal training phase, which is basically just continuing with strating from the empty bins. I will analyse the effect of pretraining together with the other hyperparameters.
+
+
+
+
 \subsubsection{Normalised Load}
 
+
+An important difference between my work and most of the research papers, is that they use normalised load values: when they refer to a load $x$ or a threshold $a$ at a load vector $v$, the actually mean $x-avg(v)$ and $a-avg(v)$. I found it more intuitive to use real load an threshold values in my explanations, but using normalised values can make convergence during training faster, since the constant zero threshold is already a reasonable strategy (also called ``mean-thinning'') in the normalised space. On the other hand, the constant zero threshold in the original space would mean rejecting everything, which leads to \textsc{One-Choice} that has been shown to perform poorly. I will analyse the effect of training in the normalised domain together with other hyperparameters.
+
+
+\NOTE{A}{Make a section about rare change, a.k.a. the batched setting?}
 
 \subsection{Dynamic Programming}
 
 
-On the other hand, for smaller instances we can use the dynamic programming based on the Bellman equations (and the known environment) to get the exact optimal policy, and we will get back to this in the next chapter.
+For smaller values of $n$ and $m$ we can use dynamic programming based on the Bellman equation \ref{eq:bellmanState} to get the exact optimal policy. In general, dynamic programming approaches for RL problems are infeasible even for very small state spaces, but in this special case there are several insights that lead to a speed-up, and make it feasible for a broader set of $n$,$m$:
+
+
+\begin{itemize}
+    \item 
+    As we did for the DQN, we can reduce the state space by around a factor of $n!$, by treating permutations of a load vector the same state, i.e. using only sorted load vectors as states.
+    \item
+    While a general RL problem can contains cycles in the state transition graph (that is, the agent can possibly move around a loop), in this case it is a Directed Acyclic Graph (DAG) - the next state always has exactly one more ball allocated. This is important, since we don't need to perform a fixed point iteration \cite{rhoades1991fixedpointiteration}, we can directly calculate the values based on a recurrence relation (see below).
+    \item
+    We can exploit Lemma \ref{lemma: thresholdproperty}: instead of using one dynamic programming state for each $Q(s,a)$ (storing a boolean value in each of them), we will have states of the form $V(s)$ (storing the optimal threshold in each of them). I also implemented a slower version of dynamic programming without using this lemma, on which interestingly I could test the validity of the lemma for specific values of $n$ and $m$.
+\end{itemize}
+
+
+Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_j$ as the corresponding unit vector $(0, 0, ... , 1, ..., 0, 0)$:
+
+\begin{equation} \label{eq:twothinning-dynamicprogramming}
+\begin{split}
+    V_{\pi^*}(s) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=s, a_t=a] \\
+    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=s, a_t=s[i]] \\
+    &= \max_{i \in [n]} (\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))
+\end{split}
+\end{equation}
+
+where we used the fact that $r_{t+1}=0$ for non-final states, and that it suffices to use only thresholds that are equal to one of the load values. Since there are many possible final states, which serve as the base cases of the dynamic programming algorithm, it was more convenient to implement is using recursion and memoisation. The base cases are those load vectors $s$ that have all $m$ balls allocated, and for those we have $V_{\pi^*}(s)=-maxload(s)$. \NOTE{A}{Exchange the last two sentences?}
+
+
+We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*O(n))$. Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(n, m)$ as a function of $n$ and $m$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
+
+
+\begin{equation} \label{eq: numberofpartitions}
+    f(n) = \begin{cases}
+        1, & \text{for } m=0\\
+        1, & \text{for } n=1\\
+        f(m,n-1)+f(m-n,n), & \text{otherwise }
+    \end{cases}
+\end{equation}
+
+
+The results from this secondary dynamic programming confirmed what I have seen about the efficiency of the main dynamic programming algorithm in practice. For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of Deep Q-Learning (few hours). These limits are indeed smaller than that of Deep Q-Learning, so while dynamic programming can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly no very large. \NOTE{A}{Add these rough estimates of n,m to Deep Q-Learning as well.}
+
 
 \subsection{Other Strategies}
+
+In addition to RL algorithms and dynamic programming, I implemented several other, more ``manual'' strategies. In Chapter \ref{evaluation}, these strategies will be compared against the strategies derived from the Deep Q-Learning training and dynamic programming.
+
+
+\paragraph{Always Accept Strategy}
+This is equivalent to \textsc{One-Choice}, and it is included as a baseline.
+
+
+\paragraph{Mean Thinning Strategy}
+This strategy always accepts a ball if it is below the current average load, an rejects otherwise.
+
+
+\paragraph{Random Strategy}
+This strategy accepts or rejects a ball with probability $p=\frac{1}{2}$. While I do not show it formally, it is easy to see that the best random strategy is achieved when $p=\frac{1}{2}$ and not something else. \NOTE{A}{Double check.} We should reasonably expect any valuable strategy to outperform the random strategy.
+
+
+\paragraph{The Threshold Strategy} 
+
+This is a strategy that has been shown to be optimal \cite{feldheim2021thinning} up to a constant\NOTE{A}{I think multiplicative, but they probably won't care.} factor for large $n$ and $m\leq O(n*\sqrt{log(n)})$. This strategy accepts a bin, if and only if the primary allocations (i.e. number of times that bin has been chosen as the primary bin and the corresponding ball has been accepted) to that bin so far are less than a constant $l$. There are at least two surprising observations about this strategy. One is that it uses essentially a constant threshold, so it is not a very `adaptive'' strategy \NOTE{A}{Explain better}. Also, it is not hard to see that there should exist an optimal strategy whose decisions depend only on the current load vector, and doesn't take into account the past. On the other hand, this strategy differentiates between the same ball being allocated in the same bin as a result of a primary, or a secondary allocation. To the best of our knowledge, the reason for this reliance is to aid the proofs in the paper \cite{feldheim2021thinning}, and also it leads to an easily expressible strategy.
+
+
+\paragraph{Local Reward Optimiser Strategy}
+
+While the goal of the agent in RL is the optimise the cumulative reward, a simplified goal can be optimising the immediate rewards. With rewards only after all the $m$ balls have been placed, this leads to all actions having an immediate reward of $0$, so for this strategy I will use the first reward shaping idea from Section \ref{rewardshaping}. This simplifies to getting a reward $-1$ if the balls gets allocated into one of the highest loaded bins, and a reward $0$ otherwise. Therefore, optimising immediate reward in this modified MDP leads to accepting any bin which is not a highest loaded one, and rejecting otherwise. Essentially, this strategy just tries to avoid increasing the maximum load in one step.
 
 
 \subsection{Restricting Available Information} \label{lesssharedstate}
