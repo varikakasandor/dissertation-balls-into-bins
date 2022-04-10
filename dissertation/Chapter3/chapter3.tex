@@ -273,7 +273,25 @@ which gives $y = n * (1 - 2^{-\frac{1}{x}})$
 \subsection{Framing it as a MDP}
 
 
+\NOTE{A}{TODO}
+
+
 \subsection{Graph Structures}
+
+
+Here I list the types of graphs on which I evaluate the algorithms. It is important that I train a separate RL agent for each graph, just like for each $n$, $m$ pair.
+
+
+\paragraph{Complete Graph} This is exactly the \textsc{Two-Choice} setting, for which Greedy is known to be the optimal strategy. This graph type serves as a baseline.
+
+
+\paragraph{Cycle} The cycle graph with $n$ nodes numbered as $[n]$ has an edge between node $i$ and $(i+1)\%n$. This is a very natural graph to investigate, since it comes up very often in computer systems, e.g. token rings.
+
+
+\paragraph{Hypercube} The hypercube graph with $n=2^N$ nodes numbered as binary numbers in the range $[n]$ has an edge between two nodes iff there is exactly one bit difference between them. Hypercube graphs have several applications in network topologies \cite{ostrouchov1987hypercubenetwork} \NOTE{A}{Why? Why is it good?}.
+
+
+\paragraph{Random Regular Graph} To better test the applicability of different algorithms, I create random regular graphs drawn (approximately) uniformly at random from all regular graphs with node $n$ of degree $d$. Interestingly, this is a challenging computational problem to do exactly uniformly at random - even generating regular graphs is difficult. I applied the efficient randomised algorithm described in \cite{steger1999randomregulargraphs}, and my code reliably generates regular graphs of size up to a few hundred with arbitrary degree.
 
 
 \subsection{Dynamic Programming}
