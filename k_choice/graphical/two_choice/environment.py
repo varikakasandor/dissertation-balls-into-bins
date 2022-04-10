@@ -4,9 +4,9 @@ from k_choice.graphical.two_choice.strategies.greedy import Greedy
 from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 
-N = 4
+N = 16
 GRAPH = Cycle(N)
-M = 11
+M = 40
 STRATEGY = FullKnowledgeDQNStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
 RUNS = 20

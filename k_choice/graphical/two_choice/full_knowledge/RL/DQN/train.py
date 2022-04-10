@@ -20,7 +20,7 @@ def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_
     if sample > eps_threshold:
         x, y = edge
         with torch.no_grad():
-            vals = policy_net(torch.as_tensor(loads)).detach()
+            vals = policy_net(torch.as_tensor(loads).unsqueeze(0)).squeeze(0).detach()
             if vals[x] >= vals[y]:
                 return x
             else:
@@ -38,7 +38,7 @@ def greedy(policy_net, loads, edge, batched=False):
         else:
             x, y = edge
             with torch.no_grad():
-                vals = policy_net(torch.as_tensor(loads)).detach()
+                vals = policy_net(torch.as_tensor(loads).unsqueeze(0)).squeeze(0).detach()
                 if vals[x] >= vals[y]:
                     return x
                 else:

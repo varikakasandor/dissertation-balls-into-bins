@@ -33,7 +33,7 @@ def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 16  # 64
+BATCH_SIZE = 64
 EPS_START = 0.2
 EPS_END = 0.04
 EPS_DECAY = 4200

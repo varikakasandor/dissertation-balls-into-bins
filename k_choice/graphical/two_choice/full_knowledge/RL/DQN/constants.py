@@ -4,28 +4,27 @@ from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 from k_choice.graphical.two_choice.graph_base import GraphBase
 
-N = 8  # TODO: for N=3 test if it converges to Greedy
-GRAPH = HyperCube(N)
-M = 11
+N = 16  # TODO: for N=3 test if it converges to Greedy
+GRAPH = Cycle(N)
+M = 40
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
 EPS_START = 0.2
 EPS_END = 0.07
 EPS_DECAY = 4000
-TRAIN_EPISODES = 2000
-TARGET_UPDATE_FREQ = 10
-MEMORY_CAPACITY = 10 * BATCH_SIZE
+TRAIN_EPISODES = 1000
+TARGET_UPDATE_FREQ = 20
+MEMORY_CAPACITY = 800
 EVAL_RUNS_TRAIN = 32
 EVAL_RUNS_EVAL = 100
 EVAL_PARALLEL_BATCH_SIZE = 32
 PATIENCE = 500
-MAX_LOAD_INCREASE_REWARD = -1
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 3 * int(sqrt(M))
-NN_MODEL = FullGraphicalTwoChoiceOneHotFCNet
-NN_TYPE = "fc_one_hot_hypercube" # not actually NN_TYPE but also what graph we use
+NN_MODEL = GeneralNet
+NN_TYPE = "general_net_hypercube"  # not actually NN_TYPE but also what graph we use
 
 
 def POTENTIAL_FUN(graph: GraphBase, loads):  # TODO: try smoothing out

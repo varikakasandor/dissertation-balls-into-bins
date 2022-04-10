@@ -14,7 +14,9 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 
 
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullGraphicalTwoChoiceFCNet if nn_type == "fc_cycle" else FullGraphicalTwoChoiceOneHotFCNet
+    model = FullGraphicalTwoChoiceFCNet if nn_type in ["fc_cycle", "fc_hypercube", "fc_random"] else \
+        GeneralNet if nn_type in ["general_net_cycle", "general_net_hypercube", "general_net_random"] else \
+            FullGraphicalTwoChoiceOneHotFCNet
 
     try:
         best_model = model(n=n, max_possible_load=m, device=device)
@@ -53,8 +55,8 @@ def compare(n=N, graph: GraphBase = GRAPH, m=M, train_episodes=TRAIN_EPISODES, m
     print(
         f"With {m} balls and {n} bins the trained current DQN model has an average score/maximum load of {current_model_performance}.")
 
-    if os.path.exists(get_best_model_path(n=n, m=m, nn_type=nn_type)):
-        best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
+    best_model = load_best_model(n=n, m=m, nn_type=nn_type, device=device)
+    if best_model is not None:
         best_model_performance = evaluate(best_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
                                           eval_parallel_batch_size=eval_parallel_batch_size)
         print(f"The average score/maximum load of the best model is {best_model_performance}.")
