@@ -45,7 +45,7 @@ Therefore the input to the DQN is a load vector $v$, and the output is an estima
 Now that the output of the DQN is fixed, the other question is how to represent the input to the DQN, which is a load vector $v$. First of all, I always sort the load vector before feeding it into the network. This is possible because the order of the bins doesn't matter in \textsc{Two-Thinning}, unlike in \textsc{Graphical Two-Choice}. This sorting makes the function that the network has to learn easier (it doesn't have to learn permutation invariance), and it will be important when using RNN as the architecture. Then, I one-hot encode each load value independently. The motivation for this is that NNs often can't learn well with ordinal data - they would think that the load values are on a continuous scale, but in fact, the real difference between e.g. load $0$ and $1$ is much smaller than the real difference between load e.g. $m-1$ and $m$. \NOTE{A}{https://stats.stackexchange.com/questions/423820/do-ordinal-variables-require-one-hot-encoding}. The natural range of one-hot encoding for the load values is from $0$ to $m$, but to condense the input to the network (and hence reduces the number of weights to train) I tried collapsing the very high load values with very small probability, into one ``outlier'' class. This didn't provide better results, so I do not discuss it any further.
 
 
-Now that the input and output format is laid down, I turn to the discussion of the architecture of the DQN. From the load values in a load vector, the highest ones are much more important, since we care about minimising the maximum load. On the extreme, if the bin with the maximum load had one more ball in it, that would be more significant than if an average bin had one more ball in it. Hence, my idea was to process the load vector in increasing order of the loads, that is, in increasing order of importance. For this, using an RNN is a perfect choice. It is used for processing sequential input, and what is more, by the end it forgets the earlier inputs to some extent, and therefore focuses more on the final (in our case most important) inputs, as desired. As mentioned in Chapter \ref{preparation}, there are more complex versions of RNNs, whose main advantage is that they forget less. However, as this forgetting property is desirable in our case, this advantage is not really an advantage. On the other hand, they are less susceptible to the vanishing/exploding gradient problems \cite{noh2021rnnvanishinggradient}, so they are sometimes easier to train, therefore I tried GRU and LSTM as well, but they didn't provide additional benefits, so I will stick to the vanilla RNN. After the last input, we can extract the hidden state of the RNN, whose exact size I will discuss in the hyperparameters section. To get the output, the estimated $q(v,a)$ values for each possible threshold $a$, I apply some (as for other hyperparameters, I discuss the exact values later) fully convolutional (linear) layers on the final hidden state of the RNN. These linear layers not only bring the output to the correct shape, they also transform from the internal representation of the RNN to the space of the action-values. \NOTE{A}{Explain some more?}\NOTE{A}{Add a figure about the DQN architecture.}
+Now that the input and output format is laid down, I turn to the discussion of the architecture of the DQN. From the load values in a load vector, the highest ones are much more important, since we care about minimising the maximum load. On the extreme, if the bin with the maximum load had one more ball in it, that would be more significant than if an average bin had one more ball in it. Hence, my idea was to process the load vector in increasing order of the loads, that is, in increasing order of importance. For this, using an RNN is a perfect choice. It is used for processing sequential input, and what is more, by the end it forgets the earlier inputs to some extent, and therefore focuses more on the final (in our case most important) inputs, as desired. As mentioned in Chapter \ref{preparation}, there are more complex versions of RNNs, whose main advantage is that they forget less. However, as this forgetting property is desirable in our case, this advantage is not really an advantage. On the other hand, they are less susceptible to the vanishing/exploding gradient problems \cite{noh2021rnnvanishinggradient}, so they are sometimes easier to train, therefore I tried GRU and LSTM as well, but they didn't provide additional benefits, so I will stick to the vanilla RNN. After the last input, we can extract the hidden state of the RNN, whose exact size I will discuss in the hyperparameters section. To get the output, the estimated $q(v,a)$ values for each possible threshold $a$, I apply some (as for other hyperparameters, I discuss the exact values later) fully convolutional (linear) layers on the final hidden state of the RNN. These linear layers not only bring the output to the correct shape, they also transform from the internal representation of the RNN to the space of the action-values. \NOTE{A}{Explain some more?}\NOTE{A}{Add a figure about the DQN architecture.}. As for the activation functions, I use a ReLU activation between the fully convolutional layers, and the tanh activation inside the RNN, following common practice \cite{szandala2020activationfunctions}.
 
 
 \subsubsection{Stabilising Training}
@@ -174,37 +174,97 @@ In addition to RL algorithms and dynamic programming, I implemented several othe
 This is equivalent to \textsc{One-Choice}, and it is included as a baseline.
 
 
-\paragraph{Mean Thinning Strategy}
-This strategy always accepts a ball if it is below the current average load, an rejects otherwise.
-
-
 \paragraph{Random Strategy}
 This strategy accepts or rejects a ball with probability $p=\frac{1}{2}$. While I do not show it formally, it is easy to see that the best random strategy is achieved when $p=\frac{1}{2}$ and not something else. \NOTE{A}{Double check.} We should reasonably expect any valuable strategy to outperform the random strategy.
 
 
-\paragraph{The Threshold Strategy} 
-
-This is a strategy that has been shown to be optimal \cite{feldheim2021thinning} up to a constant\NOTE{A}{I think multiplicative, but they probably won't care.} factor for large $n$ and $m\leq O(n*\sqrt{log(n)})$. This strategy accepts a bin, if and only if the primary allocations (i.e. number of times that bin has been chosen as the primary bin and the corresponding ball has been accepted) to that bin so far are less than a constant $l$. There are at least two surprising observations about this strategy. One is that it uses essentially a constant threshold, so it is not a very `adaptive'' strategy \NOTE{A}{Explain better}. Also, it is not hard to see that there should exist an optimal strategy whose decisions depend only on the current load vector, and doesn't take into account the past. On the other hand, this strategy differentiates between the same ball being allocated in the same bin as a result of a primary, or a secondary allocation. To the best of our knowledge, the reason for this reliance is to aid the proofs in the paper \cite{feldheim2021thinning}, and also it leads to an easily expressible strategy.
+\paragraph{Mean Thinning Strategy}
+This strategy always accepts a ball if it is below the current average load, an rejects otherwise.
 
 
 \paragraph{Local Reward Optimiser Strategy}
 
-While the goal of the agent in RL is the optimise the cumulative reward, a simplified goal can be optimising the immediate rewards. With rewards only after all the $m$ balls have been placed, this leads to all actions having an immediate reward of $0$, so for this strategy I will use the first reward shaping idea from Section \ref{rewardshaping}. This simplifies to getting a reward $-1$ if the balls gets allocated into one of the highest loaded bins, and a reward $0$ otherwise. Therefore, optimising immediate reward in this modified MDP leads to accepting any bin which is not a highest loaded one, and rejecting otherwise. Essentially, this strategy just tries to avoid increasing the maximum load in one step.
+While the goal of the agent in RL is the optimise the cumulative reward, a simplified goal can be optimising the immediate rewards. With rewards only after all the $m$ balls have been placed, this leads to all actions having an immediate reward of $0$, so for this strategy I will use the first reward shaping idea from Section \ref{rewardshaping}. This simplifies to getting a reward $-1$ if the balls gets allocated into one of the highest loaded bins, and a reward $0$ otherwise. Therefore, optimising immediate reward in this modified MDP leads to accepting any bin which is not a highest loaded one, and rejecting otherwise. Essentially, this strategy just tries to avoid increasing the maximum load in one step. It is easy to see that this is not an optimal strategy in general. \NOTE{A}{Give specific counterexample. I couldn't find any which is easy to see formally.}
+
+
+\paragraph{The Threshold Strategy} 
+
+This is a strategy that has been shown to be optimal \cite{feldheim2021thinning} up to a constant\NOTE{A}{I think multiplicative, but they probably won't care.} factor for large $n$ and $m\leq O(n*\sqrt{log(n)})$. This strategy accepts a bin, if and only if the primary allocations (i.e. number of times that bin has been chosen as the primary bin and the corresponding ball has been accepted) to that bin so far are less than a constant $l$. There are at least two surprising observations about this strategy. One is that it uses essentially a constant threshold, so it is not a very `adaptive'' strategy \NOTE{A}{Explain better}. Also, it is not hard to see that there should exist an optimal strategy whose decisions depend only on the current load vector, and doesn't take into account the past. On the other hand, this strategy differentiates between the same ball being allocated in the same bin as a result of a primary, or a secondary allocation. To the best of our knowledge, the reason for this reliance is to aid the proofs in the paper \cite{feldheim2021thinning}, and also it leads to an easily expressible strategy. 
 
 
 \subsection{Restricting Available Information} \label{lesssharedstate}
 
+\NOTE{A}{Maybe not needed? It would complicate the story quite a bit, and would add extra burden for evaluation. On the other hand, this brings the abstraction closer to real world.}
 
 \section{K-Thinning}
 
 
-\subsection{Framing it as a MDP}
+\subsection{Deep Q-Learning Implementation}
+
+
+To frame the \textsc{K-Thinning} problem as a MDP, I decided to use (load vector, number of choices left) pairs as states, and just like for \textsc{Two-Thinning}, thresholds as actions. The ``number of choices left'' part of the states indicate how many more bins can be rejected before the ball would be allocated into a randomly chosen bin. The state transitions happen according to the definition of \textsc{K-Thinning} \NOTE{A}{Should I explain more?}. We still have the sparse rewards problem, so we need a suitable reward shaping function. I decided to use the same potential function as for \textsc{Two-Thinning}, that is I ignore the number of choices left for the potential function - this way, I don't introduce any unnecessary bias, but still have less sparse rewards. 
+
+
+For the neural network, I use a similar architecture as for \textsc{Two-Thinning}. The only difference is that now the input additionally contains the number of choices left. Keeping the RNN part applied on the load vector, I decided to bring in the number of choices left before the fully convolutional layers, by concatenating it with the final hidden state of the RNN. I applied one-hot encoding for the number of choices left as well, for similar reasons as for the load vector.
 
 
 \subsection{Dynamic Programming}
 
 
+A dynamic algorithm analogous to that for \textsc{Two-Thinning} has been implemented for \textsc{K-Thinning as well}, with the states being (load vector, number of choices left) pairs.
+
+
+The recurrence equations are:
+
+
+\begin{equation} \label{eq:kthinning-dynamicprogramming-0left}
+\begin{split}
+    V_{\pi^*}((v, 0)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=a] \\
+    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=v[i]] \\
+    &= \max_{i \in [n]} (\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}((v+e_j,k)))
+\end{split}
+\end{equation}
+
+
+and 
+
+
+\begin{equation} \label{eq:kthinning-dynamicprogramming-xleft}
+\begin{split}
+    V_{\pi^*}((v, x+1)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,x+1), a_t=a] \\
+    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v, x+1), a_t=v[i]] \\
+    &= \max_{i \in [n]} (\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} * V_{\pi^*}((v, x)))
+\end{split}
+\end{equation}
+
+The runtime of this algorithm is $k$ times the runtime of the dynamic programming algorithm for \textsc{Two-Thinning}.
+
+
 \subsection{Other Strategies}
+
+The same kind of strategies are possible for \textsc{K-Thinning} as for \textsc{Two-Thinning}, with some adjustments.
+
+\paragraph{Always Accept Strategy} Same as for \textsc{Two-Thinning}.
+
+
+\paragraph{Random Strategy} In this case a number $x$ between $0$ and $k$ is sampled uniformly, and the $x$th choice will be the one accepted if $x<k$, and all the balls will be rejected if $x=k$.
+
+
+
+\paragraph{Mean Thinning Strategy} A natural extension of the Mean Thinning Strategy of \textsc{Two-Thinning} is to accept a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding threshold with $x$ choices left is the nearest integer value to the solution $y$ of the following equation:
+
+\begin{equation} \label{meankthinning}
+    P(better) = (\frac{n-y}{n})^x=\frac{1}{2}
+\end{equation}
+
+which gives $y = n * (1 - 2^{-\frac{1}{x}})$
+
+
+\paragraph{Local Reward Optimiser Strategy} Choosing according to the expected immediate reward based on the reward function outlined above would lead to rejecting any bin with maximum load, and accepting otherwise.
+
+
+\paragraph{The Threshold Strategy} This is a direct of extension of the analogous strategy for \textsc{Two-Thinning}: it accepts the $i$th choice if the number of times a ball has been allocated to the offered bin as an $i$th choice earlier is less than $l$. This strategy has been shown to be asymptotically optimal \cite{feldheim2020dthinning}.
+
 
 
 \section{Graphical Two-Choice}
@@ -221,6 +281,8 @@ While the goal of the agent in RL is the optimise the cumulative reward, a simpl
 
 \subsection{Other Strategies}
 
+
+\NOTE{A}{Mention batched evaluation somewhere, and how I used GPU.}
 
 \section{Hyperparameter Optimisation}
 

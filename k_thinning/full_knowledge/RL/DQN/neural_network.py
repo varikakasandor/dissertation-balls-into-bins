@@ -15,7 +15,8 @@ class FullKThinningRecurrentNet(nn.Module):
         self.device = device
         self.hidden_size = self.max_threshold + 1
 
-        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)  # ,nonlinearity='relu')  # ,dropout=0.5)
+        self.rnn = nn.RNN(input_size=self.max_possible_load + 1, hidden_size=self.hidden_size, batch_first=True)  # ,
+        # nonlinearity='relu')  # ,dropout=0.5)
         self.lin = nn.Linear(self.hidden_size + self.k - 1, self.max_threshold + 1)
         self.to(self.device).double()
 
