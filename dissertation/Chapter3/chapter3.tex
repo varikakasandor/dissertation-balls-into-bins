@@ -150,16 +150,39 @@ Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_
 where we used the fact that $r_{t+1}=0$ for non-final states, and that it suffices to use only thresholds that are equal to one of the load values. Since there are many possible final states, which serve as the base cases of the dynamic programming algorithm, it was more convenient to implement is using recursion and memoisation. The base cases are those load vectors $s$ that have all $m$ balls allocated, and for those we have $V_{\pi^*}(s)=-maxload(s)$. \NOTE{A}{Exchange the last two sentences?}
 
 
-We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*n)$. Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(n, m)$ as a function of $n$ and $m$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
+We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*n)$.
+
+
+Now I prove a small lemma limiting the possible improvements of an exact dynamic programming algorithm:
+
+
+\begin{lemma} \label{lemma: everystatereachable}
+For any load vector $v$ with $0\leq k\leq m$ balls in it, and any decision function (strategy), there is a non-zero probability of reaching $v$ during an execution.
+\end{lemma}
+
+\begin{proof}
+    Simply observe that if the primary and secondary bins are the same, then whatever decision function is used, the ball will be allocated in that bin. Therefore, for any sequence of allocations there is a nonzero probability, and since any load vector can be reached by adding the balls one by one e.g. from left to right, all load vectors have a nonzero probability. \NOTE{A}{Isn't it too trivial? I mean it wasn't for me, but reading it now it seems trivial.}
+\end{proof}
+\NOTE{A}{A more interesting question is what would happen if we disallow the two choices to be the same. Then, there are several load vectors that the optimal policy can avoid, e.g. (0,0,0,0,m,0,0). How can we characterise these vectors?}
+
+
+
+This means that all the possible states have to be taken into account when calculating the expectation.
+
+
+
+Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(m, n)$ as a function of $m$ and $n$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
 
 
 \begin{equation} \label{eq: numberofpartitions}
-    f(n) = \begin{cases}
+    f(m, n) = \begin{cases}
         1, & \text{for } m=0\\
         1, & \text{for } n=1\\
         f(m,n-1)+f(m-n,n), & \text{otherwise }
     \end{cases}
 \end{equation}
+
+
 
 
 The results from this secondary dynamic programming confirmed what I have seen about the efficiency of the main dynamic programming algorithm in practice. For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of Deep Q-Learning (few hours). These limits are indeed smaller than that of Deep Q-Learning, so while dynamic programming can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly no very large. \NOTE{A}{Add these rough estimates of n,m to Deep Q-Learning as well.}
@@ -194,7 +217,13 @@ This is a strategy that has been shown to be optimal \cite{feldheim2021thinning}
 
 \subsection{Restricting Available Information} \label{lesssharedstate}
 
-\NOTE{A}{Maybe not needed? It would complicate the story quite a bit, and would add extra burden for evaluation. On the other hand, this brings the abstraction closer to real world.}
+
+
+
+\NOTE{A}{Maybe not needed? It would complicate the story quite a bit, and would add extra burden for evaluation. On the other hand, this brings the abstraction closer to real world, and I promise it in Chapter \ref{preparation}.}
+
+\NOTE{A}{TODO}
+
 
 \section{K-Thinning}
 
@@ -206,6 +235,10 @@ To frame the \textsc{K-Thinning} problem as a MDP, I decided to use (load vector
 
 
 For the neural network, I use a similar architecture as for \textsc{Two-Thinning}. The only difference is that now the input additionally contains the number of choices left. Keeping the RNN part applied on the load vector, I decided to bring in the number of choices left before the fully convolutional layers, by concatenating it with the final hidden state of the RNN. I applied one-hot encoding for the number of choices left as well, for similar reasons as for the load vector.
+
+
+All the other parts of the implementation are analogous to the implementation for \textsc{Two-Thinning} (except for possibly different hyperparameters that I discuss later), so I omit those details from here. Same will apply for \textsc{Graphical Two-Choice}.
+
 
 
 \subsection{Dynamic Programming}
@@ -254,7 +287,7 @@ The same kind of strategies are possible for \textsc{K-Thinning} as for \textsc{
 \paragraph{Mean Thinning Strategy} A natural extension of the Mean Thinning Strategy of \textsc{Two-Thinning} is to accept a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding threshold with $x$ choices left is the nearest integer value to the solution $y$ of the following equation:
 
 \begin{equation} \label{meankthinning}
-    P(better) = (\frac{n-y}{n})^x=\frac{1}{2}
+    P(better) = 1 - (\frac{n-y}{n})^x = \frac{1}{2}
 \end{equation}
 
 which gives $y = n * (1 - 2^{-\frac{1}{x}})$
@@ -270,10 +303,28 @@ which gives $y = n * (1 - 2^{-\frac{1}{x}})$
 \section{Graphical Two-Choice}
 
 
-\subsection{Framing it as a MDP}
+
+\subsection{Deep Q-Learning Implementation} \label{graphical-DQN}
+
+To formulate this setting as a MDP, I use the most natural way: the states are (load vector, (bin1, bin2)) tuples, and the actions are booleans denoting which ball to choose. (Instead using load vectors simply as states would lead to a blow-up in the size of the action space, since we don't have any kind of threshold argument like for \textsc{Two-Thinning}). With the chosen formulation, it is very hard for the DQN, to learn a mapping with such an input shape, because bin1 and bin2 are indices (note that they cannot be just load values as that would ignore positional information) indexing the load vector, and indices are even worse for a NN than the simple ordinal data discussed for \textsc{Two-Thinning} \NOTE{A}{Add some reference?}. Therefore, I use the DQN to estimate the expected cumulative reward after allocating the current ball to bin1 or to bin2, and then I can greedily choose the bin with the higher such expectation. More formally, the input to the DQN is a load vector, and the output is a vector of the same shape, whose $i$th value denotes the expected cumulative reward if the next ball is allocated in bin $i$. \NOTE{A}{Is it clear?} \NOTE{A}{Is is a valid thing to do? I don't have a deep enough understanding...}
 
 
-\NOTE{A}{TODO}
+For the NN architecture, RNN is no longer a principled choice. The motivation for that in earlier settings was that it favours later inputs, and we can sort the load vector in increasing order, which also meant increasing order of importance. However, ordering the bins in this graphical setting would lead to destroying, and hence ignoring the connectivity information \NOTE{A}{Is it clear? I don't think so.}. Hence, I considered two options for the architecture. A simple fully convolutional (FC) network, which can possibly learn how to make use of the connectivity information, but there is no additional motivation for it to do so. Therefore, a more specialised architecture is any Graph Neural Network (GNN). GNNs are similar to Convolutional Neural Networks (CNNs) in that they also start by combining local information, and move towards the big picture. Due to length constraints on the dissertation, I don not consider GNNs any further, as I could get reasonable performance from a FC network as well. \NOTE{A}{TODO: Implement GNN and remove the last sentence.}
+
+
+
+To tackle the sparse rewards problem, we could use any of the potential functions defined earlier. However, all of those functions ignore the graph structure, i.e. the edges. Intuitively, having many overloaded bins that are many hops away from each other is much better than having many overloaded bins close to each other, because if there are some underloaded bins next to an overloaded one, they can take away some of the future load from the overloaded bin. Therefore, motivated by this observation, I propose two new potential functions:
+
+
+\begin{itemize}
+    \item 
+    $\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])$ \NOTE{A}{Why doesn't the argument go below the word "max"?}, i.e. finding the worst edge, where no matter what decision function is used, an already highly loade bin will be chosen.
+    \item
+    $\Phi(v)=\max_{x \in [n]} \frac{v[x]+\sum_{x\sim y \in E}v[y]}{deg(x)+1}$, i.e. finding the neighbourhood with the largest average. We will see this idea again in Section \ref{graphical-otherstrategies}.
+\end{itemize}
+
+
+I provide a comparison of the various options in the hyperparameters section.
 
 
 \subsection{Graph Structures}
@@ -298,7 +349,22 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 \subsection{Dynamic Programming}
 
 
-\subsection{Other Strategies}
+We can observe the same difficulties about \textsc{Graphical Two-Choice} for dynamic programming just like for RL. The main speedup for the dynamic programming algorithm for \textsc{Two-Thinning} was to look only at sorted loads. This is not possible here, as two bins with the same load are not interchangeable. Using load vectors as states, denoting by $G$ the graph, by $E$ its edges, and assuming that the nodes are numbered from $0$ to $n-1$, we get the following recurrence relation:
+
+
+\begin{equation} \label{eq:graphicaltwochoice-dynamicprogramming}
+    V_{\pi^*}(v) = \frac{\sum_{x\sim y \in G}\max_a (V_{\pi^*}(v+e_x), V_{\pi^*}(v+e_y))}{|E|}
+\end{equation}
+
+
+and we have $V_{\pi^*}(v)=-maxload(v)$ for final states $v$.
+
+This achieves an $O(|states|*|E|)$ algorithm, and Lemma \ref{lemma: everystatereachable} gives confidence that this is optimal for general graphs. Note that for the complete graph this is $O(n)$ times slower than the algorithm for \textsc{Two-Thinning}.
+
+I will use this algorithm to construct a counterexample that Greedy is suboptimal. For that, I need to derive not only the values (as in the equation), but also the optimal decisions when faced with two bins. This is easily derivable from the memoisation dictionary. For the purposes of the counterexample, I distinguish not two, but three possible decisions: choose the first bin, choose the second bin, doesn't matter.
+
+
+\subsection{Other Strategies} \label{graphical-otherstrategies}
 
 
 \paragraph{Greedy Strategy} Choose the bin with the smaller load. If equal, choose uniformly at random.
@@ -313,12 +379,64 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 
 \paragraph{Flow Based Strategy}
 
-As I will explicitly show by generating a counterexample in Chapter \ref{evaluation}, Greedy is not optimal for \textsc{Graphical Two-Choice} - the reason is that in this setting the bins are not independent, and their connectivity matters. The idea introduced in \cite{bansal2021twochoicegraphical} is not to compare the load of the two offered bins, but compare the average load in a neighbourhood of the two bins (i.e. endpoints of the offered edge), taking into account topological information as well. To achieve this, and crucially find out which sets of bins to consider, their algorithm represents the preferences as a particular multi-commodity flow problem. It precomputes the sets of interests by solving the flow problem using an advanced data structure called R\"{a}cke-tree \cite{racke2008racketree}. During the actual allocation phase, the algorithm just compares the average load of two sets of size $O(log(n))$. I did not implement this algorithm due to its complexity (it could be a Part II project on its own), but it here as the best-known theoretical results for the \textsc{Graphical Two-Choice} setting - it has been shown in \cite{bansal2021twochoicegraphical} to be optimal up to a polylogarithmic factor.
+As I will explicitly show by generating a counterexample in Chapter \ref{evaluation}, Greedy is not optimal for \textsc{Graphical Two-Choice} - the reason is that in this setting the bins are not independent, and their connectivity matters. The idea of the algorithm presented in \cite{bansal2021twochoicegraphical} is not to compare the load of the two offered bins, but compare the average load in a neighbourhood of the two bins (i.e. endpoints of the offered edge), taking into account topological information as well (note that this idea relates to my choice of potential function in Section \ref{graphical-DQN}). To achieve this, and crucially to find out which sets of bins to consider, their algorithm represents the preferences as a particular multi-commodity flow problem. It precomputes the sets of interests by solving the flow problem using an advanced data structure called R\"{a}cke-tree \cite{racke2008racketree}. During the actual allocation phase, the algorithm just compares the average load of two sets of size $O(log(n))$. I did not implement this algorithm due to its complexity (it could be a Part II project on its own), but it here as the best-known theoretical results for the \textsc{Graphical Two-Choice} setting - it has been shown in \cite{bansal2021twochoicegraphical} to be optimal up to a polylogarithmic factor.
 
 
 \NOTE{A}{Mention batched evaluation somewhere, and how I used GPU.}
 
 \section{Hyperparameter Optimisation}
+
+One of the biggest challenges of the project was to find the best set of hyperparameters, because there are many of them, so any kind of exhaustive search (e.g. grid search) is infeasible. Therefore I tried to use approximate hyperparameter search techniques, and combine them with expert knowledge to guide the search, and reduce the ranges. The expert knowledge mainly involves common values used in practice (e.g. learning rate), but involves domain-specific arguments as well (e.g. maximum threshold of DQN). In this section I describe the methods I used, and in Chapter \ref{evaluation} I analyse the results, and in particular the importance of each of the parameters. For the exact hyperparameter values I chose for the different settings see Appendix \ref{hyperparameters}.
+
+
+First, I list the hyperparameters with some comments:
+
+\NOTE{A}{Reorder in a more systematic way?}
+\NOTE{A}{TODO: add usual values and/or reasons}
+\begin{itemize} 
+    \item batch size: the number of samples to take from the experience replay buffer using which the DQN is updated.
+    
+    \item $\epsilon$-start: for the $\epsilon$-greedy technique, it is common practice to gradually decrease $\epsilon$ during training. The reason is that after some training, less exploration is needed, as the best actions already start to take shape. I decrease $\epsilon$ according a negative exponential function, starting from $\epsilon$-start.
+    
+    \item $\epsilon$-decay: the decay parameter of the negative exponential function.
+    
+    \item $\epsilon$-end: as training goes on, $\epsilon$ converges to $\epsilon$-end.
+     
+    
+    \item train episodes: the number of training episodes. Note that more episodes are strictly better, since early stopping keeps the best model during training. Hence, this hyperparameter is rather set to a sweetspot where there isn't much expected improvement and the code runs fairly quickly. \NOTE{A}{Mention something about overfitting?}
+    
+    \item patience: to speed up training, if the best model so far is not improved for this many episodes \NOTE{A}{Hm, double check if the term episode has been defined anywhere in my dissertation...}, training stops.
+    
+    \item target update frequency: after every how many episodes is the target network synchronised with the main network.
+    
+    \item optimising frequency: this controls after every how many steps (i.e. actions) is the main network updated. Not updating it after every step is both a speed-up, and can control the reuse of samples in the experience replay buffer.
+    
+    \item memory capacity: the maximum size of the experience replay buffer.
+    
+    \item evaluation runs during training: to determine if the current model is better than the best one so far, I run this many full executions of the game with the current model, and average the scores. Note that this is very costly, as one execution of the game is equivalent to a full episode of training.
+    
+    \item maximum threshold of DQN: as mentioned in Section \ref{DQN}, the DQN is restricted to using only thresholds below this limit. A reasonable choice of this maximum threshold is around the target expected maximum load we expect to get, which can be estimated e.g. by the performance of simpler protocols, such as \textsc{One-Choice} or \textsc{Two-Choice}, or by theoretical results.
+    
+    \item loss function: the loss function to use between the current Q-value estimate and the new (``target'') Q-value estimate. \NOTE{A}{Explain better.}
+    
+    \item learning rate: the learning rate of the ADAM optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
+    
+    \item DQN - hidden state size of RNN: this is the determines into how many numbers does the DQN have to ``compress'' the information about the load vector.
+    
+    \item DQN - number of hidden layers of RNN: even though the main property of RNNs is that they process sequences, they can also have depth as well with any number of hidden layers.
+    
+    \item DQN - number of linear layers after RNN: at least one layer is needed to bring the result to the right shape, but I allow more as well.
+    
+    \item potential function: some of the potential functions are only applicable to certain settings (e.g. \textsc{Graphical Two-Choice}).
+    
+    \item number of curriculum learning episodes: using curriculum as pretraining, this hyperparameter determines the overall number of episodes in pretraining.
+    
+    \item using normalised domain: this is a boolean choosing between normalised and absolute domain.
+    
+    
+
+
+\end{itemize}
 
 
 \subsection{Genetic Algorithm}
@@ -329,7 +447,7 @@ As I will explicitly show by generating a counterexample in Chapter \ref{evaluat
 
 \section{Repository Overview}
 
-The structure of the code repository is shown below. Only the most relevant files/folders are included here, and I do not expand two folders if they have a very similar substructure (e.g. $k\_thinning$ and $two\_thinning$). Note that there are multiple layers of evaluation: one next to the training files which are used mainly during implementation, one evaluation environment for each setting, which are used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis.
+The structure of the code repository is shown below. Only the most relevant files/folders are included here, and I do not expand two folders if they have a very similar substructure (e.g. $k\_thinning$ and $two\_thinning$). Note that there are multiple layers of evaluation: one next to the training files which were used mainly during implementation, one evaluation environment for each setting, which were used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis.
 
 
 \NOTE{A}{Should I add more files? E.g. non-deep RL attempts.}
@@ -412,6 +530,9 @@ The structure of the code repository is shown below. Only the most relevant file
     [k\_thinning]
 ]
 \end{forest}
+
+
+(continued on the next page...)
 
 \begin{forest}
   pic dir tree,

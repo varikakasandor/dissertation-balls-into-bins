@@ -179,7 +179,7 @@ An example MDP is what we will use for \textsc{Two-Thinning}:
     \item
     $A(s)$: all the possible thresholds $a$, such that for any load value above $a$ we reject the primary bin, otherwise we accept it.
     \item
-    $R(s, a)$: a primary bin is sampled, and if it is rejected according to $ä$, then a secondary bin is chosen. Allocating the ball into the primary or secondary bin, we get $s'$ the new load configuration. If $s'$ has all the $m$ balls, then the reward is $-maxloadvalue(s)$, otherwise there is no reward, i.e. it is $0$.
+    $R(s, a)$: a primary bin is sampled, and if it is rejected according to $a$, then a secondary bin is chosen. Allocating the ball into the primary or secondary bin, we get $s'$ the new load configuration. If $s'$ has all the $m$ balls, then the reward is $-maxloadvalue(s)$, otherwise there is no reward, i.e. it is $0$.
     \item
     $P(s', r | s, a)$: the probabilities are derived according to the procedure outlined for $R(s,a)$.
     \item
