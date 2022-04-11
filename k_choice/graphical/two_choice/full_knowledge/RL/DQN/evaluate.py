@@ -2,8 +2,8 @@ import os
 
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import FullGraphicalTwoChoiceFCNet
-from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, evaluate_q_values_faster, evaluate_q_values
-from k_choice.graphical.two_choice.graph_base import GraphBase
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, evaluate_q_values
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
 
 def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):

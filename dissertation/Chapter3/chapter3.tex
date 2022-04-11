@@ -150,7 +150,7 @@ Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_
 where we used the fact that $r_{t+1}=0$ for non-final states, and that it suffices to use only thresholds that are equal to one of the load values. Since there are many possible final states, which serve as the base cases of the dynamic programming algorithm, it was more convenient to implement is using recursion and memoisation. The base cases are those load vectors $s$ that have all $m$ balls allocated, and for those we have $V_{\pi^*}(s)=-maxload(s)$. \NOTE{A}{Exchange the last two sentences?}
 
 
-We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*O(n))$. Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(n, m)$ as a function of $n$ and $m$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
+We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*n)$. Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(n, m)$ as a function of $n$ and $m$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
 
 
 \begin{equation} \label{eq: numberofpartitions}
@@ -211,7 +211,7 @@ For the neural network, I use a similar architecture as for \textsc{Two-Thinning
 \subsection{Dynamic Programming}
 
 
-A dynamic algorithm analogous to that for \textsc{Two-Thinning} has been implemented for \textsc{K-Thinning as well}, with the states being (load vector, number of choices left) pairs.
+A dynamic algorithm analogous to that for \textsc{Two-Thinning} has been implemented for \textsc{K-Thinning} as well, with the states being (load vector, number of choices left) pairs.
 
 
 The recurrence equations are:
@@ -291,13 +291,29 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 \paragraph{Hypercube} The hypercube graph with $n=2^N$ nodes numbered as binary numbers in the range $[n]$ has an edge between two nodes iff there is exactly one bit difference between them. Hypercube graphs have several applications in network topologies \cite{ostrouchov1987hypercubenetwork} \NOTE{A}{Why? Why is it good?}.
 
 
-\paragraph{Random Regular Graph} To better test the applicability of different algorithms, I create random regular graphs drawn (approximately) uniformly at random from all regular graphs with node $n$ of degree $d$. Interestingly, this is a challenging computational problem to do exactly uniformly at random - even generating regular graphs is difficult. I applied the efficient randomised algorithm described in \cite{steger1999randomregulargraphs}, and my code reliably generates regular graphs of size up to a few hundred with arbitrary degree.
+\paragraph{Random Regular Graph} To better test the applicability of different algorithms, I create random regular graphs drawn (approximately) uniformly at random from all regular graphs with node $n$ of degree $d$. Interestingly, this is a challenging computational problem to do exactly uniformly at random - even generating regular graphs is difficult. I applied the efficient randomised algorithm described as Algorithm 2 in \cite{steger1999randomregulargraphs}, and my code reliably generates regular graphs of size up to a few hundred with arbitrary degree.
+
 
 
 \subsection{Dynamic Programming}
 
 
 \subsection{Other Strategies}
+
+
+\paragraph{Greedy Strategy} Choose the bin with the smaller load. If equal, choose uniformly at random.
+
+
+\paragraph{Random Strategy} Choose uniformly at random between the two options.
+
+
+
+\paragraph{Local Reward Optimiser Strategy} In this case, with the usual maximum load based potential function, this amounts to choosing the ball which is does not have maximum load, and choosing uniformly at random if they both or neither have maximum load.
+
+
+\paragraph{Flow Based Strategy}
+
+As I will explicitly show by generating a counterexample in Chapter \ref{evaluation}, Greedy is not optimal for \textsc{Graphical Two-Choice} - the reason is that in this setting the bins are not independent, and their connectivity matters. The idea introduced in \cite{bansal2021twochoicegraphical} is not to compare the load of the two offered bins, but compare the average load in a neighbourhood of the two bins (i.e. endpoints of the offered edge), taking into account topological information as well. To achieve this, and crucially find out which sets of bins to consider, their algorithm represents the preferences as a particular multi-commodity flow problem. It precomputes the sets of interests by solving the flow problem using an advanced data structure called R\"{a}cke-tree \cite{racke2008racketree}. During the actual allocation phase, the algorithm just compares the average load of two sets of size $O(log(n))$. I did not implement this algorithm due to its complexity (it could be a Part II project on its own), but it here as the best-known theoretical results for the \textsc{Graphical Two-Choice} setting - it has been shown in \cite{bansal2021twochoicegraphical} to be optimal up to a polylogarithmic factor.
 
 
 \NOTE{A}{Mention batched evaluation somewhere, and how I used GPU.}
@@ -313,9 +329,134 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 
 \section{Repository Overview}
 
+The structure of the code repository is shown below. Only the most relevant files/folders are included here, and I do not expand two folders if they have a very similar substructure (e.g. $k\_thinning$ and $two\_thinning$). Note that there are multiple layers of evaluation: one next to the training files which are used mainly during implementation, one evaluation environment for each setting, which are used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis.
+
+
+\NOTE{A}{Should I add more files? E.g. non-deep RL attempts.}
+
+{
+\definecolor{folderbg}{RGB}{124,166,198}
+\definecolor{folderborder}{RGB}{110,144,169}
+\newlength\Size
+\setlength\Size{4pt}
+\tikzset{%
+  folder/.pic={%
+    \filldraw [draw=folderborder, top color=folderbg!50, bottom color=folderbg] (-1.05*\Size,0.2\Size+5pt) rectangle ++(.75*\Size,-0.2\Size-5pt);
+    \filldraw [draw=folderborder, top color=folderbg!50, bottom color=folderbg] (-1.15*\Size,-\Size) rectangle (1.15*\Size,\Size);
+  },
+  file/.pic={%
+    \filldraw [draw=folderborder, top color=folderbg!5, bottom color=folderbg!10] (-\Size,.4*\Size+5pt) coordinate (a) |- (\Size,-1.2*\Size) coordinate (b) -- ++(0,1.6*\Size) coordinate (c) -- ++(-5pt,5pt) coordinate (d) -- cycle (d) |- (c) ;
+  },
+}
+\forestset{%
+  declare autowrapped toks={pic me}{},
+  pic dir tree/.style={%
+    for tree={%
+      folder,
+      font=\ttfamily,
+      grow'=0,
+    },
+    before typesetting nodes={%
+      for tree={%
+        edge label+/.option={pic me},
+      },
+    },
+  },
+  pic me set/.code n args=2{%
+    \forestset{%
+      #1/.style={%
+        inner xsep=2\Size,
+        pic me={pic {#2}},
+      }
+    }
+  },
+  pic me set={directory}{folder},
+  pic me set={file}{file},
+}
+
+\begin{forest}
+  pic dir tree,
+  where level=0{}{% folder icons by default; override using file for file icons
+    directory,
+  },
+[Project
+    [helper, label=right:(useful reused helper functions and objects)]
+    [two\_thinning
+        [full\_knowledge
+            [RL
+                [DQN
+                    [constants.py, file]
+                    [neural\_network.py, file]
+                    [train.py, file]
+                    [evaluate.py, file]
+                    [saved\_models, label=right:(I store here the best trained models for each $n$ and $m$)]
+                    [curriculum\_learning]
+                    [normalised\_load]
+                    [...]
+                ]
+                [DeepSarsaRL]
+                [PolicyGradient]
+            ]
+            [dp.py, file]
+        ]
+        [constant\_threshold]
+        [average\_threshold, label=right:(only the average load is known to the agent)]
+        [strategies, label=right:(strategy classes)
+            [strategy\_base.py, label=right:(abstract base class), file]
+            [mean\_thinning\_strategy.py, file]
+            [...]
+        ]
+        [environment.py, label=right:(environment for analysing strategies), file]
+        [...]
+    ]
+    [k\_thinning]
+]
+\end{forest}
+
+\begin{forest}
+  pic dir tree,
+  where level=0{}{% folder icons by default; override using file for file icons
+    directory,
+  },
+[Project
+    [k\_choice
+        [simulation.py, label=right:(code for running simple \textsc{One-Choice} and \textsc{Two-Choice}), file]
+        [graphical
+            [two\_choice
+                [full\_knowledge, label=right:(as for \textsc{Two-Thinning})]
+                [graphs, label=right:(graph structures as classes)
+                    [graph\_base.py, label=right:(abstract base class), file]
+                    [cycle.py, file]
+                    [...]
+                ]
+                [strategies, label=right:(as for \textsc{Two-Thinning})]
+                [environment.py, file]
+            ]
+        ]
+    ]
+    [evaluation
+        [hyperparameter\_tuning]
+        [analyses, label=right:(evaluation code and results)]
+        [...]
+    ]
+    [unit\_testing]
+    [dissertation]
+    [proposal]
+    [progress\_report]
+]
+\end{forest}
+}
+
+
+
+
 
 \subsection{Extensibility}
 \NOTE{A}{Software Engineering Practices. Extensibility is too focused, it should be more than that.}
+
+
+\NOTE{A}{Graph structures and Strategies are OOP}
+
 
 \subsection{Unit Tests}
 

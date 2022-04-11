@@ -1,7 +1,6 @@
 import random
 
-from k_choice.graphical.two_choice.graph_base import GraphBase
-from math import log2
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
 
 class RandomRegularGraph(GraphBase):

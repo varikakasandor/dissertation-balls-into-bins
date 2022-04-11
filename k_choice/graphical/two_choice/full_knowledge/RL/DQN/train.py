@@ -3,12 +3,11 @@ import copy
 import random
 from math import exp
 
-import torch
 import torch.optim as optim
 
 from helper.replay_memory import ReplayMemory, Transition
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
-from k_choice.graphical.two_choice.graph_base import GraphBase
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
 
 # from pytimedinput import timedInput # Works only with interactive interpreter

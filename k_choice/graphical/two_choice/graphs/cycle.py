@@ -1,4 +1,4 @@
-from k_choice.graphical.two_choice.graph_base import GraphBase
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
 
 class Cycle(GraphBase):

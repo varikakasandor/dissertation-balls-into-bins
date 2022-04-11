@@ -1,5 +1,5 @@
-from k_choice.graphical.two_choice.graph_base import GraphBase
-from k_choice.graphical.two_choice.strategy_base import StrategyBase
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
+from k_choice.graphical.two_choice.strategies.strategy_base import StrategyBase
 
 
 class Greedy(StrategyBase):

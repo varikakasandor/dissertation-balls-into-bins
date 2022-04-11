@@ -1,8 +1,7 @@
 from math import sqrt
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
-from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
-from k_choice.graphical.two_choice.graph_base import GraphBase
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
 N = 16  # TODO: for N=3 test if it converges to Greedy
 GRAPH = Cycle(N)

@@ -1,11 +1,10 @@
-import torch
 from math import *
 
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.evaluate import load_best_model, get_best_model_path
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, greedy
-from k_choice.graphical.two_choice.graph_base import GraphBase
-from k_choice.graphical.two_choice.strategy_base import StrategyBase
+from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
+from k_choice.graphical.two_choice.strategies.strategy_base import StrategyBase
 
 
 class FullKnowledgeDQNStrategy(StrategyBase):
