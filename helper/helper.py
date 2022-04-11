@@ -2,8 +2,8 @@ import functools
 
 import numpy as np
 
-N = 100
-M = 150
+N = 8
+M = 10
 
 
 @functools.lru_cache()
@@ -12,6 +12,7 @@ def number_of_increasing_partitions(m=M, n=N):
         return 1
     if m >= n:
         return number_of_increasing_partitions(m, n - 1) + number_of_increasing_partitions(m - n, n)
+    # Either all the bins get 1 ball, or we move on from the least loaded bin. This is a nice trick to make it O(n*m) instead of cubic.
     return number_of_increasing_partitions(m, n - 1)
 
 
@@ -36,7 +37,8 @@ def std(loads):
 if __name__ == "__main__":
     num_states = 0
     for i in range(M + 1):
-        num_states += number_of_increasing_partitions(m=i, n=N)
+        curr = number_of_increasing_partitions(m=i, n=N)
+        num_states += curr
     num_steps = num_states * N
     num_seconds = num_steps / (10 ** 8)
     print(num_seconds)

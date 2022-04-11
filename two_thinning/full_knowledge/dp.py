@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 25
-M = 25
+N = 2
+M = 3
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -85,7 +85,7 @@ def threshold_dp(loads_tuple, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT
 
     pref_score = 0
     pref_cnt = 0
-    for (val, cnt, res) in (results):
+    for (val, cnt, res) in results:
         pref_score += res * cnt
         pref_cnt += cnt
         if res >= avg or len(results) == 1:  # NOTE: needed for numerical precision for small values of N
@@ -211,5 +211,6 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
 if __name__ == "__main__":
     start_time = time.time()
     strategy = find_best_strategy()
-    analyse_probability_distribution(strategy, include_intermediate_states=False)
+    print(strategy)
+    #analyse_probability_distribution(strategy, include_intermediate_states=False)
     print("--- %s seconds ---" % (time.time() - start_time))
