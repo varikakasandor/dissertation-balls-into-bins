@@ -1,6 +1,6 @@
 import copy
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 from two_thinning.full_knowledge.RL.DQN.constants import *
 
 

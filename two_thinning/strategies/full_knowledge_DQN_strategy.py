@@ -1,7 +1,6 @@
-import torch
 from math import *
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 from two_thinning.full_knowledge.RL.DQN.evaluate import load_best_model, get_best_model_path # Works for normalised too, no difference
 from two_thinning.full_knowledge.RL.DQN.train import greedy, train
 from two_thinning.full_knowledge.RL.DQN.normalised_load.train import train as train_normalised

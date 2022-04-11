@@ -1,8 +1,6 @@
-from math import log, sqrt, floor
-import numpy as np
-import heapq
+from math import log, floor
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 
 
 class MultiStageThresholdStrategy(StrategyBase):

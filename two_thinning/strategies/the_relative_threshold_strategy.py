@@ -1,6 +1,6 @@
 from math import log
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 
 
 class TheRelativeThresholdStrategy(StrategyBase):

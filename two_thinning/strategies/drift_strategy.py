@@ -1,8 +1,8 @@
-from math import log, sqrt
+from math import sqrt
 import numpy as np
 import heapq
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 
 
 class DriftStrategy(StrategyBase):

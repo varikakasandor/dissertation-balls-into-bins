@@ -1,5 +1,5 @@
-from two_thinning.strategy_base import StrategyBase
-from two_thinning.full_knowledge.dp import find_best_strategy, rindex
+from two_thinning.strategies.strategy_base import StrategyBase
+from two_thinning.full_knowledge.dp import find_best_strategy
 from two_thinning.full_knowledge.RL.DQN.constants import *
 
 
@@ -10,15 +10,7 @@ class DPStrategy(StrategyBase):
 
     def decide(self, bin):
         sorted_loads = tuple(sorted(self.loads))
-
-        # Generating (an artificial "threshold")
-        threshold = sorted_loads[0]
-        for x in sorted_loads:
-            _, decision = self.strategy[(sorted_loads, x)]
-            if decision < 1:
-                threshold = x
-            else:
-                break
+        _, threshold = self.strategy[sorted_loads]
         self.curr_thresholds.append(threshold)
         return self.loads[bin] <= threshold  # either accept is better (-1) or it doesn't matter (0)
 

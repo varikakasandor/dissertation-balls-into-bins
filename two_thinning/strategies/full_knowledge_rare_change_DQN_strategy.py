@@ -1,7 +1,7 @@
 import torch
 from math import *
 
-from two_thinning.strategy_base import StrategyBase
+from two_thinning.strategies.strategy_base import StrategyBase
 from two_thinning.full_knowledge.RL.DQN.rare_change.evaluate import load_best_model, get_best_model_path
 from two_thinning.full_knowledge.RL.DQN.rare_change.train import train, greedy
 

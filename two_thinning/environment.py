@@ -9,8 +9,8 @@ from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQN
 from two_thinning.strategies.dp_strategy import DPStrategy
 from two_thinning.strategies.random_strategy import RandomStrategy
 
-N = 5
-M = 10
+N = 3
+M = 5
 STRATEGY = AlwaysAcceptStrategy(N, M)
 RUNS = 30
 PRINT_BEHAVIOUR = False
