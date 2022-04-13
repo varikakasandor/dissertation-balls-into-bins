@@ -9,8 +9,8 @@ from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQN
 from two_thinning.strategies.dp_strategy import DPStrategy
 from two_thinning.strategies.random_strategy import RandomStrategy
 
-N = 3
-M = 5
+N = 5
+M = 10
 STRATEGY = AlwaysAcceptStrategy(N, M)
 RUNS = 30
 PRINT_BEHAVIOUR = False
@@ -61,7 +61,7 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=DPStrategy(n=N, m=M, reward_fun=REWARD_FUN))  # I don't understand why it shows
+    run_strategy_multiple_times(strategy=RandomStrategy(n=N, m=M))  # I don't understand why it shows
     # yellow, whereas it runs fine
     # scores = {alpha: run_strategy_multiple_times(
     # strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)),

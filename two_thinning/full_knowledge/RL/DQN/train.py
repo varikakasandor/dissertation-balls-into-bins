@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import scale
 
 from helper.replay_memory import ReplayMemory, Transition
+from k_choice.simulation import sample_one_choice
 from two_thinning.full_knowledge.RL.DQN.constants import *
 
 
@@ -37,8 +38,8 @@ def greedy(policy_net, loads, batched=False):
             return options.max(0)[1].type(dtype=torch.int64).item()  # TODO: instead torch.argmax (?)
 
 
-def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                             batch_size=EVAL_PARALLEL_BATCH_SIZE):
+def evaluate_q_values_faster(model, n=N, m=M, max_threshold=MAX_THRESHOLD, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
+                             use_normalised=USE_NORMALISED, batch_size=EVAL_PARALLEL_BATCH_SIZE):
     batches = [batch_size] * (eval_runs // batch_size)
     if eval_runs % batch_size != 0:
         batches.append(eval_runs % batch_size)
@@ -47,12 +48,13 @@ def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_
         sum_loads = 0
         for batch in batches:
             loads = [[0] * n for _ in range(batch)]
-            for _ in range(m):
+            for i in range(m):
                 a = greedy(model, loads, batched=True)
                 first_choices = random.choices(range(n), k=batch)
                 second_choices = random.choices(range(n), k=batch)
                 for j in range(batch):  # TODO: speed up for loop
-                    if loads[j][first_choices[j]] <= a[j]:
+                    curr_a = i / n + a[j] - max_threshold if use_normalised else a[j]
+                    if loads[j][first_choices[j]] <= curr_a:
                         loads[j][first_choices[j]] += 1
                     else:
                         loads[j][second_choices[j]] += 1
@@ -71,7 +73,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
                 if print_behaviour:
                     print(f"With loads {loads} the trained model chose {a}")
                 randomly_selected = random.randrange(n)
-                if loads[randomly_selected] <= a:
+                if loads[randomly_selected] <= a: # TODO: add normalised version
                     loads[randomly_selected] += 1
                 else:
                     loads[random.randrange(n)] += 1
@@ -88,12 +90,14 @@ def calc_number_of_jumps(thresholds, delta=4):
     return num_jumps
 
 
-def analyse_threshold_progression(model, ep, save_folder, delta, n=N, m=M):
+def analyse_threshold_progression(model, ep, save_folder, delta, max_threshold, n=N, m=M, use_normalised=USE_NORMALISED):
     with torch.no_grad():
         loads = [0] * n
         thresholds = []
-        for _ in range(m):
+        for i in range(m):
             a = greedy(model, loads)
+            if use_normalised:
+                a = i / n + a - max_threshold
             thresholds.append(a)
             randomly_selected = random.randrange(n)
             if loads[randomly_selected] <= a:
@@ -138,34 +142,35 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
 
 
 def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, report_wandb=False, lr=LR,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, report_wandb=False, lr=LR, pacing_fun=PACING_FUN,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
+          pre_train_episodes=PRE_TRAIN_EPISODES, use_normalised=USE_NORMALISED,
           nn_hidden_size=NN_HIDDEN_SIZE, nn_rnn_num_layers=NN_RNN_NUM_LAYERS, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
           eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN, loss_function=LOSS_FUCNTION,
           max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, save_path=SAVE_PATH,
-          print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
+          print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, optimizer_method=OPTIMIZER_METHOD, device=DEVICE):
     start_time = time.time()
-
     mkdir(save_path)
 
     max_possible_load = m // n + ceil(sqrt(
         log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m  # based on the two-thinning paper, this can be achieved!
+    nn_max_threshold = 2 * max_threshold if use_normalised else max_threshold
 
-    policy_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+    policy_net = nn_model(n=n, max_threshold=nn_max_threshold, max_possible_load=max_possible_load,
                           hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
                           num_lin_layers=nn_num_lin_layers,
                           device=device)
-    target_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+    target_net = nn_model(n=n, max_threshold=nn_max_threshold, max_possible_load=max_possible_load,
                           hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
                           num_lin_layers=nn_num_lin_layers,
                           device=device)
-    best_net = nn_model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
+    best_net = nn_model(n=n, max_threshold=nn_max_threshold, max_possible_load=max_possible_load,
                         hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
                         device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters(), lr=lr)
+    optimizer = optimizer_method(policy_net.parameters(), lr=lr)
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
@@ -174,15 +179,22 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     threshold_jumps = []
     eval_scores = []
 
-    for ep in range(num_episodes):
-        loads = [0] * n
+    start_loads = []
+    for start_size in reversed(range(m)):  # pretraining (i.e. curriculum learning)
+        for _ in range(pacing_fun(start_size=start_size, n=n, m=m, all_episodes=pre_train_episodes)):
+            start_loads.append(sample_one_choice(n=n, m=start_size))
+    for _ in range(num_episodes):  # training
+        start_loads.append([0] * n)
+
+    for ep, loads in enumerate(start_loads):
         for i in range(m):
             torch.cuda.empty_cache()
             threshold = epsilon_greedy(policy_net=policy_net, loads=loads, max_threshold=max_threshold,
                                        steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
-            to_place = randomly_selected if loads[randomly_selected] <= threshold.item() else random.randrange(n)
+            real_threshold = i / n + threshold.item() - max_threshold if use_normalised else threshold.item()
+            to_place = randomly_selected if loads[randomly_selected] <= real_threshold else random.randrange(n)
             curr_state = copy.deepcopy(loads)
             loads[to_place] += 1
             next_state = copy.deepcopy(loads)
@@ -202,16 +214,17 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                batch_size=batch_size, criterion=loss_function,
                                device=device)
 
-        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
-                                                   batch_size=eval_parallel_batch_size)
+        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=eval_runs,
+                                                   batch_size=eval_parallel_batch_size, use_normalised=use_normalised)
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs,
-                                                       batch_size=eval_parallel_batch_size)  # only update the best if it is really better, so run more tests
+            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=5 * eval_runs,
+                                                       batch_size=eval_parallel_batch_size, use_normalised=use_normalised)  # only update the best if it is really better, so run more tests
         if report_wandb:
             wandb.log({"score": curr_eval_score})
 
         eval_scores.append(curr_eval_score)
-        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path, delta=max_threshold // 2))
+        delta = max_threshold if use_normalised else max_threshold // 2
+        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path, delta=delta, max_threshold=max_threshold, use_normalised=use_normalised))
 
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
@@ -243,7 +256,8 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     scaled_eval_scores = scale(np.array(eval_scores))
 
     plt.clf()
-    plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps, label="normalised number of threshold jumps")
+    plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps,
+             label="normalised number of threshold jumps")
     plt.plot(list(range(len(scaled_eval_scores))), scaled_eval_scores, label="normalised evaluation scores")
     plt.title(f"Training Progression")
     plt.xlabel("Epoch")

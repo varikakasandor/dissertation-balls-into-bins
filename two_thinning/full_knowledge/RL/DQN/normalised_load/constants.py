@@ -6,7 +6,7 @@ from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
 N = 5
-M = 125
+M = 15
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):

@@ -27,7 +27,7 @@ def MAX_LOAD_REWARD(loads, error_ratio=1.5):
     # return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-def PACING_FUN(start_size, n=N, m=M,
+def EVEN_PACING_FUN(start_size, n=N, m=M,
                all_epochs=1000):  # returns number of epochs to run for the given start size. Note that the exact
     # definition of "pacing function" is different
     # I assume we want linearly increasing pacing function, so we need to solve for x and that we start from n:
@@ -64,3 +64,4 @@ SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(dirname(abspath(__file_
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 REWARD_FUN = MAX_LOAD_REWARD
 POTENTIAL_FUN = STD_POTENTIAL
+PACING_FUN = EVEN_PACING_FUN

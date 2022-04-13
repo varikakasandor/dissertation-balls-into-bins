@@ -53,10 +53,10 @@ def analyse_threshold_progression(model, ep, save_folder, delta, max_threshold, 
         loads = [0] * n
         thresholds = []
         for i in range(m):
-            a = greedy(model, loads)
-            thresholds.append(a - max_threshold)
+            a = i / n + greedy(model, loads) - max_threshold
+            thresholds.append(a)
             randomly_selected = random.randrange(n)
-            if loads[randomly_selected] <= i / n + a - max_threshold:
+            if loads[randomly_selected] <= a:
                 loads[randomly_selected] += 1
             else:
                 loads[random.randrange(n)] += 1
@@ -114,7 +114,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                        steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             randomly_selected = random.randrange(n)
-            to_place = randomly_selected if loads[randomly_selected] <= i/n + threshold.item() - max_threshold else random.randrange(n)
+            to_place = randomly_selected if loads[randomly_selected] <= i / n + threshold.item() - max_threshold else random.randrange(n)
             curr_state = copy.deepcopy(loads)
             loads[to_place] += 1
             next_state = copy.deepcopy(loads)
@@ -134,10 +134,10 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                batch_size=batch_size, criterion=loss_function,
                                device=device)
 
-        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=eval_runs,
+        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size)
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, reward=reward_fun, eval_runs=5 * eval_runs,
+            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=5 * eval_runs,
                                                        batch_size=eval_parallel_batch_size)  # only update the best if it is really better, so run more tests
         if report_wandb:
             wandb.log({"score": curr_eval_score})
