@@ -37,7 +37,7 @@ def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
 def evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL, use_normalised=USE_NORMALISED,
              max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE):
     avg_score = evaluate_q_values_faster(trained_model, n=n, m=m, reward=reward_fun, eval_runs=eval_runs_eval,
-                                         batch_size=eval_parallel_batch_size)  # TODO: set back print_behaviour to True
+                                         use_normalised=use_normalised, max_threshold=max_threshold, batch_size=eval_parallel_batch_size)  # TODO: set back print_behaviour to True
     return avg_score
 
 

@@ -8,7 +8,7 @@ from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from two_thinning.full_knowledge.RL.DQN.train import train as two_thinning_train
 
 N = 5
-M = 15
+M = 13
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
@@ -80,10 +80,10 @@ if __name__ == "__main__":
     sweep_config['metric'] = metric
     parameters_dict = {
         "train_episodes": {
-            "values": [200]
+            "values": [100]
         },
         "patience": {
-            "values": [500]
+            "values": [100]
         },
         "eval_runs_eval": {
             "values": [100]
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         "pre_train_episodes": {
             'distribution': 'int_uniform',
             'min': 0,
-            'max': 200
+            'max': 100
         },
         'batch_size': {
             'distribution': 'int_uniform',
@@ -128,18 +128,18 @@ if __name__ == "__main__":
         },
         "eval_runs_train": {
             'distribution': 'int_uniform',
-            'min': 10,
-            'max': 30
+            'min': 3,
+            'max': 10  # TODO: increase?
         },
         "optimise_freq": {
             'distribution': 'int_uniform',
             'min': 1,
             'max': 50
         },
-        "max_threshold": {
+        "max_threshold": { # TODO: always set independently for new N,M
             'distribution': 'int_uniform',
-            'min': 10,
-            'max': 13
+            'min': 2,
+            'max': 5
         },
         "loss_function": {
             "values": ["SmoothL1Loss", "MSELoss", "HuberLoss", "L1Loss"]
@@ -173,5 +173,5 @@ if __name__ == "__main__":
     }
 
     sweep_config['parameters'] = parameters_dict
-    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}_nn_200ep")
+    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
     wandb.agent(sweep_id, tuning_function, count=200)
