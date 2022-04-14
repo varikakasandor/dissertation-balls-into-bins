@@ -2,8 +2,8 @@ import functools
 
 import numpy as np
 
-N = 8
-M = 10
+N = 20
+M = 60
 
 
 @functools.lru_cache()
@@ -41,4 +41,4 @@ if __name__ == "__main__":
         num_states += curr
     num_steps = num_states * N
     num_seconds = num_steps / (10 ** 8)
-    print(num_seconds)
+    print(num_states, num_steps, num_seconds)

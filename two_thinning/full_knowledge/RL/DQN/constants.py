@@ -6,7 +6,7 @@ from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
 N = 5
-M = 15
+M = 35
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
@@ -51,7 +51,7 @@ TRAIN_EPISODES = 70
 PRE_TRAIN_EPISODES = 30
 TARGET_UPDATE_FREQ = 20
 MEMORY_CAPACITY = 800
-EVAL_RUNS_TRAIN = 5
+EVAL_RUNS_TRAIN = 1
 EVAL_RUNS_EVAL = 100
 EVAL_PARALLEL_BATCH_SIZE = 16  # 64
 PATIENCE = 5000
@@ -59,7 +59,7 @@ USE_NORMALISED = True
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 3 * int(sqrt(M))  # TODO: 50 for N=10, M=100
-MAX_THRESHOLD = max(3, (0 if USE_NORMALISED else M // N) + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
+MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
 LOSS_FUCNTION = nn.SmoothL1Loss()

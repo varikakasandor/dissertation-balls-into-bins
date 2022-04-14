@@ -3,22 +3,18 @@ import wandb
 from os.path import join, dirname, abspath
 from datetime import datetime
 
+from two_thinning.full_knowledge.RL.DQN.constants import *
 from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from two_thinning.full_knowledge.RL.DQN.train import train as two_thinning_train
 
 N = 5
-M = 13
+M = 35
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
-
-
-def POTENTIAL_FUN(loads):
-    return -max(loads)  # TODO: take into account more bins
-    # return -std(loads)
 
 
 def REWARD_FUN(loads, error_ratio=1.5):
@@ -40,6 +36,11 @@ def tuning_function(config=None):
         "SGD": torch.optim.SGD,
         "RMSprop": torch.optim.RMSprop
     }
+    potential_mapping = {
+        "max_load": MAX_LOAD_POTENTIAL,
+        "std": STD_POTENTIAL,
+        "exponential": EXPONENTIAL_POTENTIAL
+    }
     with wandb.init(config=config):
         # TODO: add option to use graphical two choice or k-thinning
         SAVE_PATH = join((dirname(dirname(abspath(__file__)))), "training_progression",
@@ -57,13 +58,14 @@ def tuning_function(config=None):
                                            eps_decay=config["eps_decay"], optimise_freq=config["optimise_freq"],
                                            target_update_freq=config["target_update_freq"],
                                            eval_runs=config["eval_runs_train"], patience=config["patience"],
-                                           potential_fun=POTENTIAL_FUN, max_threshold=config["max_threshold"],
+                                           potential_fun=potential_mapping[config["potential_fun"]], max_threshold=config["max_threshold"],
                                            eval_parallel_batch_size=config["eval_parallel_batch_size"],
                                            print_progress=PRINT_PROGRESS, use_normalised=config["use_normalised"],
                                            optimizer_method=optimizer_mapping[config["optimizer_method"]],
                                            nn_model=NN_MODEL, device=DEVICE, report_wandb=True, save_path=SAVE_PATH)
         score = evaluate(trained_model, n=N, m=M, reward_fun=REWARD_FUN, eval_runs_eval=config["eval_runs_eval"],
-                         eval_parallel_batch_size=config["eval_parallel_batch_size"])
+                         eval_parallel_batch_size=config["eval_parallel_batch_size"],
+                         max_threshold=config["max_threshold"], use_normalised=config["use_normalised"])
         wandb.log({"score": score})
 
 
@@ -136,10 +138,10 @@ if __name__ == "__main__":
             'min': 1,
             'max': 50
         },
-        "max_threshold": { # TODO: always set independently for new N,M
+        "max_threshold": {  # TODO: always set independently for new N,M
             'distribution': 'int_uniform',
-            'min': 2,
-            'max': 5
+            'min': 6,
+            'max': 9
         },
         "loss_function": {
             "values": ["SmoothL1Loss", "MSELoss", "HuberLoss", "L1Loss"]
@@ -167,6 +169,9 @@ if __name__ == "__main__":
             'min': 1,
             'max': 2
         },
+        "potential_fun": {
+            "values": ["max_load", "std", "exponential"]
+        },
         "use_normalised": {
             "values": [True, False]
         }
@@ -174,4 +179,4 @@ if __name__ == "__main__":
 
     sweep_config['parameters'] = parameters_dict
     sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
-    wandb.agent(sweep_id, tuning_function, count=200)
+    wandb.agent(sweep_id, tuning_function, count=500)

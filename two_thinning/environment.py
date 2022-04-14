@@ -57,7 +57,7 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
     strategy.create_summary_(save_path)
     print(f"The average score of this strategy is {avg_score}")
     print(f"The average normalised max load of this strategy is {-avg_score - m / n}.")
-    return avg_score
+    return scores
 
 
 if __name__ == "__main__":

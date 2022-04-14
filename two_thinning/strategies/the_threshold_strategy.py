@@ -4,10 +4,10 @@ from two_thinning.constant_threshold.RL.train import train
 
 class TheThresholdStrategy(StrategyBase):
     # Works only reasonably if m=n
-    def __init__(self, n, m, limit=None):
+    def __init__(self, n, m, limit=None, **kwargs):
         super(TheThresholdStrategy, self).__init__(n, m)
-        self.limit = limit if limit is not None else train(n=n, m=m, primary_only=True)  # l is the constant threshold parameter of this
-        # strategy
+        self.limit = limit if limit is not None else train(n=n, m=m, **kwargs)  # l is the constant
+        # threshold parameter of this strategy
         self.primary_count = [0] * self.n
 
     def decide(self, bin):

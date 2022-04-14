@@ -3,14 +3,14 @@ from ray import tune
 
 from two_thinning.constant_threshold.simulation import simulate_one_run
 
-n = 10
-m = 20
-episodes = 10000
-epsilon = 0.1
-primary_only = False
+N = 10
+M = 20
+EPISODES = 10000
+EPSILON = 0.1
+PRIMARY_ONLY = True
 
-initial_q_value = 0
-reward = max
+INITIAL_Q_VALUE = 0
+REWARD = max
 
 
 def choose_random_min(q):
@@ -19,10 +19,10 @@ def choose_random_min(q):
     return random_mini
 
 
-def train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_q_value, primary_only=primary_only, reward=reward, use_tune=False):
-    # TODO: Strangely, for m=n, it always trains to output the constant threshold 1. \
-    # I wonder why it doesn't increase the threshold as n grows larger and larger. The probability of having 1 balls in each bin \
-    # decreases (very sharply!) by n, so it should be worth making the threshold equal to 2, what do I miss?
+def train(n=N, m=M, episodes=EPISODES, epsilon=EPSILON, initial_q_value=INITIAL_Q_VALUE, primary_only=PRIMARY_ONLY, reward=REWARD, use_tune=False):
+    # TODO: Strangely, for m=n, it always trains to output the constant threshold 1. \ I wonder why it doesn't
+    #  increase the threshold as n grows larger and larger. The probability of having 1 balls in each bin \ decreases
+    #  (very sharply!) by n, so it should be worth making the threshold equal to 2, what do I miss?
     q = [initial_q_value] * (m + 1)
     cnt = [0] * (m + 1)
     for _ in range(episodes):

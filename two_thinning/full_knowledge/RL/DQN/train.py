@@ -154,6 +154,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     max_possible_load = m // n + ceil(sqrt(
         log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m  # based on the two-thinning paper, this can be achieved!
+    max_threshold = max_threshold - m // n if use_normalised else max_threshold # !!!
     nn_max_threshold = 2 * max_threshold if use_normalised else max_threshold
 
     policy_net = nn_model(n=n, max_threshold=nn_max_threshold, max_possible_load=max_possible_load,
