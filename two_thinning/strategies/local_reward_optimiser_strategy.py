@@ -8,7 +8,8 @@ class LocalRewardOptimiserStrategy(StrategyBase):
     def __init__(self, n, m, reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN):
         super(LocalRewardOptimiserStrategy, self).__init__(n, m)
         self.reward_fun = reward_fun
-        self.potential_fun = potential_fun
+        self.potential_fun = potential_fun  # TODO: could be sped up for special cases, e.g. for the MAX_LOAD
+        # potential function it is just avoid maximum load
 
     def calc_local_reward(self, bin):
         next_loads = copy.deepcopy(self.loads)
@@ -19,9 +20,7 @@ class LocalRewardOptimiserStrategy(StrategyBase):
         else:
             return self.potential_fun(next_loads) - self.potential_fun(self.loads)
 
-
     def decide(self, bin):
-        # called "Away from max"
         reward_accept = self.calc_local_reward(bin)
         reward_reject = 0.0
         for i in range(self.n):

@@ -1,4 +1,4 @@
-from k_thinning.strategy_base import StrategyBase
+from k_thinning.strategies.strategy_base import StrategyBase
 
 
 class AlwaysAcceptStrategy(StrategyBase):

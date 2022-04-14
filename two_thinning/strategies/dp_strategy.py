@@ -6,7 +6,7 @@ from two_thinning.full_knowledge.RL.DQN.constants import *
 class DPStrategy(StrategyBase):
     def __init__(self, n, m, reward_fun=REWARD_FUN):
         super(DPStrategy, self).__init__(n, m)
-        self.strategy = find_best_strategy(n=n, m=m, reward=reward_fun)
+        self.strategy = find_best_strategy(n=n, m=m, reward=reward_fun, use_threshold_dp=True, print_behaviour=False)
 
     def decide(self, bin):
         sorted_loads = tuple(sorted(self.loads))

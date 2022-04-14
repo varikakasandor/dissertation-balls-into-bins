@@ -1,6 +1,6 @@
 import torch
 
-from k_thinning.strategy_base import StrategyBase
+from k_thinning.strategies.strategy_base import StrategyBase
 from k_thinning.full_knowledge.RL.DQN.evaluate import load_best_model, get_best_model_path
 from k_thinning.full_knowledge.RL.DQN.train import train, greedy
 
@@ -22,18 +22,15 @@ class FullKnowledgeDQNStrategy(StrategyBase):
         else:
             self.model = existing_model
 
-        self.choices_left = k
-
     def decide(self, bin):
         a = greedy(self.model, self.loads, self.choices_left)
         if self.loads[bin] <= a:
             return True
         else:
-            self.choices_left -= 1
             return False
 
     def note(self, bin):
-        self.choices_left = self.k
+        pass
 
     def reset(self):
         pass

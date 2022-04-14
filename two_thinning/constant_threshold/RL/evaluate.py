@@ -17,7 +17,7 @@ def evaluate_q_value(best_threshold, n=n, m=m, reward=reward, runs=runs):
 
 
 def evaluate(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_q_value, reward=reward, runs=runs):
-    best_threshold = train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_q_value, reward=reward)
+    best_threshold = train(n=n, m=m, episodes=episodes, epsilon=epsilon, initial_q_value=initial_q_value, reward_fun=reward)
     avg_load = evaluate_q_value(best_threshold, n=n, m=m, reward=reward, runs=runs)
     print(f"With {m} balls and {n} bins the best constant threshold is {best_threshold}. It produces an average maximum load of {avg_load}.")
 

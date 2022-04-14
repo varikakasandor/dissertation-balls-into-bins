@@ -3,7 +3,7 @@ from os import mkdir
 import numpy as np
 
 from two_thinning.full_knowledge.RL.DQN.constants import *
-from two_thinning.strategies.always_accept import AlwaysAcceptStrategy
+from two_thinning.strategies.always_accept_strategy import AlwaysAcceptStrategy
 from two_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
 from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from two_thinning.strategies.dp_strategy import DPStrategy
@@ -55,8 +55,9 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
     avg_score = sum(scores) / runs
     save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, "summary")
     strategy.create_summary_(save_path)
-    print(f"The average score of this strategy is {avg_score}")
-    print(f"The average normalised max load of this strategy is {-avg_score - m / n}.")
+    if print_behaviour:
+        print(f"The average score of this strategy is {avg_score}")
+        print(f"The average normalised max load of this strategy is {-avg_score - m / n}.")
     return scores
 
 

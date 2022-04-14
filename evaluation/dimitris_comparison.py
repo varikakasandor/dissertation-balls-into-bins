@@ -22,7 +22,7 @@ def create_comparison(save_name, ns=[10, 20, 50, 100], ms=[10, 20, 50, 100], run
     for limit in range(0, 4):
         two_thinning_fixed_vals = {
             str(n): run_strategy_multiple_times_2(n=n, m=m, runs=runs,
-                                                  strategy=TheThresholdStrategy(n=n, m=m, limit=limit),
+                                                  strategy=TheThresholdStrategy(n=n, m=m, threshold=limit),
                                                   print_behaviour=False) for n, m in zip(ns, ms)}
         df = df.append({**{"strategy": f"two_thinning_fixed_limit_{limit}"}, **two_thinning_fixed_vals},
                        ignore_index=True)

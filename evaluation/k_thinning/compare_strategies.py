@@ -58,7 +58,7 @@ def compare_strategies(nms=NMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
                                                             potential_fun=MAX_LOAD_POTENTIAL)
                 elif strategy_name == "threshold":
                     hyperparameters = get_threshold_hyperparameters(n=n, m=m)
-                    strategy = TheThresholdStrategy(n=n, m=m, reward_fun=reward_fun, **hyperparameters)
+                    strategy = TheThresholdStrategy(n=n, m=m, **hyperparameters)
                 elif strategy_name == "dp":
                     if n > 50 or m > 70:  # these are out of the feasible range
                         continue

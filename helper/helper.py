@@ -2,8 +2,8 @@ import functools
 
 import numpy as np
 
-N = 20
-M = 60
+N = 50
+M = 50
 
 
 @functools.lru_cache()
