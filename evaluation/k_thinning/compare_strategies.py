@@ -2,22 +2,22 @@ from os.path import exists, dirname, join, abspath
 from datetime import datetime
 import pandas as pd
 
-from two_thinning.environment import run_strategy_multiple_times
+from k_thinning.environment import run_strategy_multiple_times
 
-from two_thinning.strategies.always_accept_strategy import AlwaysAcceptStrategy
-from two_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
-from two_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
-from two_thinning.strategies.dp_strategy import DPStrategy
-from two_thinning.strategies.random_strategy import RandomStrategy
-from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
-from two_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
+from k_thinning.strategies.always_accept_strategy import AlwaysAcceptStrategy
+from k_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
+from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
+from k_thinning.strategies.dp_strategy import DPStrategy
+from k_thinning.strategies.random_strategy import RandomStrategy
+from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
+from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
 
 from two_thinning.full_knowledge.RL.DQN.constants import MAX_LOAD_POTENTIAL
 
 from evaluation.two_thinning.hyperparameters import get_dqn_hyperparameters, get_threshold_hyperparameters
 
 NMS = ((5, 5), (5, 10), (5, 25), (20, 20), (20, 60), (20, 400), (50, 50), (50, 200), (50, 2500))
-STRATEGIES = ("mean_thinning", ) #("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
+STRATEGIES = ("mean_thinning", ) #("always_accept", "random", "local_reward_optimiser", "mean_thinning", "old_dp", "threshold", "dqn")
 RUNS = 100
 RE_TRAIN_DQN = 5
 PRINT_BEHAVIOUR = False
@@ -59,7 +59,7 @@ def compare_strategies(nms=NMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
                 elif strategy_name == "threshold":
                     hyperparameters = get_threshold_hyperparameters(n=n, m=m)
                     strategy = TheThresholdStrategy(n=n, m=m, **hyperparameters)
-                elif strategy_name == "dp":
+                elif strategy_name == "old_dp":
                     if n > 50 or m > 70:  # these are out of the feasible range
                         continue
                     strategy = DPStrategy(n=n, m=m, reward_fun=reward_fun)
