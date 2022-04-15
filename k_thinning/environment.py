@@ -7,8 +7,8 @@ from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 from k_thinning.strategies.dp_strategy import DPStrategy
 
-N = 10
-M = 30
+N = 20
+M = 60
 K = 3
 STRATEGY = AlwaysAcceptStrategy(N, M, K)
 RUNS = 5
@@ -64,5 +64,5 @@ def run_strategy_multiple_times(n=N, m=M, k=K, runs=RUNS, strategy=STRATEGY, rew
 
 if __name__ == "__main__":
     run_strategy_multiple_times(
-        strategy=DPStrategy(n=N, m=M, k=K))  # I don't understand why it shows yellow,
+        strategy=RandomStrategy(n=N, m=M, k=K))  # I don't understand why it shows yellow,
     # whereas it runs fine

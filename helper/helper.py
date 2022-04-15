@@ -2,9 +2,9 @@ import functools
 
 import numpy as np
 
-N = 50
+N = 20
 M = 50
-
+K = 3
 
 @functools.lru_cache()
 def number_of_increasing_partitions(m=M, n=N):
@@ -39,6 +39,6 @@ if __name__ == "__main__":
     for i in range(M + 1):
         curr = number_of_increasing_partitions(m=i, n=N)
         num_states += curr
-    num_steps = num_states * N
+    num_steps = num_states * N * K
     num_seconds = num_steps / (10 ** 8)
     print(num_states, num_steps, num_seconds)

@@ -7,7 +7,7 @@ from helper.helper import number_of_increasing_partitions
 N = 10
 M = 20
 K = 4
-DICT_LIMIT = 6000000  # M * N * K * number_of_increasing_partitions(N, M)
+DICT_LIMIT = 10000000  # M * N * K * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
 def REWARD_FUN(loads):
@@ -100,7 +100,7 @@ def threshold_dp(loads_tuple, choices_left, strategy, n=N, m=M, k=K, reward_fun=
 def find_best_strategy(n=N, m=M, k=K, reward_fun=REWARD_FUN, use_threshold_dp=True, print_behaviour=PRINT_BEHAVIOUR):
     strategy = {}
     best_expected_score = threshold_dp(tuple([0] * n), k, strategy, n=n, m=m, k=k, reward_fun=reward_fun) if use_threshold_dp \
-        else old_dp(tuple([0] * n), 0, strategy, n=n, m=m, k=k, rejects_left=k - 1, reward_fun=reward_fun)
+        else old_dp(tuple([0] * n), 0, n=n, m=m, k=k, rejects_left=k - 1, reward_fun=reward_fun)
     if print_behaviour:
         print(
             f"With {n} bins and {m} balls the best achievable expected maximum score with two-thinning is {best_expected_score}")

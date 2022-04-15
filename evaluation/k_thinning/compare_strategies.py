@@ -13,11 +13,10 @@ from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
 from k_thinning.strategies.random_strategy import RandomStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
-NMKS = (
-(5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 60, 3), (20, 60, 5), (20, 60, 10), (50, 50, 3), (50, 50, 5), (50, 50, 10))
+NMKS = ((5, 25, 2), (5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 2), (20, 50, 3), (20, 50, 5), (20, 50, 10))
 STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold")  # , "dqn")
-RUNS = 5
-RE_TRAIN_DQN = 1
+RUNS = 100
+RE_TRAIN_DQN = 5
 PRINT_BEHAVIOUR = False
 
 
