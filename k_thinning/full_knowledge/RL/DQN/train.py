@@ -1,10 +1,15 @@
 import copy
 import random
+import time
 from math import exp
+from os import mkdir
 
 import torch.optim as optim
+import wandb
+from matplotlib import pyplot as plt
 
 from helper.replay_memory import ReplayMemory, Transition
+from k_choice.simulation import sample_one_choice
 from k_thinning.full_knowledge.RL.DQN.constants import *
 
 
@@ -29,7 +34,7 @@ def greedy(policy_net, loads, choices_left):
 
 
 def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                      print_behaviour=PRINT_BEHAVIOUR):  # TODO: do fast version as for two_choice
+                      max_threshold=MAX_THRESHOLD, use_normalised=USE_NORMALISED, print_behaviour=PRINT_BEHAVIOUR):  # TODO: do fast version as for two_choice
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
@@ -39,6 +44,7 @@ def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RU
                 to_increase = None
                 while choices_left > 1:
                     a = greedy(model, loads, choices_left)
+                    a = i / n + a - max_threshold if use_normalised else a
                     if print_behaviour:
                         print(f"With loads {loads}, having {choices_left} choices left, the trained model chose {a}")
                     to_increase = random.randrange(n)
@@ -56,7 +62,7 @@ def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RU
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criterion, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -77,7 +83,6 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     # next_state_values[non_final_mask] = policy(non_final_next_states)[argmax].detach() # TODO: double Q learning
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
 
-    criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
     loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
 
     # Optimize the model
@@ -89,25 +94,51 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
 
 
 def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES, reward_fun=REWARD_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, report_wandb=False, lr=LR, pacing_fun=PACING_FUN,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN,
-          max_threshold=MAX_THRESHOLD, print_behaviour=PRINT_BEHAVIOUR, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
-    policy_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
-    target_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
-    best_net = nn_model(n=n, max_threshold=max_threshold, k=k, max_possible_load=m, device=device)
+          pre_train_episodes=PRE_TRAIN_EPISODES, use_normalised=USE_NORMALISED,
+          nn_hidden_size=NN_HIDDEN_SIZE, nn_rnn_num_layers=NN_RNN_NUM_LAYERS, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, potential_fun=POTENTIAL_FUN, loss_function=LOSS_FUCNTION,
+          max_threshold=MAX_THRESHOLD, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE, save_path=SAVE_PATH,
+          print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, optimizer_method=OPTIMIZER_METHOD, device=DEVICE):
+    start_time = time.time()
+    mkdir(save_path)
+
+    max_possible_load = m
+    max_threshold = max_threshold - m // n if use_normalised else max_threshold # !!!
+    nn_max_threshold = 2 * max_threshold if use_normalised else max_threshold
+
+    policy_net = nn_model(n=n, max_threshold=nn_max_threshold, k=k, max_possible_load=max_possible_load,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
+                          num_lin_layers=nn_num_lin_layers,
+                          device=device)
+    target_net = nn_model(n=n, max_threshold=nn_max_threshold, k=k, max_possible_load=max_possible_load,
+                          hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers,
+                          num_lin_layers=nn_num_lin_layers,
+                          device=device)
+    best_net = nn_model(n=n, max_threshold=nn_max_threshold, k=k, max_possible_load=max_possible_load,
+                        hidden_size=nn_hidden_size, rnn_num_layers=nn_rnn_num_layers, num_lin_layers=nn_num_lin_layers,
+                        device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters())
+    optimizer = optimizer_method(policy_net.parameters(), lr=lr)
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
     best_eval_score = None
     not_improved = 0
+    threshold_jumps = []
+    eval_scores = []
 
-    for ep in range(num_episodes):
-        loads = [0] * n
+    start_loads = []
+    for start_size in reversed(range(m)):  # pretraining (i.e. curriculum learning)
+        for _ in range(pacing_fun(start_size=start_size, n=n, m=m, all_episodes=pre_train_episodes)):
+            start_loads.append(sample_one_choice(n=n, m=start_size))
+    for _ in range(num_episodes):  # training
+        start_loads.append([0] * n)
+
+    for ep, loads in enumerate(start_loads):
         for i in range(m):
             to_place = None
             threshold = None
@@ -135,7 +166,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 to_place = random.randrange(n)
                 choices_left += 1
 
-            curr_state = loads + [choices_left] # in a format that can directly go into the neural network
+            curr_state = loads + [choices_left]  # in a format that can directly go into the neural network
             loads[to_place] += 1
             next_state = (loads + [k])
 
@@ -148,13 +179,17 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size, device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
+                               batch_size=batch_size, criterion=loss_function, device=device)
 
-        curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, k=k, reward=reward_fun, eval_runs=eval_runs,
-                                            print_behaviour=print_behaviour)
+        curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun,
+                                            eval_runs=eval_runs, use_normalised=use_normalised)
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, k=k, reward=reward_fun, eval_runs=5 * eval_runs,
-                                                print_behaviour=print_behaviour)  # only update the best if it is really better, so run more tests
+            curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun,
+                                                eval_runs=5 * eval_runs, use_normalised=use_normalised)
+        if report_wandb:
+            wandb.log({"score": curr_eval_score})
+
+        eval_scores.append(curr_eval_score)
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
@@ -181,6 +216,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
+    print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 
 

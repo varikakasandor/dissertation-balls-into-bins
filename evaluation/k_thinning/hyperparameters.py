@@ -6,7 +6,7 @@ from k_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
 
-def get_dqn_hyperparameters(n, m):
+def get_dqn_hyperparameters(n, m, k):
     def MAX_LOAD_POTENTIAL(loads):
         return -max(loads)
 
@@ -45,7 +45,7 @@ def get_dqn_hyperparameters(n, m):
     return d
 
 
-def get_threshold_hyperparameters(n, m):
+def get_threshold_hyperparameters(n, m, k):
     d = {
         "episodes": 10000,
         "epsilon": 0.1,

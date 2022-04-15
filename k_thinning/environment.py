@@ -11,12 +11,15 @@ N = 10
 M = 30
 K = 3
 STRATEGY = AlwaysAcceptStrategy(N, M, K)
-REWARD = max
 RUNS = 5
 PRINT_BEHAVIOUR = True
 
 
-def run_strategy(n=N, m=M, k=K, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def REWARD_FUN(loads):
+    return -max(loads)
+
+
+def run_strategy(n=N, m=M, k=K, strategy=STRATEGY, reward=REWARD_FUN, print_behaviour=PRINT_BEHAVIOUR):
     loads = [0] * n
     for i in range(m):
         choices_left = k
@@ -45,18 +48,18 @@ def run_strategy(n=N, m=M, k=K, strategy=STRATEGY, reward=REWARD, print_behaviou
     return score
 
 
-def run_strategy_multiple_times(n=N, m=M, k=K, runs=RUNS, strategy=STRATEGY, reward=REWARD,
+def run_strategy_multiple_times(n=N, m=M, k=K, runs=RUNS, strategy=STRATEGY, reward=REWARD_FUN,
                                 print_behaviour=PRINT_BEHAVIOUR):
     scores = []
-    for _ in range(runs):
+    for i in range(runs):
         score = run_strategy(n=n, m=m, k=k, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
     if print_behaviour:
-        print(f"The average max load of this strategy is {avg_score}.")
-        print(f"The average normalised max load of this strategy is {avg_score - m / n}.")
-    return avg_score
+        print(f"The average score of this strategy is {avg_score}")
+        print(f"The average normalised max load of this strategy is {-avg_score - m / n}.")
+    return scores
 
 
 if __name__ == "__main__":

@@ -4,7 +4,6 @@ from two_thinning.strategies.strategy_base import StrategyBase
 from two_thinning.full_knowledge.RL.DQN.evaluate import load_best_model, get_best_model_path # Works for normalised too, no difference
 from two_thinning.full_knowledge.RL.DQN.train import greedy, train
 from two_thinning.full_knowledge.RL.DQN.constants import *
-
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 
 
