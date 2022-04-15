@@ -4,10 +4,10 @@ from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 class CompleteGraph(GraphBase):
     def __init__(self, n):
         self._n = n
-        self._e = n * (n + 1) // 2
+        self._e = n * n
         self._d = n
         self._adjacency_list = [list(range(n)) for _ in range(n)]
-        self._edge_list = [(i, j) for i in range(n) for j in range(i, n)]
+        self._edge_list = [(i, j) for i in range(n) for j in range(n)]
 
     @property
     def n(self):

@@ -23,6 +23,7 @@ def rindex(l, elem):
 
 def old_dp(loads_tuple, chosen_load, strategy, n=N, m=M, reward=REWARD, dict_limit=DICT_LIMIT):
     if (loads_tuple, chosen_load) in strategy:
+        print("BOOOOOO", loads_tuple, chosen_load)
         val, _ = strategy[(loads_tuple, chosen_load)]
         return val
 
@@ -30,25 +31,28 @@ def old_dp(loads_tuple, chosen_load, strategy, n=N, m=M, reward=REWARD, dict_lim
     if sum(loads) == m:
         return reward(loads)
 
-    last_occurence = rindex(loads, chosen_load)
+
+    print(loads_tuple, chosen_load)
+
+    last_occurrence = rindex(loads, chosen_load)
 
     accept = 0
-    loads[last_occurence] += 1
+    loads[last_occurrence] += 1
     loads_cnt = dict(Counter(loads))
     for val, cnt in loads_cnt.items():
         accept += cnt * old_dp(tuple(loads), val, strategy, n=n, m=m, reward=reward)
-    loads[last_occurence] -= 1
+    loads[last_occurrence] -= 1
     accept /= n
 
     reject = 0
     loads_cnt1 = dict(Counter(loads))
     for val1, cnt1 in loads_cnt1.items():
-        last_occurence = rindex(loads, val1)
-        loads[last_occurence] += 1
+        last_occurrence = rindex(loads, val1)
+        loads[last_occurrence] += 1
         loads_cnt2 = dict(Counter(loads))
         for val2, cnt2 in loads_cnt2.items():
             reject += cnt1 * cnt2 * old_dp(tuple(loads), val2, strategy, n=n, m=m, reward=reward)
-        loads[last_occurence] -= 1
+        loads[last_occurrence] -= 1
     reject /= (n * n)
 
     val = max(accept, reject)
