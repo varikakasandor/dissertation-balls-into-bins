@@ -33,14 +33,15 @@ def CORRECTED_MAX_LOAD_REWARD(loads, error_ratio=1.5):
     return 1 if max(loads) < error_ratio * sum(loads) / len(loads) else 0
 
 
-def EVEN_PACING_FUN(start_size, n=N, m=M,
-                    all_episodes=1000):  # returns number of episodes to run for the given start size. Note that the exact
-    # definition of "pacing function" is different
-    # I assume we want linearly increasing pacing function, so we need to solve for x and that we start from n:
-    # n + (n+x) + (n+2x) + ... + (n+(m-1)x) = all_episodes, that is
-    # n*m + x*m*(m-1)/2 = all_episodes, giving (changing x to delta, adding max)
-    delta = max((all_episodes - n * m) * 2 // (m * (m - 1)), 0)
-    return n + ((m - 1) - start_size) * delta
+def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
+    # 1 + (1+x) + (1+2x) + ... + (1+(m-1)x) = all_episodes, that is
+    # m + x*m*(m-1)/2 = all_episodes, giving (changing x to delta, adding max)
+    delta = max((all_episodes-m) * 2 // (m * (m - 1)), 0)
+    if delta == 0:
+        return 1 if start_size % (m // all_episodes) == 0 else 0  # make sure to have at most all_episodes overall
+    return 1 + start_size * delta  # later choices are more important!
+
+
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

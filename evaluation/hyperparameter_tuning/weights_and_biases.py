@@ -8,14 +8,14 @@ from two_thinning.full_knowledge.RL.DQN.evaluate import evaluate
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from two_thinning.full_knowledge.RL.DQN.train import train as two_thinning_train
 
-N = 5
-M = 35
+N = 20
+M = 400
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
-
+PACING_FUN = EVEN_PACING_FUN
 
 def REWARD_FUN(loads, error_ratio=1.5):
     return -max(loads)
@@ -51,7 +51,7 @@ def tuning_function(config=None):
                                            pre_train_episodes=config["pre_train_episodes"],
                                            loss_function=loss_mapping[config["loss_function"]], lr=config["lr"],
                                            reward_fun=REWARD_FUN, batch_size=config["batch_size"],
-                                           eps_start=config["eps_start"],
+                                           eps_start=config["eps_start"], pacing_fun=PACING_FUN,
                                            eps_end=config["eps_end"], nn_hidden_size=config["hidden_size"],
                                            nn_rnn_num_layers=config["rnn_num_layers"],
                                            nn_num_lin_layers=config["num_lin_layers"],
@@ -82,13 +82,13 @@ if __name__ == "__main__":
     sweep_config['metric'] = metric
     parameters_dict = {
         "train_episodes": {
-            "values": [100]
+            "values": [200]
         },
         "patience": {
-            "values": [100]
+            "values": [300]
         },
         "eval_runs_eval": {
-            "values": [100]
+            "values": [30]  # TODO: set larger
         },
         "eval_parallel_batch_size": {
             "values": [32]
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         },
         "eps_decay": {
             'distribution': 'uniform',
-            'min': 100,
+            'min': 2000, # 100
             'max': 5000
         },
         "target_update_freq": {
@@ -126,57 +126,57 @@ if __name__ == "__main__":
         "memory_capacity": {
             'distribution': 'int_uniform',
             'min': 300,
-            'max': 1000
+            'max': 600 # 1000
         },
         "eval_runs_train": {
             'distribution': 'int_uniform',
-            'min': 3,
-            'max': 10  # TODO: increase?
+            'min': 2,
+            'max': 6  # TODO: increase?
         },
         "optimise_freq": {
             'distribution': 'int_uniform',
             'min': 1,
-            'max': 50
+            'max': 30 # 50
         },
         "max_threshold": {  # TODO: always set independently for new N,M
             'distribution': 'int_uniform',
-            'min': 6,
-            'max': 9
+            'min': 21,
+            'max': 25
         },
         "loss_function": {
-            "values": ["SmoothL1Loss", "MSELoss", "HuberLoss", "L1Loss"]
+            "values": ["MSELoss", "HuberLoss", "L1Loss"] #, "SmoothL1Loss"]
         },
         "optimizer_method": {
-            "values": ["Adam", "Adagrad", "SGD", "RMSprop"]
+            "values": ["Adam", "Adagrad"] #, "SGD", "RMSprop"]
         },
         "lr": {
             "distribution": "log_uniform",
-            "min": -8,
+            "min": -6,
             "max": -4
         },
         "hidden_size": {
             'distribution': 'int_uniform',
-            'min': 16,
+            'min': 64, # 16
             'max': 256
         },
         "rnn_num_layers": {
             'distribution': 'int_uniform',
-            'min': 1,
-            'max': 2
+            'min': 2, # 1
+            'max': 3
         },
         "num_lin_layers": {
             'distribution': 'int_uniform',
             'min': 1,
-            'max': 2
+            'max': 3
         },
         "potential_fun": {
             "values": ["max_load", "std", "exponential"]
         },
         "use_normalised": {
-            "values": [True, False]
+            "values": [True]
         }
     }
 
     sweep_config['parameters'] = parameters_dict
-    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}")
+    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}_final")
     wandb.agent(sweep_id, tuning_function, count=500)

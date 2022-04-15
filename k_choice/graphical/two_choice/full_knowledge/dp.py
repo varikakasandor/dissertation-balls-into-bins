@@ -2,12 +2,13 @@ import time
 
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
+from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
 from helper.helper import number_of_increasing_partitions
 
-N = 5
-M = 25
-GRAPH = Cycle(N)
+N = 10
+M = 10
+GRAPH = CompleteGraph(N)
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
 
 
