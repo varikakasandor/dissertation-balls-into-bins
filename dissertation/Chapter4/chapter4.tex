@@ -18,6 +18,9 @@
 
 \section{Two-Thinning}
 
+
+\NOTE{A}{5-5, 5-10, 5-25, 20-20, 20-60, 20-400, 50-50, 50-200, 50-2500}
+\NOTE{A}{How to reason about why I use X runs for evaluation? Is there any formal reasoning related to statistical significance? I couldn't find any.}
 \NOTE{A}{Should the ``evaluation'' of how the score progresses during training be presented in the Implementation or the Evaluation chapter?}
 
 
@@ -45,6 +48,17 @@
 
 \section{Graphical Two-Choice}
 
+
+\begin{lemma} \label{lemma: greedy-suboptimal}
+There exist a graph, such that the Greedy strategy is suboptimal with respect to the expected final maximum load of \textsc{Graphical Two Choice}.
+\end{lemma}
+
+\begin{proof}
+It is enough to show that there is a state $s$ (i.e. a load vector $v$, edge $e$) where is is better to choose the bin with the larger load. This suffices because there is a non-zero probability of reaching $s$, and hence a strategy which agree with Greedy everywhere else except for this state has a strictly better expected score.
+
+
+I used the dynamic programming algorithm to find the optimal strategy for \textsc{Graphical Two Choice}, and then I searched the strategy for a state where it disagrees with Greedy. I found a very small counterexample for the Cycle graph with $n=4$ bins $m=6$ balls. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $l=(2,0,1,0)$, $e=(2,3)$, i.e. there is an edge between the second and third bin. The reason why it is better to choose bin $3$ even though it has larger load than bin $2$ is that after that, from load vector $(2,0,2,0)$ with $2$ balls remaining we can definitely avoid having a maximum load $3$ by always placing the ball in an even-indexed bin. On the other hand, from load vector $(2,1,1,0)$, if both of the remaining edges are $(1,2)$, then there will be a maximum load of at least $3$ using whatever strategy. Therefore, the expected final maximum load of choosing bin $3$ is $2.0$, while that of bin $2$ is between $2.0$ and $3.0$.
+\end{proof}
 
 \subsection{Training}
 

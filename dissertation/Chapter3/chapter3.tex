@@ -7,14 +7,14 @@
     \graphicspath{{Chapter3/Figs/Vector/}{Chapter3/Figs/}}
 \fi
 
-
+\NOTE{D}{General note: This book https://d2l.ai/index.html has good references for the original papers.}
 \section{Two-Thinning}
 
 
 \subsection{Deep Q-Learning Implementation}
 
 
-Unlike for many supervised learning problems, there is no library for RL that provides one-liner solutions to my settings. While there are some libraries for RL (e.g. Stable Baselines, Pyqlearning), they are usually very hard to customize, and for example the format of the state space is very unique RL problems. Also, implementing the basic RL logic is not too long, so I made the decision to implement the RL logic myself, and use Pytorch for the NNs.
+Unlike for many supervised learning problems, there is no library for RL that provides one-liner\NOTE{T}{a bit of an extreme?} solutions to my settings. While there are some libraries for RL (e.g. Stable Baselines, Pyqlearning), they are usually very hard to customize, and for example the format of the state space is very unique RL problems\NOTE{D}{This sentence does not read well}. Also, implementing the basic RL logic is not too long, so I made the decision to implement the RL logic myself, and use Pytorch for the NNs.\NOTE{D}{How about this sentence instead of the entire paragraph? As there is no prior work on RL for thinning, I implemented the RL algorithms from scratch using PyTorch for the NNs.}
 
 
 \NOTE{A}{At this point I expect the reader to understand Deep Q-Learning in enough detail, so that I just have to note some implementation details.}
@@ -23,7 +23,7 @@ Unlike for many supervised learning problems, there is no library for RL that pr
 \subsubsection{Deep Q-Network (DQN)} \label{DQN}
 
 
-The NN used in Deep Q-Learning is often referred to as Deep Q-Network (DQN). 
+The NN used in Deep Q-Learning is often referred to as Deep Q-Network (DQN). \NOTE{D}{This sentence needs to be merged with either the introductory paragraph or the paragraph below.}
 
 
 There are two ways to formulate the \textsc{Two-Thinning} setting as a MDP. One is to treat (load vector, primary bin) pairs as states, and accept/reject as actions. The other is to treat load vectors as states, and thresholds for accepting/rejecting as actions. The latter implicitly makes use of a very important (also intuitive) property of an optimal policy:
@@ -32,48 +32,53 @@ There are two ways to formulate the \textsc{Two-Thinning} setting as a MDP. One 
 \begin{lemma} \label{lemma: thresholdproperty}
 At a load vector $v$, the optimal policy doesn't reject a primary bin with load $x$, if it would accept a primary bin with load $y>x$. That is, the optimal strategy is always a threshold strategy, that rejects above a load value $z$ and accepts otherwise.
 \end{lemma}
+\NOTE{D}{Consider an arbitrary load vector $x^t$ at time step $t$. Then there exists a decision function $f$ achieving the optimal expected gap at $m$, such that for any $i, j$ with $x_j < x_i$, we have $f(x^t, i) = 1 \Rightarrow f(x^t, j) = 1$.}\NOTE{T}{Yes, the formulation of the lemma is not good. The writing should be more formal, and it should be more formal.}
 
+\NOTE{D}{Have you checked if there is a load vector, where it is better to use with probability $p_A$ threshold $f_a$ and with probability $1 - p_A$ threshold $f_b$?}
 
 \NOTE{A}{Add proof, or say something about it.}
 
-Since this lemma holds, I chose the second formulation, which using this lemma, restricts the space in which the algorithm has to search for the optimal policy. We will see later that this lemma is useful in optimising the dynamic programming approach as well.
+Since this lemma holds, I chose the second formulation, which using this lemma, restricts the space in which the algorithm has to search for the optimal policy.\NOTE{D}{Using this lemma, we can limit the space of policies explored by the RL and the DP algorithms?} We will see later that this lemma is useful in optimising the dynamic programming approach as well.
 
 
-Therefore the input to the DQN is a load vector $v$, and the output is an estimate of $Q(v, a)$ for each possible thresholds. There is no point in using non-integer thresholds, since the load of the primary bin is always a non-negative integer. Also, there is no benefit in using a threshold larger than the current maximum load, as setting the threshold to that instead achieves the same (accepting everything). Similarly, as a consequence of Lemma \ref{lemma: thresholdproperty} \NOTE{A}{Is it a corollary strictly speaking?}, the best possible load primary bin load is $0$, therefore it never makes sense to reject it (or in general reject a bin with minimum load). So theoretically, the possible thresholds should be from $0$ to $m$, that is, the output of the DQN should have size $m+1$. Even though it is possible that a load of $m$ is reached during execution, it has a very small probability (more details in Chapter \ref{evaluation}), so I decided to restrict the maximum threshold available for the algorithm. The optimal maximum threshold should depend on $n$ and $m$, and together with other hyperparameters, I provide their final values and their importance in later sections. 
+Therefore the input to the DQN is a load vector $v$, and the output is an estimate of $Q(v, a)$ for each possible thresholds\NOTE{D}{threshold $a$?}. There is no point\NOTE{D}{Informal} in using non-integer thresholds, since the load of the primary bin is always a non-negative integer. Also, there is no benefit in using a threshold larger than the current maximum load, as setting the threshold to that instead achieves the same (accepting everything).\NOTE{D}{Maybe state these as observations.} Similarly, as a consequence of Lemma \ref{lemma: thresholdproperty}\NOTE{D}{Use \cref{lemma: thresholdproperty}. Also spaces are a bit confusing} \NOTE{A}{Is it a corollary strictly speaking?}, the best possible load primary bin load is $0$, therefore it never makes sense to reject it (or in general reject a bin with minimum load). So theoretically, the possible thresholds should be from $0$ to $m$, that is, the output of the DQN should have size $m+1$. Even though it is possible that a load of $m$ is reached during execution, it has a very small probability (more details in Chapter \ref{evaluation}), so I decided to restrict the maximum threshold available for the algorithm.\NOTE{D}{How about? However, because of properties of \textsc{One-Choice}, we can restrict the maximum load to $\max(4m/n, \log n/\log \log n$ with high probability (and you could confirm with a simple experiment: throw $2m$ balls into $n$ bins and find the max load.} The optimal maximum threshold should depend on $n$ and $m$,\NOTE{D}{Maybe use a separate sentence because this does not split nicely.} and together with other hyperparameters, I provide their final values and their importance in later sections. 
 
 
-Now that the output of the DQN is fixed, the other question is how to represent the input to the DQN, which is a load vector $v$. First of all, I always sort the load vector before feeding it into the network. This is possible because the order of the bins doesn't matter in \textsc{Two-Thinning}, unlike in \textsc{Graphical Two-Choice}. This sorting makes the function that the network has to learn easier (it doesn't have to learn permutation invariance), and it will be important when using RNN as the architecture. Then, I one-hot encode each load value independently. The motivation for this is that NNs often can't learn well with ordinal data - they would think that the load values are on a continuous scale, but in fact, the real difference between e.g. load $0$ and $1$ is much smaller than the real difference between load e.g. $m-1$ and $m$. \NOTE{A}{https://stats.stackexchange.com/questions/423820/do-ordinal-variables-require-one-hot-encoding}. The natural range of one-hot encoding for the load values is from $0$ to $m$, but to condense the input to the network (and hence reduces the number of weights to train) I tried collapsing the very high load values with very small probability, into one ``outlier'' class. This didn't provide better results, so I do not discuss it any further.
+Now that the output of the DQN is fixed, the other question is how to represent the input to the DQN, which is a load vector $v$.\NOTE{D}{Shorter: Now, I will explain the input representation.} First of all, I always sort the load vector before feeding it into the network. This is possible because the order of the bins doesn't matter in \textsc{Two-Thinning}, unlike in \textsc{Graphical Two-Choice}\NOTE{D}{Maybe refer to lemma?}. This sorting makes the function that the network has to learn easier (it doesn't have to learn permutation invariance)\NOTE{D}{Sorting improves learning as the NN does not need to learn permutation invariance }\NOTE{D}{You could also cite: (a) https://arxiv.org/pdf/1602.07576.pdf or (b) https://proceedings.neurips.cc/paper/2017/file/f22e4747da1aa27e363d86d40ff442fe-Paper.pdf or (c) https://arxiv.org/pdf/2109.02869.pdf}, and it will be important when using RNN as the architecture. Then, I one-hot encode each load value independently. The motivation for this is that NNs often can't learn well with ordinal data - they would think that the load values are on a continuous scale, but in fact, the real difference between e.g. load $0$ and $1$ is much smaller than the real difference between load e.g. $m-1$ and $m$. \NOTE{A}{https://stats.stackexchange.com/questions/423820/do-ordinal-variables-require-one-hot-encoding}. The natural range of one-hot encoding for the load values is from $0$ to $m$, but to condense the input to the network (and hence reduces the number of weights to train) I tried collapsing the very high load values with very small probability, into one ``outlier'' class. This didn't provide better results, so I do not discuss it any further.\NOTE{D}{Would be good to support this with a figure}\NOTE{T}{Yes, I was also thinking about this!}
 
 
-Now that the input and output format is laid down, I turn to the discussion of the architecture of the DQN. From the load values in a load vector, the highest ones are much more important, since we care about minimising the maximum load. On the extreme, if the bin with the maximum load had one more ball in it, that would be more significant than if an average bin had one more ball in it. Hence, my idea was to process the load vector in increasing order of the loads, that is, in increasing order of importance. For this, using an RNN is a perfect choice. It is used for processing sequential input, and what is more, by the end it forgets the earlier inputs to some extent, and therefore focuses more on the final (in our case most important) inputs, as desired. As mentioned in Chapter \ref{preparation}, there are more complex versions of RNNs, whose main advantage is that they forget less. However, as this forgetting property is desirable in our case, this advantage is not really an advantage. On the other hand, they are less susceptible to the vanishing/exploding gradient problems \cite{noh2021rnnvanishinggradient}, so they are sometimes easier to train, therefore I tried GRU and LSTM as well, but they didn't provide additional benefits, so I will stick to the vanilla RNN. After the last input, we can extract the hidden state of the RNN, whose exact size I will discuss in the hyperparameters section. To get the output, the estimated $q(v,a)$ values for each possible threshold $a$, I apply some (as for other hyperparameters, I discuss the exact values later) fully convolutional (linear) layers on the final hidden state of the RNN. These linear layers not only bring the output to the correct shape, they also transform from the internal representation of the RNN to the space of the action-values. \NOTE{A}{Explain some more?}\NOTE{A}{Add a figure about the DQN architecture.}. As for the activation functions, I use a ReLU activation between the fully convolutional layers, and the tanh activation inside the RNN, following common practice \cite{szandala2020activationfunctions}.
+Now that the input and output format is laid down, I turn to the discussion of the architecture of the DQN. From the load values in a load vector, the highest ones\NOTE{T}{What is a ``high'' load vector? Load vector which a high maximum load compared to the average load?} are much more important, since we care about minimising the maximum load.\NOTE{D}{Would be nice if you could support this in the evaluation.} On the extreme, if the bin with the maximum load had one more ball in it, that would be more significant than if an average bin had one more ball in it. Hence, my idea was to process the load vector in increasing order of the loads, that is, in increasing order of importance. For this, using an RNN is a perfect choice. It is used for processing sequential input, and what is more, by the end it forgets the earlier inputs to some extent, and therefore focuses more on the final (in our case most important) inputs, as desired. As mentioned in Chapter \ref{preparation}, there are more complex versions of RNNs, whose main advantage is that they forget less. However, as this forgetting property is desirable in our case, this advantage is not really an advantage. On the other hand, they are less susceptible to the vanishing/exploding gradient problems \cite{noh2021rnnvanishinggradient}\NOTE{D}{This is not a standard reference. A bit better to use (a)  ``Learn-
+ing long-term dependencies with gradient descent is
+difficult'' or (b) http://proceedings.mlr.press/v28/pascanu13.pdf}, so they are sometimes easier to train, therefore I tried GRU\NOTE{D}{Cite the paper: Cho, K., Van Merriënboer, B., Bahdanau, D., \& Bengio, Y. (2014). On the properties of neural machine translation: encoder-decoder approaches} and LSTM\NOTE{D}{Cite the paper: ``Hochreiter, S., \& Schmidhuber, J. (1997). Long short-term memory. Neural computation, 9(8), 1735–1780.''} as well, but they didn't provide additional benefits, so I will stick\NOTE{D}{informal} to the vanilla RNN\NOTE{D}{Would be good to refer to a figure in the evaluation section}. After the last input, we can extract the hidden state of the RNN, whose exact size I will discuss in the hyperparameters section.\NOTE{D}{The last input of the RNN is fed through ... , to produce the estimates for $q(v, a)$} To get the output, the estimated $q(v,a)$ values for each possible threshold $a$ \NOTE{T}{Say more what the $q$-value is}, I apply some\NOTE{D}{a number of} (as for other hyperparameters, I discuss the exact values later)\NOTE{D}{Mention this once in the beginning} fully convolutional (linear) layers on the final hidden state of the RNN. These linear layers not only bring the output to the correct shape\NOTE{D}{This is not very important. Maybe: ``These linear layers transform ...''}, they also transform from the internal representation\NOTE{D}{In the evaluation, it would be nice to mention/explore what is encoded in this representation.} of the RNN to the space of the action-values. \NOTE{A}{Explain some more?}\NOTE{A}{Add a figure about the DQN architecture.}. As for the activation functions, I use a ReLU activation between the fully convolutional layers, and the tanh\NOTE{D}{$\tanh$} activation inside the RNN, following common practice \cite{szandala2020activationfunctions}\NOTE{D}{This is not a standard reference. Maybe remove}.
 
 
 \subsubsection{Stabilising Training}
 
 
-In practice, Deep Q-Learning - and in general any off-policy deep reinforcement learning algorithm - can become unstable during training. There are several methods proposed to address this issue, out of which the three most popular are the following. I added these to my implementation as well.
+In practice, Deep Q-Learning -\NOTE{D}{-- !} and in general any off-policy deep reinforcement learning algorithm -\NOTE{D}{--} can become unstable during training. There are several methods proposed to address this issue, out of which the three most popular\NOTE{D}{Popular is not necessarily a good reason for choosing} are the following. I added these to my implementation as well.\NOTE{D}{What does this sentence mean?}
 
 
 \paragraph{Experience Replay}
+\NOTE{D}{Maybe start by what happens in your setting when you apply the vanilla Deep Q-Learning algorithm. And then mention how ``experience replay~\cite{lin1992experiencereplay}'' solves this problem. }
+\NOTE{D}{It might be helpful to split the paragraph into two: (i) what is experience delay and the problem it solves, (ii) how you implemented it}
 
-
-Experience replay was first introduced in \cite{lin1992experiencereplay}. The problem it is trying to solve is that in vanilla Deep Q-Learning, subsequent the update steps are correlated - i.e. in our case, after we update network around a load vector with $x$ balls, we next update it around a load vector with $x+1$ balls. This correlation stems from updating in the same order as executing the actions in the game. In order to get the theoretical guarantees for these supervised learning-like updates, we need to have independent identically distributed, so certainly not correlated training samples. The idea in experience replay, is to instead of calling the update rule \ref{eq:deep-q-learning-update-with-semi-gradient} on the current $(s, a, s', r)$ tuple, we store this tuple in an experience replay buffer. Then, after every fixed number of steps, a batch of tuples are samples uniformly at random from the buffer, and the DQN is updated according to those tuples. Another benefit of the idea is that tuples can be reused multiple times, leading to a more efficient learning. Nevertheless, there is a size limit on the buffer to get rid of outdated samples, so whenever it is full, a tuple is deleted from it. I implemented it using a deque data structure. Finally, note the importance of sampling a batch of tuples when updating, and not only a single tuple - it has been shown that batching helps stabilising learning \cite{qian2020batchingsgd}.
+Experience replay was first introduced in \cite{lin1992experiencereplay}. The problem it is trying to solve is that in vanilla Deep Q-Learning, subsequent the update steps are correlated - i.e.\NOTE{D}{After a full-stop that is not terminating the sentence you need to add a small space: https://tex.stackexchange.com/questions/2734/taking-unncessary-space-after-e-g-or-i-e} in our case, after we update network\NOTE{D}{update network?} around a load vector with $x$ balls, we next update it around a load vector with $x+1$ balls. This correlation stems from updating in the same order as executing the actions in the game. In order to get the theoretical guarantees for these supervised learning-like updates, we need to have independent identically distributed, so certainly not correlated training samples. The idea in experience replay, is to instead of calling the update rule \ref{eq:deep-q-learning-update-with-semi-gradient} on the current $(s, a, s', r)$ tuple, we store this tuple in an experience replay buffer. Then, after every fixed number of steps, a batch of tuples are samples uniformly at random from the buffer, and the DQN is updated according to those tuples. Another benefit of the idea is that tuples can be reused multiple times, leading to a more efficient learning. Nevertheless, there is a size limit on the buffer to get rid of outdated samples, so whenever it is full, a tuple is deleted from it. I implemented it using a deque data structure\NOTE{D}{State the time complexity of your choice.}. Finally, note the importance of sampling a batch of tuples when updating, and not only a single tuple - it has been shown that batching helps stabilising learning \cite{qian2020batchingsgd}.
 
 
 \paragraph{Target Network}
 
 
-The idea of a target network was first introduced in \cite{argueta1992targetnetwork}. The main difference between Q-Learning and Deep Q-Learning is that in the former, during one step we only update a single value in the Q-table, while in the latter, due to the nature of NNs, many neighbouring values are also updated (it is a continuous function approximation). This becomes problematic, since looking at the update rule \ref{eq:deep-q-learning-update-with-semi-gradient} for Deep Q-Learning, to update at a Q-value $Q_{\mathbf{w_t}}(s_t, a_t)$, a neighbouring Q-value $Q_{\mathbf{w_t}}(s_{t+1}, a')$ is used. This can lead to a blow-up in the Q-values, intuitively, as a chain reaction. \NOTE{A}{Honestly, I don't understand it at all... I couldn't find any good explanation of this.}. The idea with target networks, is to have two copies of the same network architecture: one whose weights are updated by the update rule, and one that provides $Q_{\mathbf{w_t}}(s_{t+1}, a')$ of the ``target'' part $r_{t+1}+ \max_{a'} Q_{\mathbf{w'_t}}(s_{t+1}, a')$ of the rule. This weights $w'$ of the target network are updated to that of the main network periodically, every fixed number of training episodes.
+The idea of a target network was first introduced in \cite{argueta1992targetnetwork}. The main difference between Q-Learning and Deep Q-Learning is that in the former, during one step we only update a single value in the Q-table, while in the latter, due to the nature of NNs, many neighbouring values are also updated (it is a continuous function approximation).\NOTE{D}{Try to merge the first two sentences.} This becomes problematic, since looking at the update rule \ref{eq:deep-q-learning-update-with-semi-gradient} for Deep Q-Learning, to update at a Q-value $Q_{\mathbf{w_t}}(s_t, a_t)$, a neighbouring Q-value $Q_{\mathbf{w_t}}(s_{t+1}, a')$ is used. This can lead to a blow-up in the Q-values, intuitively, as a chain reaction. \NOTE{A}{Honestly, I don't understand it at all... I couldn't find any good explanation of this.}\NOTE{D}{The learning is based on the Huber loss between predictions and target values. The target network approach means that the target values are assumed constant, so no gradients will flow through them, during the gradient descent step. Basically what you say above equation 2.8}. The idea with target networks, is to have two copies of the same network architecture: one whose weights are updated by the update rule, and one that provides $Q_{\mathbf{w_t}}(s_{t+1}, a')$ of the ``target'' part $r_{t+1}+ \max_{a'} Q_{\mathbf{w'_t}}(s_{t+1}, a')$ of the rule. This weights $w'$ of the target network are updated to that of the main network periodically, every fixed number of training episodes.
 
 
 \paragraph{Using a better Optimiser}
 
 
-Looking more closely at the update rule \ref{eq:deep-q-learning-update-with-semi-gradient}, and using the batching technique outlined for experience replay, we can see that this resembles the update rule of the Stochastic Gradient Descent (SGD) optimiser method. Therefore, instead of SGD, we could use any other optimiser method. In practice, the most widely used optimiser for Deep Q-Learning is the ADAM optimiser \cite{kingma2015adamoptimiser}. Briefly, it is a more complex version of SGD that doesn't use the raw gradients, and instead keeps track of moving averages and variances of the gradients, to adjust the step size in the size of the current gradient. An important parameter of ADAM is its learning rate, which I will optimise using hyperparameter optimisation. Also, a widely used extension in deep reinforcement learning is gradient clipping, which doesn't allow absolute gradient values to go above $1$, and has been shown to speed up training \cite{zhang2020gradientclipping}. I added gradient clipping to my implementation.\\
+Looking more closely at the update rule \ref{eq:deep-q-learning-update-with-semi-gradient}\NOTE{D}{Use eqref or cref}, and using the batching technique outlined for experience replay, we can see that this resembles\NOTE{D}{What you derived in equation 2.8 is the gradient descent update (not resembles).} the update rule of the Stochastic Gradient Descent (SGD) optimiser method. Therefore, instead of SGD, we could use any other optimiser method. In practice, the most widely used optimiser\NOTE{D}{an ``effective optimiser'' (popularity on its own is not good enough)} for Deep Q-Learning is the ADAM optimiser \cite{kingma2015adamoptimiser}\NOTE{D}{Good reference. Remember to use tilde~\cite{kingma2015adamoptimiser}}. Briefly, it is a more complex version of SGD that doesn't use the raw gradients, and instead keeps track of moving averages and variances of the gradients, to adjust the step size in the size of the current gradient.\NOTE{D}{A description might be more appropriate in the preparation section. Maybe you could add the gradient update equations instead of stating them.} An important parameter of ADAM is its learning rate, which I will optimise using hyperparameter optimisation. Also, a widely used extension in deep reinforcement learning is gradient clipping, which doesn't allow absolute gradient values to go above $1$, and has been shown to speed up training \cite{zhang2020gradientclipping}\NOTE{D}{Look here for a proper reference: https://ai.stackexchange.com/questions/19905/which-work-originally-introduced-gradient-clipping}. I added gradient clipping to my implementation.\\
 
 
 
-There are plenty of more ideas in the literature to improve the training of DQN, for example the so-called double learning \cite{hasselt2010doubleqlearning}, which argues that vanilla (deep) Q-Learning overestimates the action values, since under the hood it uses $\mathbb{E}[\max_a(Q(s,a)]$ and not $\max_a(\mathbb{E}[Q(s,a)])$. I do not consider these possibilities any further.
+There are plenty of more ideas in the literature to improve the training of DQN, for example the so-called double learning \cite{hasselt2010doubleqlearning}, which argues that vanilla (deep) Q-Learning overestimates the action values, since under the hood it uses $\mathbb{E}[\max_a(Q(s,a)]$ and not $\max_a(\mathbb{E}[Q(s,a)])$. I do not consider these possibilities any further.\NOTE{D}{This should be moved to the future work section}
 
 
 \subsection{Deep Sarsa-Learning Implementation}
@@ -85,22 +90,23 @@ There are plenty of more ideas in the literature to improve the training of DQN,
 \subsection{Ideas Implemented for Improvement} \label{improvementideas}
 
 
-In this section I outline ideas independent of DQN that I used to improve the performance of my RL algorithm. Some of these are well-known general ideas in RL, while others are specific to the \textsc{Two-Thinning} Balls into Bins setting. I will highlight why each of the ideas were worth considering for this setting.
+In this section I outline ideas independent of DQN that I used to improve the performance of my RL algorithm. Some of these are well-known general ideas in RL, while others are specific to the \textsc{Two-Thinning} Balls into Bins setting. I will highlight why each of the ideas were worth considering for this setting.\NOTE{D}{Condense}
 
 
 \subsubsection{Reward Shaping} \label{rewardshaping}
 
+\NOTE{T}{This is a nice part of the thesis!}
+As discussed in Chapter \ref{preparation}, the most direct way to formulate the \textsc{Two-Thinning} setting as a MDP is to only give reward after a final state, i.e. when all the balls have been placed. The problem with this is that rewards are very sparse - concretely, the agent only receives one reward per execution. It is problematic because until the final rewards propagate back to earlier states (that is, load vectors with few balls), the updates at earlier states are not justified - they use a zero reward and a randomly initialised next state to update the current state. Hence, the idea is to inject additional rewards into the MDP, while maintaining correctness: the optimal policy for the new modified MDP has to be optimal for the original one as well, and hence for \textsc{Two-Thinning} too. There is a very neat\NOTE{D}{informal} results proved in \cite{ng1999rewardshaping} about exactly what extra rewards can be used while maintaining the correctness\NOTE{D}{convergence? } property: the extra reward, when moving from state $s$ to state $s'$ using action $a$ has to be in the form $\Phi(s')-\Phi(s)$, i.e. the difference of the so-called potential functions\NOTE{D}{$\Phi$} of the two states. Intuitively, the potential function should denote an estimate of how good a state is with respect to the original (in our case final) rewards. I experimented with several candidate potential functions, and here I present the most promising ones, while I compare them numerically in the hyperparameter optimisation section \NOTE{A}{I write this sentence too many times...}.
 
-As discussed in Chapter \ref{preparation}, the most direct way to formulate the \textsc{Two-Thinning} setting as a MDP is to only give reward after a final state, i.e. when all the balls have been placed. The problem with this is that rewards are very sparse - concretely, the agent only receives one reward per execution. It is problematic because until the final rewards propagate back to earlier states (that is, load vectors with few balls), the updates at earlier states are not justified - they use a zero reward and a randomly initialised next state to update the current state. Hence, the idea is to inject additional rewards into the MDP, while maintaining correctness: the optimal policy for the new modified MDP has to be optimal for the original one as well, and hence for \textsc{Two-Thinning} too. There is a very neat results proved in \cite{ng1999rewardshaping} about exactly what extra rewards can be used while maintaining the correctness property: the extra reward, when moving from state $s$ to state $s'$ using action $a$ has to be in the form $\Phi(s')-\Phi(s)$, i.e. the difference of the so-called potential functions of the two states. Intuitively, the potential function should denote an estimate of how good a state is with respect to the original (in our case final) rewards. I experimented with several candidate potential functions, and here I present the most promising ones, while I compare them numerically in the hyperparameter optimisation section \NOTE{A}{I write this sentence too many times...}.
-
-
+\NOTE{D}{Give different names to the potentials: e.g., $\Phi_{\max}$}
 \begin{itemize}
     \item
-    $\Phi(v)=-maxload(v)$. This is a natural extension of the final reward, which is also the same expression. In practice, it turns into getting a reward $-1$ if the current ball has been allocated such that the max load has increased, and otherwise still no reward.
+    $\Phi(v)=-maxload(v)$\NOTE{D}{$\Phi(v) = \max_{i \in [n]} v_i$}. This is a natural extension of the final reward, which is also the same expression.\NOTE{D}{Maybe replace with: ``which naturally extends the final reward''?} In practice, it turns into getting a reward $-1$ if the current ball has been allocated such that the max load has increased, and otherwise still no reward.\NOTE{D}{This means that the reward is $-1$ if the ball is allocated to the maximum bin. Or even remove this sentence?}
     \item
-    $\Phi(v)=-std(v)$, where $std(v)$ is the standard deviation of the load vector. This is an extension of the previous idea, which differentiates between cases when the max load hasn't increased - it is much better if the ball is allocated in the most underloaded bin than if in the second most overloaded.
+    $\Phi(v)=-std(v)$\NOTE{D}{$\mathrm{std}$}, where $std(v)$ is the standard deviation of the load vector. This is an extension\NOTE{D}{These are substantially different, right?} of the previous idea, which differentiates between cases when the max load hasn't increased - it is much better if the ball is allocated in the most underloaded bin than if in the second most overloaded.\NOTE{D}{Try to condense into one sentence}
     \item
-    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - avg(v))}$, where $\alpha$ is a hyperparameter. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for Balls into Bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}. As a relevant example, if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.
+    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - avg(v))}$\NOTE{D}{Maybe $\overline{v}$ or $\mathrm{avg}(v)$}, where $\alpha$ is a hyperparameter\NOTE{T}{use cdot for product, not star}. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for Balls into Bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}\NOTE{D}{This is not a bad thing}. As a relevant example,\NOTE{D}{Mention that this is a smoother version of the first one} if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.\NOTE{D}{!! In the general case if $\Phi < c$, then $maxload(v) \leq \frac{1}{\alpha}\log c$}
+    \NOTE{D}{A diagram might be helpful here for different values of $\alpha$}
 \end{itemize}
 
 
@@ -108,7 +114,7 @@ As discussed in Chapter \ref{preparation}, the most direct way to formulate the 
 
 
 
-The idea of curriculum learning \cite{bengio2009curriculumoriginal} is to first provide easier problems to the agent, and just gradually increase the difficulty up to the original problem - just like how humans learn using a curriculum. Without curriculum learning, the agent cannot learn as much as desired from the hard problems initially \NOTE{A}{Explain some more?}. For \textsc{Two-Thinning}, I implemented curriculum learning by first starting from $m-1$ balls already being allocated, then starting from $m-2$ balls already being allocated, and so on until starting from the original empty bins. To choose the training samples on level $k$ (i.e. how to place the initial balls), I had to find which load vectors with sum $m-k$ are ``relevant'' - there are exponentially many ways to place $m-k$ balls into $n$ bins, so it is not feasible to give each of them to the agent. I decided to run the vanilla \textsc{One-Choice} protocol with $m=m-k$ balls, and it provides training samples distributed according to their occurrence when running \textsc{One-Choice}, which is a good approximation to the relevant load vectors for \textsc{Two-Thinning}. I decided to run the same amount of iterations on each level, since though there are many more different load vectors with sum $m-1$ than with sum $0$, running from the empty bins will also reach sum of loads $m-1$ but not vice versa. It is important to note that curriculum learning can serve as a pretraining phase as well. This is exactly what I did - I ran curriculum learning, and then I ran the normal training phase, which is basically just continuing with strating from the empty bins. I will analyse the effect of pretraining together with the other hyperparameters.
+The idea of curriculum learning \cite{bengio2009curriculumoriginal} is to first provide easier problems to the agent, and just gradually increase the difficulty up to the original problem - just like how humans learn using a curriculum\NOTE{D}{Maybe remove comment after --}. Without curriculum learning, the agent cannot learn as much as desired from the hard problems initially \NOTE{A}{Explain some more?}. For \textsc{Two-Thinning}, I implemented curriculum learning by first \NOTE{D}{providing load vectors with $m-1$ balls allocated.}starting from $m-1$ balls already being allocated, then starting from $m-2$ balls already being allocated, and so on until starting from the original empty bins. To choose the training samples on level $k$ (i.e. how to place the initial balls), I had to find which load vectors with sum $m-k$ are ``relevant'' - there are exponentially many ways to place $m-k$ balls into $n$ bins, so it is not feasible to give each of them to the agent. I decided to run the vanilla \textsc{One-Choice}\NOTE{D}{I thought you compared one more option here, right?} protocol with $m=m-k$\NOTE{D}{$m' = m - k$} balls, and it provides training samples distributed according to their occurrence when running \textsc{One-Choice}, which is a good approximation\NOTE{D}{Add support for this in evaluation section} to the relevant load vectors for \textsc{Two-Thinning}. I decided to run the same amount of iterations on each level\NOTE{D}{Did you compare against something else? What do they usually do ? }, since though there are many more different load vectors with sum $m-1$ than with sum $0$, running from the empty bins will also reach sum of loads $m-1$ but not vice versa. It is important to note that curriculum learning can serve as a pretraining phase as well. This is exactly what I did - I ran curriculum learning, and then I ran the normal training phase, which is basically just continuing with strating from the empty bins. I will analyse the effect of pretraining together with the other hyperparameters.
 
 
 
@@ -116,7 +122,7 @@ The idea of curriculum learning \cite{bengio2009curriculumoriginal} is to first 
 \subsubsection{Normalised Load}
 
 
-An important difference between my work and most of the research papers, is that they use normalised load values: when they refer to a load $x$ or a threshold $a$ at a load vector $v$, the actually mean $x-avg(v)$ and $a-avg(v)$. I found it more intuitive to use real load an threshold values in my explanations, but using normalised values can make convergence during training faster, since the constant zero threshold is already a reasonable strategy (also called ``mean-thinning'') in the normalised space. On the other hand, the constant zero threshold in the original space would mean rejecting everything, which leads to \textsc{One-Choice} that has been shown to perform poorly. I will analyse the effect of training in the normalised domain together with other hyperparameters.
+An important difference between my work and most of the research papers, is that they use normalised load values: when they refer to a load $x$ or a threshold $a$ at a load vector $v$, the actually mean $x-avg(v)$ and $a-avg(v)$. I found it more intuitive to use real load an\NOTE{D}{?} threshold values in my explanations, but using normalised values can make convergence during training faster, since the constant zero threshold is already a reasonable strategy (also called ``mean-thinning''\NOTE{D}{Refer to ``Caching and packing, thinning and twinning'' }) in the normalised space. On the other hand, the constant zero threshold in the original space would mean rejecting everything\NOTE{D}{rejecting all primary allocations}\NOTE{T}{I think this is a bit of a silly protocol. I'd say that this subsubsection is perhaps not that important, in comparison to others.}, which leads to \textsc{One-Choice} that has been shown to perform poorly. I will analyse the effect of training in the normalised domain together with other hyperparameters.
 
 
 \NOTE{A}{Make a section about rare change, a.k.a. the batched setting?}
@@ -129,16 +135,22 @@ For smaller values of $n$ and $m$ we can use dynamic programming based on the Be
 
 \begin{itemize}
     \item 
-    As we did for the DQN, we can reduce the state space by around a factor of $n!$, by treating permutations of a load vector the same state, i.e. using only sorted load vectors as states.
+    As we did for the DQN, we can reduce the state space by\NOTE{D}{$\Theta(n!)$?} around a factor of $n!$, by treating permutations of a load vector the same state, i.e. using only sorted load vectors as states.
     \item
-    While a general RL problem can contains cycles in the state transition graph (that is, the agent can possibly move around a loop), in this case it is a Directed Acyclic Graph (DAG) - the next state always has exactly one more ball allocated. This is important, since we don't need to perform a fixed point iteration \cite{rhoades1991fixedpointiteration}, we can directly calculate the values based on a recurrence relation (see below).
+    While a general RL problem can contains\NOTE{D}{contain} cycles in the state transition graph (that is, the agent can possibly move around a loop), in this case it is a Directed Acyclic Graph (DAG) - the next state always has exactly one more ball allocated. This is important, since we don't need to perform a fixed point iteration \cite{rhoades1991fixedpointiteration}, we can directly calculate the values based on a recurrence relation (see below).
     \item
-    We can exploit Lemma \ref{lemma: thresholdproperty}: instead of using one dynamic programming state for each $Q(s,a)$ (storing a boolean value in each of them), we will have states of the form $V(s)$ (storing the optimal threshold in each of them). I also implemented a slower version of dynamic programming without using this lemma, on which interestingly I could test the validity of the lemma for specific values of $n$ and $m$.
+    We can exploit Lemma \ref{lemma: thresholdproperty}: instead of using one dynamic programming state for each $Q(s,a)$ (storing a boolean value in each of them), we will have states of the form $V(s)$ (storing the optimal threshold in each of them). I also implemented a slower version of dynamic programming without using this lemma, on which interestingly I could test the validity of the lemma for specific values of $n$ and $m$.\NOTE{D}{Make a list of the observations/results you obtained}
 \end{itemize}
 
 
-Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_j$ as the corresponding unit vector $(0, 0, ... , 1, ..., 0, 0)$:
+Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_j$ as the corresponding unit vector $(0, 0, ... , 1, ..., 0, 0)$: \NOTE{T}{What is the range of $i$? Is it $i=1,2,\ldots,n$? But then you need to update the formula below.}
 
+\NOTE{D}{Use $\cdot$ instead of $*$}
+\NOTE{D}{For larger parentheses use $\left( \right)$}
+\NOTE{D}{Use \begin{align}
+    1 & = 2 + 3 \notag \\
+    4 & = 5
+\end{align}}
 \begin{equation} \label{eq:twothinning-dynamicprogramming}
 \begin{split}
     V_{\pi^*}(s) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=s, a_t=a] \\
@@ -146,11 +158,11 @@ Denoting $s[i]$ as the $i$th smallest load value in the load vector $s$, and $e_
     &= \max_{i \in [n]} (\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))
 \end{split}
 \end{equation}
-
+\NOTE{T}{can't we skip the first or second equation?}
 where we used the fact that $r_{t+1}=0$ for non-final states, and that it suffices to use only thresholds that are equal to one of the load values. Since there are many possible final states, which serve as the base cases of the dynamic programming algorithm, it was more convenient to implement is using recursion and memoisation. The base cases are those load vectors $s$ that have all $m$ balls allocated, and for those we have $V_{\pi^*}(s)=-maxload(s)$. \NOTE{A}{Exchange the last two sentences?}
 
 
-We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time, since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront. Hence, the overall runtime of the algorithm is $O(|states|*n)$.
+We can observe that having already calculated $(\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}(s+e_j) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j))$ for $i$, calculating it for $i+1$ takes $O(1)$ time,\NOTE{D}{Mention the speedup you get from this} since only a constant number of terms change, and the $\sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}(s+e_j)$ term can be pre-calculated upfront\NOTE{D}{When upfront?}. Hence, the overall runtime of the algorithm is $O(|states|*n)$.\
 
 
 Now I prove a small lemma limiting the possible improvements of an exact dynamic programming algorithm:
@@ -164,16 +176,16 @@ For any load vector $v$ with $0\leq k\leq m$ balls in it, and any decision funct
     Simply observe that if the primary and secondary bins are the same, then whatever decision function is used, the ball will be allocated in that bin. Therefore, for any sequence of allocations there is a nonzero probability, and since any load vector can be reached by adding the balls one by one e.g. from left to right, all load vectors have a nonzero probability. \NOTE{A}{Isn't it too trivial? I mean it wasn't for me, but reading it now it seems trivial.}
 \end{proof}
 \NOTE{A}{A more interesting question is what would happen if we disallow the two choices to be the same. Then, there are several load vectors that the optimal policy can avoid, e.g. (0,0,0,0,m,0,0). How can we characterise these vectors?}
-
-
+\NOTE{T}{I'm not sure you could reduce the space by that much. I think you can probably still get load vectors like (m/2,m/2,0,...,0).}
 
 This means that all the possible states have to be taken into account when calculating the expectation.
 
 
 
-Interestingly, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(m, n)$ as a function of $m$ and $n$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
+Interestingly \NOTE{T}{I think this paragraph could be perhaps also dropped}\NOTE{D}{I think this is nice to have. You could also obtain some statistics like how many states have a high probability of being reachable or computing the entropy?}, there is no closed-form formula for the number of states, even for $m=n$ the number of states equal the so-called partition function $p(n)$ for which only approximate results are known: $p(n) \sim e^{\sqrt{n}}$ \cite{hardy1918partitionfunction}. I implemented the calculation of the number of states $f(m, n)$ as a function of $m$ and $n$, i.e. the number of increasing partitions of $m$ of size $n$, for which I also used dynamic programming:
 
-
+\NOTE{D}{for $\to$ if?}
+\NOTE{D}{comma after each case and full-stop in the last one.}
 \begin{equation} \label{eq: numberofpartitions}
     f(m, n) = \begin{cases}
         1, & \text{for } m=0\\
@@ -185,7 +197,7 @@ Interestingly, there is no closed-form formula for the number of states, even fo
 
 
 
-The results from this secondary dynamic programming confirmed what I have seen about the efficiency of the main dynamic programming algorithm in practice. For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of Deep Q-Learning (few hours). These limits are indeed smaller than that of Deep Q-Learning, so while dynamic programming can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly no very large. \NOTE{A}{Add these rough estimates of n,m to Deep Q-Learning as well.}
+\NOTE{D}{The values of $f$ confirmed the empirical performance of the DP algorithm.}The results from this secondary dynamic programming confirmed what I have seen about the efficiency of the main dynamic programming algorithm in practice. For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of Deep Q-Learning (few hours).\NOTE{D}{You will need to add a figure in the evaluation section.} These limits are indeed smaller than that of Deep Q-Learning, so while dynamic programming can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly not very large\NOTE{D}{Are you sure?}. The main drawback of the dynamic programming algorithm is rather that it does not use function approximation, so it has to represent every state explicitly, which would cause memory error even before it would take too much time. \NOTE{A}{Add these rough estimates of n,m to Deep Q-Learning as well.}
 
 
 \subsection{Other Strategies}
@@ -198,22 +210,22 @@ This is equivalent to \textsc{One-Choice}, and it is included as a baseline.
 
 
 \paragraph{Random Strategy}
-This strategy accepts or rejects a ball with probability $p=\frac{1}{2}$. While I do not show it formally, it is easy to see that the best random strategy is achieved when $p=\frac{1}{2}$ and not something else. \NOTE{A}{Double check.} We should reasonably expect any valuable strategy to outperform the random strategy.
-
+This strategy accepts or rejects a ball\NOTE{T}{bin} with probability $p=\frac{1}{2}$. While I do not show it formally, it is easy to see that the best random strategy is achieved when $p=\frac{1}{2}$ and not something else. \NOTE{A}{Double check.} We should reasonably expect any valuable strategy to outperform the random strategy.
+\NOTE{T}{I don't fully understand this. Isn't this the same as One-Choice?}
 
 \paragraph{Mean Thinning Strategy}
-This strategy always accepts a ball if it is below the current average load, an rejects otherwise.
+This strategy always accepts a ball if it is below the current average load, and rejects otherwise. \NOTE{T}{Maybe add reference.}
 
 
 \paragraph{Local Reward Optimiser Strategy}
 
 While the goal of the agent in RL is the optimise the cumulative reward, a simplified goal can be optimising the immediate rewards. With rewards only after all the $m$ balls have been placed, this leads to all actions having an immediate reward of $0$, so for this strategy I will use the first reward shaping idea from Section \ref{rewardshaping}. This simplifies to getting a reward $-1$ if the balls gets allocated into one of the highest loaded bins, and a reward $0$ otherwise. Therefore, optimising immediate reward in this modified MDP leads to accepting any bin which is not a highest loaded one, and rejecting otherwise. Essentially, this strategy just tries to avoid increasing the maximum load in one step. It is easy to see that this is not an optimal strategy in general. \NOTE{A}{Give specific counterexample. I couldn't find any which is easy to see formally.}
 
-
 \paragraph{The Threshold Strategy} 
 
-This is a strategy that has been shown to be optimal \cite{feldheim2021thinning} up to a constant\NOTE{A}{I think multiplicative, but they probably won't care.} factor for large $n$ and $m\leq O(n*\sqrt{log(n)})$. This strategy accepts a bin, if and only if the primary allocations (i.e. number of times that bin has been chosen as the primary bin and the corresponding ball has been accepted) to that bin so far are less than a constant $l$. There are at least two surprising observations about this strategy. One is that it uses essentially a constant threshold, so it is not a very `adaptive'' strategy \NOTE{A}{Explain better}. Also, it is not hard to see that there should exist an optimal strategy whose decisions depend only on the current load vector, and doesn't take into account the past. On the other hand, this strategy differentiates between the same ball being allocated in the same bin as a result of a primary, or a secondary allocation. To the best of our knowledge, the reason for this reliance is to aid the proofs in the paper \cite{feldheim2021thinning}, and also it leads to an easily expressible strategy. 
+This is a strategy that has been shown to be optimal \NOTE{T}{make clear that optimal means minimizing the gap at time $m$} \cite{feldheim2021thinning} up to a constant\NOTE{A}{I think multiplicative, but they probably won't care.}\NOTE{D}{Better to say multiplicative} factor for large $n$ and $m\leq O(n*\sqrt{log(n)})$\NOTE{D}{$m = \mathcal{O}(n \cdot \sqrt(\log n))$}.\NOTE{T}{Minor: Use $\log n$ instead of $log n$.} This strategy accepts a bin, if and only if the primary allocations (i.e. number of times that bin has been chosen as the primary bin and the corresponding ball has been accepted) to that bin so far are less than a constant $l$. There are at least two surprising observations about this strategy. One is that it uses essentially a constant threshold, so it is not a very `adaptive'' strategy \NOTE{A}{Explain better}. Also, it is not hard to see that there should exist an optimal strategy whose decisions depend only on the current load vector, and doesn't take into account the past. On the other hand, this strategy differentiates between the same ball being allocated in the same bin as a result of a primary, or a secondary allocation. To the best of our knowledge, the reason for this reliance is to aid the proofs in the paper \cite{feldheim2021thinning}, and also it leads to an easily expressible strategy. 
 
+\NOTE{D}{!!(So that I don't forget) The thinning upper bound in \url{https://projecteuclid.org/journalArticle/Download?urlId=10.1214\%2F21-ECP400} holds for any $n \geq 3$.}
 
 \subsection{Restricting Available Information} \label{lesssharedstate}
 
@@ -247,9 +259,9 @@ All the other parts of the implementation are analogous to the implementation fo
 A dynamic algorithm analogous to that for \textsc{Two-Thinning} has been implemented for \textsc{K-Thinning} as well, with the states being (load vector, number of choices left) pairs.
 
 
-The recurrence equations are:
+The recurrence equations are: \NOTE{T}{What exactly is $v[i]$? Make notation consistent to 3.1 and 3.2}
 
-
+\NOTE{D}{See comments above}
 \begin{equation} \label{eq:kthinning-dynamicprogramming-0left}
 \begin{split}
     V_{\pi^*}((v, 0)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=a] \\
@@ -257,10 +269,10 @@ The recurrence equations are:
     &= \max_{i \in [n]} (\sum_{0\leq j \leq i} \frac{1}{n}*V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} * \sum_{j \in [n]} \frac{1}{n}*V_{\pi^*}((v+e_j,k)))
 \end{split}
 \end{equation}
-
+\NOTE{D}{The extra line breaks that you have are increasing the white space (and you are loosing pages)}
 
 and 
-
+\NOTE{D}{Same here}
 
 \begin{equation} \label{eq:kthinning-dynamicprogramming-xleft}
 \begin{split}
@@ -284,20 +296,21 @@ The same kind of strategies are possible for \textsc{K-Thinning} as for \textsc{
 
 
 
-\paragraph{Mean Thinning Strategy} A natural extension of the Mean Thinning Strategy of \textsc{Two-Thinning} is to accept a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding threshold with $x$ choices left is the nearest integer value to the solution $y$ of the following equation:
+\paragraph{Mean Thinning Strategy} A natural extension of the Mean Thinning Strategy\NOTE{D}{This is not exactly mean-thinning, it is more median quantile. In mean-thinning you compare the load to the mean.} of \textsc{Two-Thinning} is to accept a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding threshold with $x$ choices left, we solve the following equation for $y$:\NOTE{D}{So $y$ is a quantile?}
 
 \begin{equation} \label{meankthinning}
     P(better) = 1 - (\frac{n-y}{n})^x = \frac{1}{2}
 \end{equation}
+\NOTE{D}{Do you need $P(better)$?}
 
-which gives $y = n * (1 - 2^{-\frac{1}{x}})$
+which gives $y = n * (1 - 2^{-\frac{1}{x}})$, and then the threshold is $v[y]$ where $v$ is the sorted load vector. \NOTE{A}{Explain better?}
 
 
 \paragraph{Local Reward Optimiser Strategy} Choosing according to the expected immediate reward based on the reward function outlined above would lead to rejecting any bin with maximum load, and accepting otherwise.
 
 
 \paragraph{The Threshold Strategy} This is a direct of extension of the analogous strategy for \textsc{Two-Thinning}: it accepts the $i$th choice if the number of times a ball has been allocated to the offered bin as an $i$th choice earlier is less than $l$. This strategy has been shown to be asymptotically optimal \cite{feldheim2020dthinning}.
-
+\NOTE{D}{This is adaptive threshold, which changes for each load vector (so at every time step) and also depends on the sample number.}
 
 
 \section{Graphical Two-Choice}
@@ -318,11 +331,11 @@ To tackle the sparse rewards problem, we could use any of the potential function
 
 \begin{itemize}
     \item 
-    $\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])$ \NOTE{A}{Why doesn't the argument go below the word "max"?}, i.e. finding the worst edge, where no matter what decision function is used, an already highly loade bin will be chosen.
+    $\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])$ \NOTE{A}{Why doesn't the argument go below the word "max"?}\NOTE{D}{Because it is inline. You can change to \[\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])\]}, i.e. finding the worst edge, where no matter what decision function is used, an already highly loaded bin will be chosen.
     \item
-    $\Phi(v)=\max_{x \in [n]} \frac{v[x]+\sum_{x\sim y \in E}v[y]}{deg(x)+1}$, i.e. finding the neighbourhood with the largest average. We will see this idea again in Section \ref{graphical-otherstrategies}.
+    $\Phi(v)=\max_{x \in [n]} \frac{v[x]+\sum_{x\sim y \in E}v[y]}{deg(x)+1}$, i.e. finding the neighbourhood with the largest average. We will see this idea again in Section \ref{graphical-otherstrategies}.\NOTE{D}{Replace sentence with (see \cref{graphical-otherstrategies})}
 \end{itemize}
-
+\NOTE{T}{Maybe also add a list of the known potential functions?}
 
 I provide a comparison of the various options in the hyperparameters section.
 
@@ -336,7 +349,7 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 \paragraph{Complete Graph} This is exactly the \textsc{Two-Choice} setting, for which Greedy is known to be the optimal strategy. This graph type serves as a baseline.
 
 
-\paragraph{Cycle} The cycle graph with $n$ nodes numbered as $[n]$ has an edge between node $i$ and $(i+1)\%n$. This is a very natural graph to investigate, since it comes up very often in computer systems, e.g. token rings.
+\paragraph{Cycle} The cycle graph with $n$ nodes numbered as $[n]$ has an edge between node $i$ and $(i+1)\%n$\NOTE{D}{$i+1 \pmod{n}$}. This is a very natural graph to investigate, since it comes up very often in computer systems, e.g. token rings.
 
 
 \paragraph{Hypercube} The hypercube graph with $n=2^N$ nodes numbered as binary numbers in the range $[n]$ has an edge between two nodes iff there is exactly one bit difference between them. Hypercube graphs have several applications in network topologies \cite{ostrouchov1987hypercubenetwork} \NOTE{A}{Why? Why is it good?}.
@@ -359,9 +372,9 @@ We can observe the same difficulties about \textsc{Graphical Two-Choice} for dyn
 
 and we have $V_{\pi^*}(v)=-maxload(v)$ for final states $v$.
 
-This achieves an $O(|states|*|E|)$ algorithm, and Lemma \ref{lemma: everystatereachable} gives confidence that this is optimal for general graphs. Note that for the complete graph this is $O(n)$ times slower than the algorithm for \textsc{Two-Thinning}.
+This achieves an $O(|states|*|E|)$ algorithm, and Lemma \ref{lemma: everystatereachable} gives confidence\NOTE{T}{Phrasing. ``confidence'', this sounds too vague. The lemma establishes or demonstrates?} that this is optimal for general graphs. Note that for the complete graph this is $O(n)$ times slower than the algorithm for \textsc{Two-Thinning}.
 
-I will use this algorithm to construct a counterexample that Greedy is suboptimal. For that, I need to derive not only the values (as in the equation), but also the optimal decisions when faced with two bins. This is easily derivable from the memoisation dictionary. For the purposes of the counterexample, I distinguish not two, but three possible decisions: choose the first bin, choose the second bin, doesn't matter.
+I will use this algorithm to construct a counterexample that Greedy is suboptimal. For that, I need to derive not only the values (as in the equation), but also the optimal decisions when faced with two bins. This is easily derivable from the memoisation dictionary. For the purposes of the counterexample, I distinguish not two, but three possible decisions: choose the first bin, choose the second bin, doesn't matter\NOTE{D}{informal}.
 
 
 \subsection{Other Strategies} \label{graphical-otherstrategies}
@@ -389,23 +402,23 @@ As I will explicitly show by generating a counterexample in Chapter \ref{evaluat
 One of the biggest challenges of the project was to find the best set of hyperparameters, because there are many of them, so any kind of exhaustive search (e.g. grid search) is infeasible. Therefore I tried to use approximate hyperparameter search techniques, and combine them with expert knowledge to guide the search, and reduce the ranges. The expert knowledge mainly involves common values used in practice (e.g. learning rate), but involves domain-specific arguments as well (e.g. maximum threshold of DQN). In this section I describe the methods I used, and in Chapter \ref{evaluation} I analyse the results, and in particular the importance of each of the parameters. For the exact hyperparameter values I chose for the different settings see Appendix \ref{hyperparameters}.
 
 
+\subsection{List of Hyperparameters}
+
+
 First, I list the hyperparameters with some comments:
 
 \NOTE{A}{Reorder in a more systematic way?}
-\NOTE{A}{TODO: add usual values and/or reasons}
+\NOTE{A}{TODO: add usual values and/or reasons?}
+\NOTE{A}{Should I add the ranges and options I used during the hyperparamter search?}
 \begin{itemize} 
     \item batch size: the number of samples to take from the experience replay buffer using which the DQN is updated.
     
     \item $\epsilon$-start: for the $\epsilon$-greedy technique, it is common practice to gradually decrease $\epsilon$ during training. The reason is that after some training, less exploration is needed, as the best actions already start to take shape. I decrease $\epsilon$ according a negative exponential function, starting from $\epsilon$-start.
     
-    \item $\epsilon$-decay: the decay parameter of the negative exponential function.
+    \item $\epsilon$-decay: the decay parameter of the negative exponential function.\NOTE{T}{maybe better to use some formulas here?}
     
     \item $\epsilon$-end: as training goes on, $\epsilon$ converges to $\epsilon$-end.
      
-    
-    \item train episodes: the number of training episodes. Note that more episodes are strictly better, since early stopping keeps the best model during training. Hence, this hyperparameter is rather set to a sweetspot where there isn't much expected improvement and the code runs fairly quickly. \NOTE{A}{Mention something about overfitting?}
-    
-    \item patience: to speed up training, if the best model so far is not improved for this many episodes \NOTE{A}{Hm, double check if the term episode has been defined anywhere in my dissertation...}, training stops.
     
     \item target update frequency: after every how many episodes is the target network synchronised with the main network.
     
@@ -419,7 +432,9 @@ First, I list the hyperparameters with some comments:
     
     \item loss function: the loss function to use between the current Q-value estimate and the new (``target'') Q-value estimate. \NOTE{A}{Explain better.}
     
-    \item learning rate: the learning rate of the ADAM optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
+    \item optimiser: the optimiser used for updating the neural network. \NOTE{A}{Update my code to include this as well.}
+    
+    \item learning rate: the learning rate of the optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
     
     \item DQN - hidden state size of RNN: this is the determines into how many numbers does the DQN have to ``compress'' the information about the load vector.
     
@@ -439,14 +454,30 @@ First, I list the hyperparameters with some comments:
 \end{itemize}
 
 
-\subsection{Genetic Algorithm}
+Note that the number of training episodes and the patience interval used for early stopping are not included in the hyperparameter search explicitly. This is because there isn't an optimal value for them based only on the score, as the score only improves by adding more episodes and not stopping early, it just takes more time. Therefore, I have run a first phase of the hyperparameter optimisation finding a sweetspot for the number of episodes, where the difference between the strength of different hyperparameters is already apparent (though the score could potentially improve by training longer), but it is still feasible to do several runs in a few hours. Then, during the main optimisation phase outlined below I have used a fixed number of episodes, and I didn't use early stopping \NOTE{A}{Should I explain why not?}.
 
 
-\subsection{Weights and Biases tool}
+
+\subsection{Hyperparameter Optimisation Methods}
+
+Due to the difficulties of the large search space, I tried several methods for optimising the hyperparameters. One which is worth mentioning is a genetic hyperparameter optimisation algorithm \cite{wicaksono2018genetichyper}. The idea of genetic algorithms is to mutate hyperparameter combinations similar to human evolution, hopefully leading to a good combination after some generations.
+
+
+Instead of genetic algorithms, I chose as my final choice Bayesian hyperparameter optimisation \cite{eggensperger2013bayesianhyper}. Just like genetic algorithms, this also tries to choose the next combination of hyperparameters to try more cleverly than simple grid search and random search, but in a more principled way. The idea is to train a secondary, so-called ``surrogate'' model, using Bayesian techniques based on the results for previous hyperparameter combinations. The motivation is that calling the actual model is very costly, but calling, and hence optimising the surrogate model is much cheaper, and hopefully still guides towards good hyperparamters for the original model.
+
+
+I found the amazing Weights and Biases (WANDB) online tool \cite{biewald2020wandb} which is not just a framework for grid, random and Bayesian search, but also provides very useful insights e.g. into parameter importance, and automatically creates several analyses plots. The tool can be used by declaring the set of hyperparameters, connecting to the online server, choosing the optimisation method (and its parameters, e.g. I have set the number of rounds to $200$), and then reporting the scores from each run of the model to optimise.
+
+
+Overall, I used the WANDB tool with the Bayesian option. Also, even though automatically tries to converge in the direction of good set of hyperparameters, it is just an approximation (and due to the large state space it is not very accurate), so I applied an iterative approach by running the Bayesian hyperparameter search with more and more refined ranges/options for the hyperparameters, based on previous iterations.
+
+
+The optimal hyperparameters can differ between different settings, and between different values of $n$ and $m$. Therefore I have run different hyperparameter optimisation instances for each of the three different settings, and a representative subset of their subsettings, modifying $n$, $m$, $k$ for \textsc{K-Thinning} and the graph for \textsc{Graphical Two-Choice}. I discuss the choices in more detail in Chapter \ref{evaluation}.
 
 
 \section{Repository Overview}
 
+\NOTE{T}{Is this section really needed? And the figure later? I would think some figures on RL learning or balls-into-bins might help the reader more}
 The structure of the code repository is shown below. Only the most relevant files/folders are included here, and I do not expand two folders if they have a very similar substructure (e.g. $k\_thinning$ and $two\_thinning$). Note that there are multiple layers of evaluation: one next to the training files which were used mainly during implementation, one evaluation environment for each setting, which were used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis.
 
 
@@ -569,15 +600,5 @@ The structure of the code repository is shown below. Only the most relevant file
 }
 
 
-
-
-
-\subsection{Extensibility}
-\NOTE{A}{Software Engineering Practices. Extensibility is too focused, it should be more than that.}
-
-
-\NOTE{A}{Graph structures and Strategies are OOP}
-
-
-\subsection{Unit Tests}
-
+\NOTE{A}{Should I emphasize the OOP style more?}
+\NOTE{D}{You should mention it somewhere. }

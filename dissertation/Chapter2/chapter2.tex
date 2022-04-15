@@ -76,7 +76,7 @@ A generalisation of \textsc{Two-Choice} is \textsc{K-Choice}\NOTE{D}{$d$-\textsc
 
 \paragraph{\textsc{Two-Thinning}}
 
-
+\NOTE{T}{I would prefer a more concise, mathematical description of each protocol, clearly separated from motivation etc.}
 This is the main setting I will focus on. Here I present the main interpretation of this protocol, but in section\NOTE{T}{Section} \ref{alternative} I present another way to look at this setting. An important difference between this protocol, and \textsc{K-Choice} is that this protocol additionally requires a decision function, a free parameter of the protocol\NOTE{D}{Maybe remove ``a free parameter of the protocol''}. When a ball arrives, a (primary) bin is chosen uniformly at random, and the according to the decision function, the primary bin is accepted, and the ball is placed into that bin, or it is rejected, and the ball is placed into a (secondary) bin chosen again uniformly at random. \NOTE{D}{This decision function is commonly a threshold function.}The motivation for this interpretation of \textsc{Two-Thinning} is that unlike for \textsc{Two-Thinning}\NOTE{D}{Two-Choice?} where always $2$\NOTE{D}{two} servers are interrupted by a query, here if the primary load is accepted by the decision function, than only $1$\NOTE{D}{one} server is interrupted. A subtlety is that the secondary and primary bins can in fact be the same, while in a real-world application, the client would probably avoid the primary bin if it has been rejected\NOTE{D}{OK, but the improvement is minor}.
 
 \paragraph{\textsc{K-Thinning}}\NOTE{D}{$k$-\textsc{Thinning}}
@@ -126,11 +126,11 @@ Combining many of the above points, I can say to the best of my knowledge that m
 \section{Reinforcement Learning}
 
 
-In the Part IB Artificial Intelligence course we have been introduced to supervised learning. While Reinforcement learning (RL) is also about optimising an objective function, it differs in several ascepts. A very readable introduction to RL can be found in \cite{sutton2018RLbook}, expanding on my explanation below.
+In the Part IB Artificial Intelligence course we have been introduced to supervised learning. While Reinforcement learning (RL) is also about optimising an objective function, it differs in several aspects\NOTE{T}{such as?...}. A very readable introduction to RL can be found in \cite{sutton2018RLbook}, expanding on my explanation below.
 
 %For example, there is no target correct answer (unlike e.g. in image classification when the correct labels are known for the training data) and instead, learning is based on rewards that can guide the algorithm. The other important component of RL is that there is an underlying iterative process, where the agent is interacting with the environment.
 
-In RL, there is an agent that is trying to learn an optimal policy by interacting with an environment. It starts in a start state, carries out an action, receives a reward from the environment, observes a new state, and repeats this process until it reaches an end state. This game is played several times, until a sufficiently good policy is learnt. There are several versions of RL, e.g. depending on what we are optimising exactly, but there is a common underlying mathematical model, the so-called Markov Decision Process that I will introduce next.
+In RL, there is an agent that is trying to learn an optimal policy by interacting with an environment. It starts in a start state\NOTE{T}{odd formulation. Isn't the point that the start states has no training set/no initial information?}, carries out an action, receives a reward from the environment, observes a new state, and repeats this process until it reaches an end state. This game is played several times, until a sufficiently good policy is learnt. There are several versions of RL, e.g. depending on what we are optimising exactly, but there is a common underlying mathematical model, the so-called Markov Decision Process that I will introduce next.\NOTE{T}{Make this more precise. I don't think MDP cover everything in RL learning.}
 
 \subsection{Finite Markov Decision Process (MDP)}
 
@@ -244,7 +244,7 @@ The most common approach for dealing with the exploitation-exploration trade-off
 
 
 Q-Learning \cite{watkins1989qlearning} is based on the second, action-value function based Bellman equation. The algorithms maintains a so-called ``Q-table'' $Q(s,a)$, which stores the current estimates of action-value function $Q_{\pi^*}(s,a)$ of the optimal policy. The agent plays the game several times using the $\epsilon$-greedy technique to choose the next action in state $s$ based on the Q-table at state $s$. After every step, it updates the Q-table according to the following update rule:
-
+\NOTE{T}{use shorter arrow (is more standard, also arrow should go to the left!)}
 \begin{equation} \label{eq:q-learningUpdate}
 Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + \max_{a'} Q(s_{t+1}, a')) - Q(s_t,a_t)]
 \end{equation}
@@ -299,7 +299,7 @@ The problem with this approach is slow training. The reason is partly that if an
 
 \subsubsection{Policy Gradient}
 
-Policy gradient methods are in contrast with the methods outlined above because they don't learn state- or action-value functions, instead they directly learn an optimal (stochastic) policy. Briefly, these algorithms use (another) neural network that represents the policy, and therefore returns probabilities choosing a given action in a given state. This leads to using the outputs of the neural network directly while playing the games during training, not the $\epsilon$-greedy technique. An advantage of this method is that there is no sharp boundary between the currently best estimated action and the second best, unlike for $\epsilon$-greedy. \NOTE{A}{Maybe add an equation. The problem is that it is a bit out of nowhere without derivation, and the derivation is a bit long.}
+Policy gradient methods are in contrast with the methods outlined above because they don't\NOTE{T}{do not} learn state- or action-value functions, instead they directly learn an optimal (stochastic) policy. Briefly, these algorithms use (another) neural network that represents the policy, and therefore returns probabilities choosing a given action in a given state. This leads to using the outputs of the neural network directly while playing the games during training, not the $\epsilon$-greedy technique. An advantage of this method is that there is no sharp boundary between the currently best estimated action and the second best, unlike for $\epsilon$-greedy. \NOTE{A}{Maybe add an equation. The problem is that it is a bit out of nowhere without derivation, and the derivation is a bit long.}
 
 
 
@@ -340,7 +340,7 @@ We still have to address the question of why to choose the secondary server at r
 
 \subsection{Software and Hardware}
 
-\NOTE{D}{This section is a bit verbose. You might need to reduce its length.}
+\NOTE{D}{This section is a bit verbose. You might need to reduce its length.}\NOTE{T}{I agree with Dimitris. I don't think you need to justify the use of Python and libraries/IDE in such detail.}
 
 For the project I chose to use Python as the programming language, for several reasons. The project has a large experimental part, trying out slight modifications quickly, writing a short script to test a hypothesis, etc., and Python is very convenient for such experimentation due to its compact syntax, and extensive library support (e.g. numpy\NOTE{D}{Add citation https://numpy.org/citing-numpy/}, matplotlib\NOTE{D}{Add citation https://matplotlib.org/stable/users/project/citing.html}). This library support comes with thorough documentation and a strong community, making it fairly easy to fix errors. I also used Python's object-oriented features for implementing the flexible evaluation environment. Perhaps the most important reason for choosing Python is its support for Deep Learning which I used in the Deep Q-Learning algorithm. For this, I chose Pytorch \cite{ketkar2021pytorch}\NOTE{D}{The correct citation is ``PyTorch: an imperative style, high-performance deep learning library''}, which is flexible, and increasingly popular deep learning library, supporting easy experimentation.
 
@@ -363,6 +363,7 @@ We had biweekly, and sometimes weekly meetings with my supervisors where we care
 I used LaTex\NOTE{D}{\LaTeX} for the dissertation, due to its support for custom formatting, references, and mathematical notation. I have written the dissertation in Overleaf, an online LaTex editor, due to its collaborative features, that made it easy to exchange comments with my supervisors. I also included the dissertation in the Git repository, regularly updating from Overleaf.
 
 \NOTE{A}{Maybe risk saying some fancy Spiral methodology?}
+\NOTE{T}{I think this subsection can be shortened.}
 
 
 \subsection{Risk Assessment}
@@ -372,7 +373,7 @@ Now I present the risk assessment of the project, which helped me prioritise com
 \begin{itemize}
     \item Background Reading
     
-    Low risk, Medium difficulty
+    Low risk, Medium difficulty \NOTE{T}{Layout, move this into the previous line. Maybe also highlight the title of the bullet in bold face or sth}
     
     I had no previous knowledge at all about RL, or Balls into Bins\NOTE{D}{Mention that the material goes well beyond the scope of the relevant courses.}, so I had to do extensive background reading in both. Coming with a strong mathematical, and algorithms background I was confident that I will succeed in understanding both topics. Background reading was successful, I gained a deep understanding of the Balls into Bins literature, and explore the relevant parts of RL. The largest challenge was understanding the proofs in Balls into Bins papers, but I considered it as an extension, and I eventually succeeded and gained valuable insights.
     \item Implementing Deep Reinforcement Learning
