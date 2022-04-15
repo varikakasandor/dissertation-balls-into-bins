@@ -4,7 +4,6 @@ import time
 from os import mkdir
 
 import numpy as np
-import torch.optim as optim
 import wandb
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import scale

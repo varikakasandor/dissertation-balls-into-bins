@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 10
-M = 10
+N = 30
+M = 30
 DICT_LIMIT = 6000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -214,6 +214,6 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
 
 if __name__ == "__main__":
     start_time = time.time()
-    strategy = find_best_strategy(use_threshold_dp=False)
-    #analyse_probability_distribution(strategy, include_intermediate_states=False)
+    strategy = find_best_strategy()
+    analyse_probability_distribution(strategy, include_intermediate_states=False)
     print("--- %s seconds ---" % (time.time() - start_time))
