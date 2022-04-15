@@ -66,7 +66,7 @@ def compare_strategies(nmks=NMKS, runs=RUNS, strategies=STRATEGIES, reward_fun=R
                                                      print_behaviour=print_behaviour)
 
             df = pd.DataFrame(data=scores, columns=["score"])
-            output_path = f'{n}_{m}_{k}_{strategy_name}.csv'
+            output_path = f'data/{n}_{m}_{k}_{strategy_name}.csv'
             df.to_csv(output_path, mode='a', index=False, header=not exists(output_path))
 
 
