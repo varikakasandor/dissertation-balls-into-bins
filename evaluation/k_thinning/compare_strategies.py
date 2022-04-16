@@ -14,7 +14,7 @@ from k_thinning.strategies.random_strategy import RandomStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
 NMKS = ((5, 25, 2), (5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 2), (20, 50, 3), (20, 50, 5), (20, 50, 10))
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "find_best_strategy", "threshold")  # , "dqn")
+STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold")  # , "dqn")
 RUNS = 100
 RE_TRAIN_DQN = 5
 PRINT_BEHAVIOUR = False
@@ -55,7 +55,7 @@ def compare_strategies(nmks=NMKS, runs=RUNS, strategies=STRATEGIES, reward_fun=R
                 elif strategy_name == "threshold":
                     hyperparameters = get_threshold_hyperparameters(n=n, m=m, k=k)
                     strategy = TheThresholdStrategy(n=n, m=m, k=k, **hyperparameters)
-                elif strategy_name == "find_best_strategy":
+                elif strategy_name == "dp":
                     if n > 50 or m > 70:  # these are out of the feasible range
                         continue
                     strategy = DPStrategy(n=n, m=m, k=k, reward_fun=reward_fun)
