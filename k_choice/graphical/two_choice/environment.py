@@ -7,9 +7,9 @@ from k_choice.graphical.two_choice.strategies.dp_strategy import DPStrategy
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegularGraph
 
-M = 5
+M = 10
 N = 5
-D = 4
+D = 2
 GRAPH = RandomRegularGraph(N, D)
 STRATEGY = DPStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
@@ -22,10 +22,6 @@ def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_
     random_edges = random.choices(graph.edge_list, k=m)
     for i in range(m):
         bin1, bin2 = random_edges[i]
-        if loads[bin1] > loads[bin2]:  # for output clarity I always set the first bin to the lesser loaded one
-            tmp = bin1
-            bin1 = bin2
-            bin2 = tmp
         if print_behaviour:
             print(f"Ball number {i}, bin1 load {loads[bin1]}, bin2 load {loads[bin2]}, chosen", end=": ")
         if strategy.decide_(bin1, bin2):
@@ -36,9 +32,6 @@ def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_
             chosen_bin = bin2
             if print_behaviour:
                 print(f"SECOND")
-
-        """if i < 8 and loads[chosen_bin] > loads[bin1]:
-            print(loads, (bin1, bin2))"""
 
         loads[chosen_bin] += 1
 
