@@ -10,23 +10,24 @@ N = 10
 M = 10
 GRAPH = CompleteGraph(N)
 DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
+PRINT_BEHAVIOUR = True
 
 
 def REWARD_FUN(loads):
     return -max(loads)
 
 
-def dp_helper(loads_tuple, memo, strategy, graph=GRAPH, m=M, reward=REWARD_FUN, dict_limit=DICT_LIMIT):
+def dp(loads_tuple, memo, strategy, graph=GRAPH, m=M, reward_fun=REWARD_FUN, dict_limit=DICT_LIMIT):
     if loads_tuple in memo:
         return memo[loads_tuple]
     loads = list(loads_tuple)
     if sum(loads) == m:
-        return reward(loads)
+        return reward_fun(loads)
 
     next_vals = []
     for node in range(graph.n):
         loads[node] += 1
-        next_vals.append(dp_helper(tuple(loads), memo, strategy, reward=reward, graph=graph, m=m))
+        next_vals.append(dp(tuple(loads), memo, strategy, reward_fun=reward_fun, graph=graph, m=m))
         loads[node] -= 1
 
     avg = 0
@@ -41,18 +42,19 @@ def dp_helper(loads_tuple, memo, strategy, graph=GRAPH, m=M, reward=REWARD_FUN, 
     return avg
 
 
-def dp(graph=GRAPH, m=M, reward=REWARD_FUN):
+def find_best_strategy(graph=GRAPH, m=M, reward_fun=REWARD_FUN, print_behaviour=PRINT_BEHAVIOUR):
     memo = {}
     strategy = {}
-    score = dp_helper(tuple([0] * graph.n), memo, strategy, reward=reward, graph=graph, m=m)
-    return score , strategy
+    score = dp(tuple([0] * graph.n), memo, strategy, reward_fun=reward_fun, graph=graph, m=m)
+    if print_behaviour:
+        print(f"With {N} bins and {M} balls on a {GRAPH}, the best achievable expected maximum load is {-score}")
+    return strategy
 
 
 if __name__ == "__main__":
     start_time = time.time()
-    score, strategy = dp()
-    print(
-        f"With {N} bins and {M} balls on a {GRAPH}, the best achievable expected maximum load is {-score}")
+    score, strategy = find_best_strategy()
+
 
     # for ((loads, (x, y)), decision) in strategy.items():
     #    if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):

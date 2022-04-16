@@ -2,14 +2,16 @@ import random
 
 from k_choice.graphical.two_choice.strategies.greedy_strategy import GreedyStrategy
 from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
+from k_choice.graphical.two_choice.strategies.dp_strategy import DPStrategy
+
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegularGraph
 
-M = 40
-N = 16
+M = 5
+N = 5
 D = 4
 GRAPH = RandomRegularGraph(N, D)
-STRATEGY = GreedyStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
+STRATEGY = DPStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
 RUNS = 20
 PRINT_BEHAVIOUR = False  # True
