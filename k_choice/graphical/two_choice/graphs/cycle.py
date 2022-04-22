@@ -10,6 +10,10 @@ class Cycle(GraphBase):
         self._edge_list = [(i, (i + 1) % n) for i in range(n)]
 
     @property
+    def name(self):
+        return "cycle"
+
+    @property
     def n(self):
         return self._n
 

@@ -4,6 +4,11 @@ from abc import ABCMeta, abstractmethod
 class GraphBase(metaclass=ABCMeta):
     @property
     @abstractmethod
+    def name(self):
+        pass
+
+    @property
+    @abstractmethod
     def n(self):
         pass
 

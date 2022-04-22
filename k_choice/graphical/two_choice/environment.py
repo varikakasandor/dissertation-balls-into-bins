@@ -17,8 +17,8 @@ RUNS = 20
 PRINT_BEHAVIOUR = False  # True
 
 
-def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
-    loads = [0] * n
+def run_strategy(graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+    loads = [0] * graph.n
     random_edges = random.choices(graph.edge_list, k=m)
     for i in range(m):
         bin1, bin2 = random_edges[i]
@@ -39,11 +39,11 @@ def run_strategy(n=N, graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_
     return score
 
 
-def run_strategy_multiple_times(n=N, graph=GRAPH, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD,
+def run_strategy_multiple_times(graph=GRAPH, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD,
                                 print_behaviour=PRINT_BEHAVIOUR):
     scores = []
     for _ in range(runs):
-        score = run_strategy(n=n, graph=graph, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
+        score = run_strategy(graph=graph, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs

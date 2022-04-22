@@ -5,9 +5,9 @@ from datetime import datetime
 from k_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 5
-M = 35
-K = 3
+N = 20
+M = 50
+K = 10
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
@@ -49,8 +49,8 @@ BATCH_SIZE = 64
 EPS_START = 0.2
 EPS_END = 0.04
 EPS_DECAY = 4200
-TRAIN_EPISODES = 70
-PRE_TRAIN_EPISODES = 30
+TRAIN_EPISODES = 5
+PRE_TRAIN_EPISODES = 5
 TARGET_UPDATE_FREQ = 20
 MEMORY_CAPACITY = 800
 EVAL_RUNS_TRAIN = 1

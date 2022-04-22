@@ -29,9 +29,12 @@ def load_best_model(n=N, m=M, k=K, nn_type=NN_TYPE, device=DEVICE):
     return None
 
 
-def evaluate(trained_model, n=N, m=M, k=K, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL):
+def evaluate(trained_model, n=N, m=M, k=K, reward_fun=REWARD_FUN, eval_runs_eval=EVAL_RUNS_EVAL, use_normalised=USE_NORMALISED,
+             max_threshold=MAX_THRESHOLD):
+    if use_normalised:
+        max_threshold -= m // n
     avg_score = evaluate_q_values(trained_model, n=n, m=m, k=k, reward=reward_fun, eval_runs=eval_runs_eval,
-                                  print_behaviour=False)  # TODO: set back print_behaviour to True
+                                  use_normalised=use_normalised, max_threshold=max_threshold)
     return avg_score
 
 
@@ -47,7 +50,7 @@ def compare(n=N, m=M, k=K, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY
                           batch_size=batch_size, eps_start=eps_start, eps_end=eps_end,
                           max_threshold=max_threshold, optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
-                          patience=patience, print_behaviour=print_behaviour, print_progress=print_progress, nn_model=NN_MODEL,
+                          patience=patience, print_progress=print_progress, nn_model=NN_MODEL,
                           device=device)
     current_model_performance = evaluate(current_model, n=n, m=m, k=k, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval)
     print(

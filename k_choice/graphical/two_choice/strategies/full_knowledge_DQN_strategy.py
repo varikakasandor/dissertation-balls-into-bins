@@ -9,7 +9,8 @@ from k_choice.graphical.two_choice.strategies.strategy_base import StrategyBase
 
 class FullKnowledgeDQNStrategy(StrategyBase):
 
-    def __init__(self, graph: GraphBase, m, nn_model=GeneralNet, nn_type="general_net_hypercube", use_pre_trained=True):
+    def __init__(self, graph: GraphBase, m, use_pre_trained=True,
+                 nn_type="general_net_hypercube", **kwargs):
         super(FullKnowledgeDQNStrategy, self).__init__(graph, m)
         existing_model = load_best_model(n=graph.n, m=m, nn_type=nn_type)
         if existing_model is None or not use_pre_trained:
@@ -20,7 +21,7 @@ class FullKnowledgeDQNStrategy(StrategyBase):
                 version = "_tmp"
             elif existing_model is None and use_pre_trained:
                 print("There is no trained model yet with the given parameters, so a new one will be trained now.")
-            self.model = train(graph=graph, m=m, nn_model=nn_model, optimise_freq=int(sqrt(m)))
+            self.model = train(graph=graph, m=m, **kwargs)
             torch.save(self.model.state_dict(), get_best_model_path(n=graph.n, m=m, nn_type=nn_type)[:-4] + version + '.pth')
         else:
             self.model = existing_model

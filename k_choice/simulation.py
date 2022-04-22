@@ -2,8 +2,8 @@ import random
 
 from k_choice.maths_results import one_choice_high_probability_maximum_load, two_choice_high_probability_maximum_load
 
-N = 10
-M = 10
+N = 50
+M = 200
 RUNS = 1000
 REWARD = max
 PRINT_BEHAVIOUR = True

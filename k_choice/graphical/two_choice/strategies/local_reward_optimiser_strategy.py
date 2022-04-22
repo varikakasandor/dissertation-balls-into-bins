@@ -4,8 +4,8 @@ from k_choice.graphical.two_choice.strategies.strategy_base import StrategyBase
 
 
 class LocalRewardOptimiserStrategy(StrategyBase):
-    def __init__(self, n, m):
-        super(LocalRewardOptimiserStrategy, self).__init__(n, m)
+    def __init__(self, graph, m):
+        super(LocalRewardOptimiserStrategy, self).__init__(graph, m)
 
     def decide(self, bin1, bin2):
         curr_max_load = max(self.loads)

@@ -30,6 +30,10 @@ class RandomRegularGraph(GraphBase):
         return adj
 
     @property
+    def name(self):
+        return "random_regular"
+
+    @property
     def n(self):
         return self._n
 

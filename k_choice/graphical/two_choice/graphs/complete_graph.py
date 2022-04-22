@@ -10,6 +10,10 @@ class CompleteGraph(GraphBase):
         self._edge_list = [(i, j) for i in range(n) for j in range(n)]
 
     @property
+    def name(self):
+        return "complete"
+
+    @property
     def n(self):
         return self._n
 
