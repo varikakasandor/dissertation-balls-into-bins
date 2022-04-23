@@ -178,5 +178,5 @@ if __name__ == "__main__":
     }
 
     sweep_config['parameters'] = parameters_dict
-    sweep_id = wandb.sweep(sweep_config, project=f"two_thinning_{N}_{M}_{K}_final")
+    sweep_id = wandb.sweep(sweep_config, project=f"k_thinning_{N}_{M}_{K}_final")
     wandb.agent(sweep_id, tuning_function, count=500)

@@ -11,8 +11,10 @@ def get_dqn_hyperparameters(n, m, k):
         return -max(loads)
 
     def EVEN_PACING_FUN(start_size, n, m, all_episodes):
-        delta = max((all_episodes - n * m) * 2 // (m * (m - 1)), 0)
-        return n + ((m - 1) - start_size) * delta
+        delta = max((all_episodes - m) * 2 // (m * (m - 1)), 0)
+        if delta == 0:
+            return 1 if start_size % (m // all_episodes) == 0 else 0
+        return 1 + start_size * delta
 
     d = {
         "batch_size": 64,
