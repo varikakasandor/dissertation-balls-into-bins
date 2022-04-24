@@ -1,3 +1,117 @@
 %!TEX root = ../thesis.tex
 
 \chapter{Hyperparameters}\label{hyperparameters} 
+
+
+
+\begin{table}[h!]\label{tab:two-thinning-hyperparameters}
+\begin{threeparttable}
+\caption{\textsc{Two-Thinning} Deep Q-Learning Hyperparameters}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     32 \\ 
+$\epsilon$-start               &    0.25 \\ 
+$\epsilon$-decay         &     3500\\
+$\epsilon$-end              &     0.05 \\
+target update frequency               &     25 \\ 
+optimising frequency          &     25 \\ 
+memory capacity     &     500 \\
+evaluation runs during training             &     10 \\
+maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
+loss function               &     SmoothL1Loss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size of RNN               &     128 \\ 
+DQN - number of hidden layers of RNN         &     3 \\ 
+DQN - number of linear layers after RNN     &     2 \\
+potential function            &    negative maximum load \\
+number of curriculum learning episodes            & 50 \\ 
+using normalised domain               &     true \\ 
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+      \small
+      \item Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average values are shown for the other hyperparameters.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+
+
+
+\begin{table}[h!]\label{tab:k-thinning-hyperparameters}
+\begin{threeparttable}
+\caption{\textsc{K-Thinning} Deep Q-Learning Hyperparameters}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     32 \\ 
+$\epsilon$-start               &    0.25 \\ 
+$\epsilon$-decay         &     3500\\
+$\epsilon$-end              &     0.05 \\
+target update frequency               &     25 \\ 
+optimising frequency          &     25 \\ 
+memory capacity     &     500 \\
+evaluation runs during training             &     10 \\
+maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
+loss function               &     SmoothL1Loss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size of RNN               &     128 \\ 
+DQN - number of hidden layers of RNN         &     3 \\ 
+DQN - number of linear layers after RNN     &     2 \\
+potential function            &    negative maximum load \\
+number of curriculum learning episodes            & 50 \\ 
+using normalised domain               &     true \\ 
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+      \small
+      \item TODO
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+
+
+\begin{table}[h!]\label{tab:graphical-k-choice-hyperparameters}
+\begin{threeparttable}
+\caption{\textsc{Graphical-K-Choice} Deep Q-Learning Hyperparameters}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     32 \\ 
+$\epsilon$-start               &    0.25 \\ 
+$\epsilon$-decay         &     3500\\
+$\epsilon$-end              &     0.05 \\
+target update frequency               &     25 \\ 
+optimising frequency          &     25 \\ 
+memory capacity     &     500 \\
+evaluation runs during training             &     10 \\
+maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
+loss function               &     SmoothL1Loss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size of RNN               &     128 \\ 
+DQN - number of hidden layers of RNN         &     3 \\ 
+DQN - number of linear layers after RNN     &     2 \\
+potential function            &    negative maximum load \\
+number of curriculum learning episodes            & 50 \\ 
+using normalised domain               &     true \\ 
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+      \small
+      \item TODO
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
