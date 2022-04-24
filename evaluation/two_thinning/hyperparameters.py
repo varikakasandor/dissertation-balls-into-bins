@@ -106,7 +106,7 @@ def get_dqn_hyperparameters(n, m):
             "eps_decay": 3500,
             "num_episodes": 1000,  # TODO
             "pre_train_episodes": 50,  # TODO
-            "target_update_freq": 25,
+            "target_update_freq": 20,
             "memory_capacity": 450,
             "eval_runs": 5,
             "eval_parallel_batch_size": 64,
@@ -118,6 +118,35 @@ def get_dqn_hyperparameters(n, m):
             "nn_model": GeneralNet,
             "nn_type": "general_net",
             "loss_function": nn.MSELoss(),
+            "lr": 0.005,
+            "nn_hidden_size": 128,
+            "nn_rnn_num_layers": 3,
+            "nn_num_lin_layers": 2,
+            "optimizer_method": torch.optim.Adam,
+            "potential_fun": MAX_LOAD_POTENTIAL,
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
+    else:
+        return {
+            "batch_size": 32,
+            "eps_start": 0.25,
+            "eps_end": 0.05,
+            "eps_decay": 3500,
+            "num_episodes": 1000,  # TODO
+            "pre_train_episodes": 50,  # TODO
+            "target_update_freq": 25,
+            "memory_capacity": 500,
+            "eval_runs": 10,
+            "eval_parallel_batch_size": 64,
+            "patience": 1000,
+            "use_normalised": True,
+            "print_progress": True,
+            "optimise_freq": 25,
+            "max_threshold": m // n + ceil(sqrt(log(n))),
+            "nn_model": GeneralNet,
+            "nn_type": "general_net",
+            "loss_function": nn.SmoothL1Loss(),
             "lr": 0.005,
             "nn_hidden_size": 128,
             "nn_rnn_num_layers": 3,

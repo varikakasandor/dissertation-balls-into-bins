@@ -6,6 +6,9 @@ N = 20
 M = 50
 K = 3
 
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
 @functools.lru_cache()
 def number_of_increasing_partitions(m=M, n=N):
     if m == 0 or n == 1:

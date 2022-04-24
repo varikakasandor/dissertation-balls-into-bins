@@ -38,7 +38,7 @@ def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
     # m + x*m*(m-1)/2 = all_episodes, giving (changing x to delta, adding max)
     delta = max((all_episodes-m) * 2 // (m * (m - 1)), 0)
     if delta == 0:
-        return 1 if start_size % (m // all_episodes) == 0 else 0  # make sure to have at most all_episodes overall
+        return 1 if start_size % max((m // all_episodes), 1) == 0 else 0  # make sure to have at most all_episodes overall
     return 1 + start_size * delta  # later choices are more important!
 
 

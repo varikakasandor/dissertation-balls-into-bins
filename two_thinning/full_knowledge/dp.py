@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 30
-M = 30
+N = 5
+M = 5
 DICT_LIMIT = 6000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
