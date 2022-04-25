@@ -127,6 +127,35 @@ def get_dqn_hyperparameters(n, m):
             "pacing_fun": EVEN_PACING_FUN
         }
 
+    elif n == 50 and m == 2500:
+        return {
+            "batch_size": 32,
+            "eps_start": 0.2,
+            "eps_end": 0.05,
+            "eps_decay": 3500,
+            "num_episodes": 1000,  # TODO
+            "pre_train_episodes": 50,  # TODO
+            "target_update_freq": 20,
+            "memory_capacity": 450,
+            "eval_runs": 3,
+            "eval_parallel_batch_size": 64,
+            "patience": 1000,
+            "use_normalised": True,
+            "print_progress": True,
+            "optimise_freq": 25,
+            "max_threshold": 56,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net",
+            "loss_function": nn.SmoothL1Loss(),
+            "lr": 0.005,
+            "nn_hidden_size": 128,
+            "nn_rnn_num_layers": 3,
+            "nn_num_lin_layers": 2,
+            "optimizer_method": torch.optim.Adam,
+            "potential_fun": STD_POTENTIAL,
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
     else:
         return {
             "batch_size": 32,

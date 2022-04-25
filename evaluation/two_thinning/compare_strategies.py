@@ -16,7 +16,7 @@ from two_thinning.full_knowledge.RL.DQN.constants import MAX_LOAD_POTENTIAL
 
 from evaluation.two_thinning.hyperparameters import get_dqn_hyperparameters, get_threshold_hyperparameters
 
-NMS = ((20, 400), )  # ((5, 5), (5, 10), (5, 25), (20, 20), (20, 60), (20, 400), (50, 50), (50, 200), (50, 2500))
+NMS = ((50, 2500), )  # ((5, 5), (5, 10), (5, 25), (20, 20), (20, 60), (20, 400), (50, 50), (50, 200), (50, 2500))
 STRATEGIES = ("dqn", )  # ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dqn", "threshold")
 RUNS = 100
 RE_TRAIN_DQN = 1
@@ -33,8 +33,6 @@ def compare_strategies(nms=NMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
         for strategy_name in strategies:
             print(f"n={n}, m={m}, strategy={strategy_name} started.")
             if strategy_name == "dqn":
-                if n > 100 or m > 500:  # these are out of the feasible range
-                    continue
                 hyperparameters = get_dqn_hyperparameters(n=n, m=m)
                 scores = []
                 for _ in range(re_train_dqn):

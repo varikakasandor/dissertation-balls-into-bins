@@ -7,7 +7,7 @@ from helper.helper import std
 
 N = 20
 M = 50
-K = 10
+K = 3
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
