@@ -22,8 +22,8 @@ PATIENCE = 500
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 3 * int(sqrt(M))
-NN_MODEL = GeneralNet
-NN_TYPE = "general_net_hypercube"  # not actually NN_TYPE but also what graph we use
+NN_MODEL = FullGraphicalTwoChoiceOneHotFCNet
+NN_TYPE = "one_hot_fc_net_hypercube"  # not actually NN_TYPE but also what graph we use
 
 
 def POTENTIAL_FUN(graph: GraphBase, loads):  # TODO: try smoothing out
