@@ -47,7 +47,10 @@ def run_strategy_multiple_times(graph=GRAPH, m=M, runs=RUNS, strategy=STRATEGY, 
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
-    print(f"The average score of this strategy is {avg_score}")
+    if print_behaviour:
+        print(f"The average score of this strategy is {avg_score}")
+        print(f"The average normalised max load of this strategy is {-avg_score - m / graph.n}.")
+    return scores
 
 
 if __name__ == "__main__":

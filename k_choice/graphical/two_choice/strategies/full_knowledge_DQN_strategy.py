@@ -1,5 +1,6 @@
 from math import *
 
+from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.evaluate import load_best_model, get_best_model_path
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train, greedy
@@ -10,7 +11,7 @@ from k_choice.graphical.two_choice.strategies.strategy_base import StrategyBase
 class FullKnowledgeDQNStrategy(StrategyBase):
 
     def __init__(self, graph: GraphBase, m, use_pre_trained=True,
-                 nn_type="general_net_hypercube", **kwargs):
+                 nn_type=NN_TYPE, **kwargs):
         super(FullKnowledgeDQNStrategy, self).__init__(graph, m)
         existing_model = load_best_model(n=graph.n, m=m, nn_type=nn_type)
         if existing_model is None or not use_pre_trained:

@@ -16,7 +16,7 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     model = FullGraphicalTwoChoiceFCNet if nn_type in ["fc_cycle", "fc_hypercube", "fc_random"] else \
         GeneralNet if nn_type in ["general_net_cycle", "general_net_hypercube", "general_net_random"] else \
-            GemeralNet
+            GeneralNet
 
     try:
         best_model = model(n=n, max_possible_load=m, device=device)

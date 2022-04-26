@@ -27,10 +27,10 @@ class FullGraphicalTwoChoiceFCNet(nn.Module):
         return x
 
 
-class GemeralNet(nn.Module):
+class GeneralNet(nn.Module):
 
     def __init__(self, n, max_possible_load, hidden_size, num_lin_layers, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
-        super(GemeralNet, self).__init__()
+        super(GeneralNet, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.device = device

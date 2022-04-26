@@ -4,11 +4,12 @@ import random
 from math import exp, ceil, log
 
 import torch.optim as optim
+import wandb
 
 from helper.replay_memory import ReplayMemory, Transition
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
 from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
-
+from k_choice.simulation import sample_one_choice
 
 
 def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_decay, device):
@@ -29,9 +30,7 @@ def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_
 def greedy(policy_net, loads, edge, batched=False):
     with torch.no_grad():
         if batched:
-            """options = policy_net(torch.tensor(loads))
-            return options.max(1)[1].type(dtype=torch.int64).tolist()"""
-            pass  # TODO
+            pass
         else:
             x, y = edge
             with torch.no_grad():
@@ -60,7 +59,7 @@ def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs
         return avg_score
 
 
-def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device):
+def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criterion, device):
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -81,7 +80,6 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
 
 
-    criterion = nn.SmoothL1Loss()
     loss = criterion(state_action_values, expected_state_action_values)
 
     # Optimize the model
@@ -92,7 +90,7 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     optimizer.step()
 
 
-def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,
+def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,  loss_function=LOSS_FUCNTION,
           reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN, report_wandb=False, pre_train_episodes=PRE_TRAIN_EPISODES,
           batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, lr=LR, pacing_fun=PACING_FUN, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
           eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, nn_hidden_size=NN_HIDDEN_SIZE,
@@ -102,21 +100,28 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
     max_possible_load = min(m, m // graph.n + 2 * ceil(sqrt(log(graph.n))))
     policy_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
     target_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
-    best_net = nn_model(n=graph.n, max_possible_load=m, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
+    best_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters())
+    optimizer = optimizer_method(policy_net.parameters(), lr=lr)
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
     best_eval_score = None
     not_improved = 0
 
-    for ep in range(num_episodes):
-        loads = [0] * graph.n
+    start_loads = []
+    for start_size in reversed(range(m)):  # pretraining (i.e. curriculum learning)
+        for _ in range(pacing_fun(start_size=start_size, graph=graph, m=m, all_episodes=pre_train_episodes)):
+            start_loads.append(sample_one_choice(n=graph.n, m=start_size))
+    for _ in range(num_episodes):  # training
+        start_loads.append([0] * graph.n)
+
+    for ep, loads in enumerate(start_loads):
         edge = random.choice(graph.edge_list)
         for i in range(m):
+            torch.cuda.empty_cache()
             chosen = epsilon_greedy(policy_net=policy_net, loads=loads, edge=edge, steps_done=steps_done,
                                        eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             old_loads = copy.deepcopy(loads)
@@ -136,11 +141,14 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
 
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
-                               batch_size=batch_size,
-                               device=device)
+                               batch_size=batch_size, criterion=loss_function, device=device)
         curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs)
         if best_eval_score is None or curr_eval_score >= best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=10 * eval_runs)
+            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=5 * eval_runs)
+
+        if report_wandb:
+            wandb.log({"score": curr_eval_score})
+
         if best_eval_score is None or curr_eval_score >= best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
