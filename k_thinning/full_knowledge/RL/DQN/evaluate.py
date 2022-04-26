@@ -56,8 +56,8 @@ def compare(n=N, m=M, k=K, train_episodes=TRAIN_EPISODES, memory_capacity=MEMORY
     print(
         f"With {m} balls and {n} bins the trained current DQN model has an average score/maximum load of {current_model_performance}.")
 
-    if os.path.exists(get_best_model_path(n=n, m=m, nn_type=nn_type)):
-        best_model = load_best_model(n=n, m=m, k=k, nn_type=nn_type, device=device)
+    best_model = load_best_model(n=n, m=m, k=k, nn_type=nn_type, device=device)
+    if best_model is not None:
         best_model_performance = evaluate(best_model, n=n, m=m, k=k, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval)
         print(f"The average maximum load of the best model is {best_model_performance}.")
         if current_model_performance > best_model_performance:
