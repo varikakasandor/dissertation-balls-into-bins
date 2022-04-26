@@ -181,10 +181,10 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
                                batch_size=batch_size, criterion=loss_function, device=device)
 
-        curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun,
+        curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, k=k, max_threshold=max_threshold, reward=reward_fun,
                                             eval_runs=eval_runs, use_normalised=use_normalised)
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun,
+            curr_eval_score = evaluate_q_values(policy_net, n=n, m=m, k=k, max_threshold=max_threshold, reward=reward_fun,
                                                 eval_runs=5 * eval_runs, use_normalised=use_normalised)
         if report_wandb:
             wandb.log({"score": curr_eval_score})

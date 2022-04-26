@@ -14,7 +14,7 @@ from k_thinning.strategies.random_strategy import RandomStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
 NMKS = ((5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 3), (20, 50, 5), (20, 50, 10))  # (5, 25, 2), (20, 50, 2) they are analysed for two-thinning already
-STRATEGIES = ("dqn", )  #("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
+STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
 RUNS = 100
 RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
