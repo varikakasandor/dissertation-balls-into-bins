@@ -13,10 +13,10 @@ from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
 from k_thinning.strategies.random_strategy import RandomStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
-NMKS = ((5, 25, 2), (5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 2), (20, 50, 3), (20, 50, 5), (20, 50, 10))
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold")  # , "dqn")
+NMKS = ((5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 3), (20, 50, 5), (20, 50, 10))  # (5, 25, 2), (20, 50, 2) they are analysed for two-thinning already
+STRATEGIES = ("dqn", )  #("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
 RUNS = 100
-RE_TRAIN_DQN = 5
+RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
 
 
@@ -30,8 +30,6 @@ def compare_strategies(nmks=NMKS, runs=RUNS, strategies=STRATEGIES, reward_fun=R
         for strategy_name in strategies:
             print(f"n={n}, m={m}, k={k} strategy={strategy_name} started.")
             if strategy_name == "dqn":
-                if n > 100 or m > 200:  # these are out of the feasible range
-                    continue
                 hyperparameters = get_dqn_hyperparameters(n=n, m=m, k=k)
                 scores = []
                 for _ in range(re_train_dqn):
@@ -56,8 +54,6 @@ def compare_strategies(nmks=NMKS, runs=RUNS, strategies=STRATEGIES, reward_fun=R
                     hyperparameters = get_threshold_hyperparameters(n=n, m=m, k=k)
                     strategy = TheThresholdStrategy(n=n, m=m, k=k, **hyperparameters)
                 elif strategy_name == "dp":
-                    if n > 50 or m > 70:  # these are out of the feasible range
-                        continue
                     strategy = DPStrategy(n=n, m=m, k=k, reward_fun=reward_fun)
                 else:
                     raise Exception("No such strategy is known, check spelling!")

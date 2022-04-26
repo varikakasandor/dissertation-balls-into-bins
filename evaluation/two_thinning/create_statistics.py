@@ -41,5 +41,7 @@ def create_csv(nms=NMS, strategies=STRATEGIES):
     output_path = f"data/comparison.csv"
     df.to_csv(output_path)
     return df
+
+
 if __name__ == "__main__":
     create_csv()

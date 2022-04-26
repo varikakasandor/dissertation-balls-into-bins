@@ -10,7 +10,7 @@ from k_thinning.full_knowledge.RL.DQN.train import train
 
 N = 5
 M = 25
-K = 3
+K = 10
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         "max_threshold": {  # TODO: always set independently for new N,M
             'distribution': 'int_uniform',
             'min': 4,
-            'max': 8
+            'max': 7
         },
         "loss_function": {
             "values": ["MSELoss", "HuberLoss", "L1Loss", "SmoothL1Loss"]

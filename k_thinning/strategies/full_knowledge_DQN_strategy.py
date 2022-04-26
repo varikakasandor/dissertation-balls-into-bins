@@ -30,10 +30,7 @@ class FullKnowledgeDQNStrategy(StrategyBase):
 
     def decide(self, bin):
         a = greedy(self.model, self.loads, self.choices_left)
-        if self.loads[bin] <= a:
-            return True
-        else:
-            return False
+        return self.loads[bin] <= a
 
     def note(self, bin):
         pass

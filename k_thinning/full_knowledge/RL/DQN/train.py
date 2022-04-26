@@ -34,7 +34,8 @@ def greedy(policy_net, loads, choices_left):
 
 
 def evaluate_q_values(model, n=N, m=M, k=K, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                      max_threshold=MAX_THRESHOLD, use_normalised=USE_NORMALISED, print_behaviour=PRINT_BEHAVIOUR):  # TODO: do fast version as for two_choice
+                      max_threshold=MAX_THRESHOLD, use_normalised=USE_NORMALISED,
+                      print_behaviour=PRINT_BEHAVIOUR):  # TODO: do fast version as for two_choice
     with torch.no_grad():
         sum_loads = 0
         for _ in range(eval_runs):
@@ -72,7 +73,6 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
     non_final_next_states = torch.tensor(
         [next_state for (done, next_state) in zip(batch.done, batch.next_state) if not done])
 
-
     state_action_values = policy_net(torch.tensor([x for x in batch.state]))
     state_action_values = state_action_values.gather(1,
                                                      torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
@@ -105,7 +105,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
     mkdir(save_path)
 
     max_possible_load = m
-    max_threshold = max_threshold - m // n if use_normalised else max_threshold # !!!
+    max_threshold = max_threshold - m // n if use_normalised else max_threshold  # !!!
     nn_max_threshold = 2 * max_threshold if use_normalised else max_threshold
 
     policy_net = nn_model(n=n, max_threshold=nn_max_threshold, k=k, max_possible_load=max_possible_load,
@@ -205,15 +205,7 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
                 print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
             break
 
-        if ep % target_update_freq == 0:  # TODO: decouple target update and optional user halting
-            """user_text, timed_out = timedInput(prompt="Press Y if you would like to stop the training now!\n", timeout=2)
-
-            if not timed_out and user_text == "Y":
-                print("Training has been stopped by the user.")
-                return best_net
-            else:
-                if not timed_out:
-                    print("You pressed the wrong button, it has no effect. Training continues.")"""
+        if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
     print(f"--- {(time.time() - start_time)} seconds ---")
