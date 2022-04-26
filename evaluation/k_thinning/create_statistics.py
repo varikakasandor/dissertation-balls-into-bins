@@ -17,8 +17,11 @@ def calculate_statistics(n, m, k, strategy, alpha=0.95):
         scores = np.array(df["score"].to_list())
         mean = np.mean(scores)
         sem = st.sem(scores)
-        lower, upper = st.norm.interval(alpha=alpha, loc=mean, scale=sem)
-        return mean, (upper - lower) / 2
+        if sem > 0:
+            lower, upper = st.norm.interval(alpha=alpha, loc=mean, scale=sem)
+            return mean, (upper - lower) / 2
+        else:
+            return mean, 0
     else:
         return -1, -1
 

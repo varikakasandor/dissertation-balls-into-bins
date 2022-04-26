@@ -27,26 +27,29 @@ class FullGraphicalTwoChoiceFCNet(nn.Module):
         return x
 
 
-class FullGraphicalTwoChoiceOneHotFCNet(nn.Module):
+class GemeralNet(nn.Module):
 
-    def __init__(self, n, max_possible_load, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
-        super(FullGraphicalTwoChoiceOneHotFCNet, self).__init__()
+    def __init__(self, n, max_possible_load, hidden_size, num_lin_layers, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+        super(GemeralNet, self).__init__()
         self.n = n
         self.max_possible_load = max_possible_load
         self.device = device
-        self.hidden_size = self.n
+        self.hidden_size = hidden_size
+        self.num_lin_layers = num_lin_layers
 
-        self.fc = nn.Sequential(  # TODO: maybe try with just two layers
-            nn.Linear(self.n * (self.max_possible_load + 1), self.hidden_size),
-            nn.ReLU(),
-            nn.Linear(self.hidden_size, self.hidden_size),
-            nn.ReLU(),
-            nn.Linear(self.hidden_size, self.n)
-        )
+        layers = []
+        curr_size = self.n * (self.max_possible_load + 1)
+        for _ in range(self.num_lin_layers-1):
+            layers.append(nn.Linear(curr_size, self.hidden_size))
+            layers.append(nn.ReLU())
+            curr_size = self.hidden_size
+        layers.append(nn.Linear(curr_size, self.n))
 
+        self.fc = nn.Sequential(*layers)
         self.to(self.device).double()
 
     def forward(self, x):
+        x = x.minimum(torch.tensor(self.max_possible_load))
         x = F.one_hot(x, num_classes=self.max_possible_load + 1).flatten(-2, -1).double().to(self.device)
         x = self.fc(x)
         return x

@@ -1,7 +1,7 @@
 import time
 import copy
 import random
-from math import exp
+from math import exp, ceil, log
 
 import torch.optim as optim
 
@@ -9,8 +9,6 @@ from helper.replay_memory import ReplayMemory, Transition
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
 from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 
-
-# from pytimedinput import timedInput # Works only with interactive interpreter
 
 
 def epsilon_greedy(policy_net, loads, edge, steps_done, eps_start, eps_end, eps_decay, device):
@@ -43,31 +41,6 @@ def greedy(policy_net, loads, edge, batched=False):
                 else:
                     return y
 
-
-def evaluate_q_values_faster(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
-                             batch_size=EVAL_PARALLEL_BATCH_SIZE):
-    pass
-    """batches = [batch_size] * (eval_runs // batch_size)
-    if eval_runs % batch_size != 0:
-        batches.append(eval_runs % batch_size)
-
-    with torch.no_grad():
-        sum_loads = 0
-        for batch in batches:
-            loads = [[0] * n for _ in range(batch)]
-            for i in range(m):
-                a = greedy(model, loads, batched=True)
-                first_choices = random.choices(range(n), k=batch)
-                second_choices = random.choices(range(n), k=batch)
-                for j in range(batch):  # TODO: speed up for loop
-                    if loads[j][first_choices[j]] <= a[j]:
-                        loads[j][first_choices[j]] += 1
-                    else:
-                        loads[j][second_choices[j]] += 1
-            sum_loads += sum([reward(l) for l in loads])
-        avg_score = sum_loads / eval_runs
-        return avg_score
-"""
 
 
 def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
@@ -108,32 +81,32 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, device
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
 
 
-    criterion = nn.SmoothL1Loss()  # Huber loss TODO: maybe not the best
-    loss = criterion(state_action_values, expected_state_action_values)  # .unsqueeze(1))
+    criterion = nn.SmoothL1Loss()
+    loss = criterion(state_action_values, expected_state_action_values)
 
     # Optimize the model
     optimizer.zero_grad()
     loss.backward()
     for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)  # Gradient clipping
+        param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
 
 def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,
-          reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END,
-          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE,
-          print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, device=DEVICE):
+          reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN, report_wandb=False, pre_train_episodes=PRE_TRAIN_EPISODES,
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, lr=LR, pacing_fun=PACING_FUN, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
+          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, nn_hidden_size=NN_HIDDEN_SIZE,
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, optimizer_method=OPTIMIZER_METHOD, device=DEVICE):
     start_time = time.time()
 
-    policy_net = nn_model(n=graph.n, max_possible_load=m, device=device)
-    target_net = nn_model(n=graph.n, max_possible_load=m, device=device)
-    best_net = nn_model(n=graph.n, max_possible_load=m, device=device)
+    max_possible_load = min(m, m // graph.n + 2 * ceil(sqrt(log(graph.n))))
+    policy_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
+    target_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
+    best_net = nn_model(n=graph.n, max_possible_load=m, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters())  # TODO: see if it sets learning rate automatically
+    optimizer = optim.Adam(policy_net.parameters())
     memory = ReplayMemory(memory_capacity)
 
     steps_done = 0
@@ -164,11 +137,10 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
             if steps_done % optimise_freq == 0:
                 optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer,
                                batch_size=batch_size,
-                               device=device)  # TODO: should I not call it after every step instead only after every episode? TODO: 10*m -> num_episodes*m
-
-        curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs) # TODO: change back to ..._faster
+                               device=device)
+        curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs)
         if best_eval_score is None or curr_eval_score >= best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=10 * eval_runs)  # # TODO: change back to ..._faster
+            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=10 * eval_runs)
         if best_eval_score is None or curr_eval_score >= best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
@@ -184,15 +156,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
                 print(f"Training has stopped after episode {ep} as the eval score didn't improve anymore.")
             break
 
-        if ep % target_update_freq == 0:  # TODO: decouple target update and optional user halting
-            """user_text, timed_out = timedInput(prompt="Press Y if you would like to stop the training now!\n", timeout=2)
-
-            if not timed_out and user_text == "Y":
-                print("Training has been stopped by the user.")
-                return best_net
-            else:
-                if not timed_out:
-                    print("You pressed the wrong button, it has no effect. Training continues.")"""
+        if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
     print(f"--- {(time.time() - start_time)} seconds ---")

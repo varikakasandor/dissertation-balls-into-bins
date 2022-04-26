@@ -16,7 +16,7 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
 def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
     model = FullGraphicalTwoChoiceFCNet if nn_type in ["fc_cycle", "fc_hypercube", "fc_random"] else \
         GeneralNet if nn_type in ["general_net_cycle", "general_net_hypercube", "general_net_random"] else \
-            FullGraphicalTwoChoiceOneHotFCNet
+            GemeralNet
 
     try:
         best_model = model(n=n, max_possible_load=m, device=device)
@@ -49,7 +49,7 @@ def compare(n=N, graph: GraphBase = GRAPH, m=M, train_episodes=TRAIN_EPISODES, m
                           optimise_freq=optimise_freq,
                           eps_decay=eps_decay, target_update_freq=target_update_freq, eval_runs=eval_runs_train,
                           patience=patience, print_progress=print_progress, nn_model=nn_model,
-                          device=device, eval_parallel_batch_size=EVAL_PARALLEL_BATCH_SIZE)
+                          device=device)
     current_model_performance = evaluate(current_model, n=n, m=m, reward_fun=reward_fun, eval_runs_eval=eval_runs_eval,
                                          eval_parallel_batch_size=eval_parallel_batch_size)
     print(

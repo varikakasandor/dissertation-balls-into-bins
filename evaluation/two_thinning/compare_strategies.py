@@ -17,7 +17,7 @@ from two_thinning.full_knowledge.RL.DQN.constants import MAX_LOAD_POTENTIAL
 from evaluation.two_thinning.hyperparameters import get_dqn_hyperparameters, get_threshold_hyperparameters
 
 NMS = ((20, 50), )  # ((5, 5), (5, 10), (5, 25), (20, 20), (20, 60), (20, 400), (50, 50), (50, 200), (50, 2500))
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dqn", "threshold")
+STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "dqn", "threshold")
 RUNS = 100
 RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
