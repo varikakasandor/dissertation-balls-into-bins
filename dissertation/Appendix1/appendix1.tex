@@ -34,7 +34,7 @@ using normalised domain               &     true \\
 \end{tabular}
 \begin{tablenotes}
       \small
-      \item Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average values are shown for the other hyperparameters.
+      \item Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average/mode values are shown for the other hyperparameters.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -52,29 +52,25 @@ using normalised domain               &     true \\
 Hyperparameter             &     Value \\
 \midrule
 batch size               &     32 \\ 
-$\epsilon$-start               &    0.25 \\ 
-$\epsilon$-decay         &     3500\\
-$\epsilon$-end              &     0.05 \\
-target update frequency               &     25 \\ 
-optimising frequency          &     25 \\ 
-memory capacity     &     500 \\
+$\epsilon$-start               &    0.2 \\ 
+$\epsilon$-decay         &     3000\\
+$\epsilon$-end              &     0.06 \\
+target update frequency               &     20 \\ 
+optimising frequency          &     15 \\ 
+memory capacity     &     650 \\
 evaluation runs during training             &     10 \\
 maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
 loss function               &     SmoothL1Loss \\ 
 optimiser        &     Adam \\
 learning rate             &     0.005 \\
 DQN - hidden state size of RNN               &     128 \\ 
-DQN - number of hidden layers of RNN         &     3 \\ 
-DQN - number of linear layers after RNN     &     2 \\
-potential function            &    negative maximum load \\
-number of curriculum learning episodes            & 50 \\ 
+DQN - number of hidden layers of RNN         &     2 \\ 
+DQN - number of linear layers after RNN     &     3 \\
+potential function            &    exponential potential \\
+number of curriculum learning episodes            & 40 \\ 
 using normalised domain               &     true \\ 
 \bottomrule
 \end{tabular}
-\begin{tablenotes}
-      \small
-      \item TODO
-\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -89,29 +85,22 @@ using normalised domain               &     true \\
 \toprule
 Hyperparameter             &     Value \\
 \midrule
-batch size               &     32 \\ 
-$\epsilon$-start               &    0.25 \\ 
-$\epsilon$-decay         &     3500\\
-$\epsilon$-end              &     0.05 \\
+batch size               &     64 \\ 
+$\epsilon$-start               &    0.45 \\ 
+$\epsilon$-decay         &     4000\\
+$\epsilon$-end              &     0.06 \\
 target update frequency               &     25 \\ 
-optimising frequency          &     25 \\ 
-memory capacity     &     500 \\
+optimising frequency          &     15 \\ 
+memory capacity     &     650 \\
 evaluation runs during training             &     10 \\
-maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
-loss function               &     SmoothL1Loss \\ 
+loss function               &     HuberLoss \\ 
 optimiser        &     Adam \\
 learning rate             &     0.005 \\
-DQN - hidden state size of RNN               &     128 \\ 
-DQN - number of hidden layers of RNN         &     3 \\ 
-DQN - number of linear layers after RNN     &     2 \\
-potential function            &    negative maximum load \\
+DQN - hidden state size               &     128 \\ 
+DQN - number of linear layers     &     2 \\
+potential function            &    neighbourhood potential \\
 number of curriculum learning episodes            & 50 \\ 
-using normalised domain               &     true \\ 
 \bottomrule
 \end{tabular}
-\begin{tablenotes}
-      \small
-      \item TODO
-\end{tablenotes}
 \end{threeparttable}
 \end{table}

@@ -18,6 +18,33 @@
 
 \section{Two-Thinning}
 
+\NOTE{A}{Mention that local reward optimiser is just away from max.}
+\NOTE{A}{Explain why DP is run experimentally even though there is an exact value for its expected value - the extreme values are very rare which make the comparison less fair for 100 runs}
+\NOTE{A}{State the optimal threshold of the threshold strategy}
+
+
+
+\begin{table}[h!]
+\caption{Average reward of \textsc{Two-Thinning} strategies with $95\%$ confidence intervals}
+\label{tab:two-thinning-comparison}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
+\hline
+                                & \multicolumn{3}{c|}{$n=5$} & \multicolumn{3}{c|}{$n=20$} & \multicolumn{3}{c|}{$n=50$} \\ \hline
+                                & $m=5$ & $m=10$ & $m=15$ & $m=20$ & $m=60$ & $m=400$ & $m=50$ & $m=200$ & $m=2500$ \\ \hline
+Always Accept Strategy          & -2.26 $\pm$ 0.06 & -3.84 $\pm$ 0.1 & -7.88 $\pm$ 0.14 & -3.26 $\pm$ 0.1 & -6.68 $\pm$ 0.15 & -28.84 $\pm$ 0.32 & -3.87 $\pm$ 0.1 & -9.12 $\pm$ 0.16 & -66.66 $\pm$ 0.5 \\ \hline
+Random Strategy                 & -2.35 $\pm$ 0.07 & -3.72 $\pm$ 0.09 & -7.66 $\pm$ 0.14 & -3.21 $\pm$ 0.1 & -6.67 $\pm$ 0.15 & -28.55 $\pm$ 0.32 & -3.8 $\pm$ 0.1 & -9.02 $\pm$ 0.18 & -66.83 $\pm$ 0.48 \\ \hline
+Local Reward Optimiser Strategy & -1.82 $\pm$ 0.05 & -2.97 $\pm$ 0.05 & -6.08 $\pm$ 0.06 & -2.25 $\pm$ 0.06 & -4.75 $\pm$ 0.08 & -22.46 $\pm$ 0.09 & -2.54 $\pm$ 0.07 & -6.37 $\pm$ 0.07 & -53.98 $\pm$ 0.11 \\ \hline
+Mean Thinning Strategy          & -1.87 $\pm$ 0.07 & -3.1 $\pm$ 0.07 & -6.17 $\pm$ 0.09 & -2.56 $\pm$ 0.08 & -5.12 $\pm$ 0.1 & -22.52 $\pm$ 0.12 & -3.06 $\pm$ 0.08 & -6.79 $\pm$ 0.11 & -53.53 $\pm$ 0.15 \\ \hline
+DP Strategy                     & -1.85 $\pm$ 0.06 & -2.98 $\pm$ 0.07 & -6.06 $\pm$ 0.1 & -2.33 $\pm$ 0.1 & -4.69 $\pm$ 0.11 & TLE & -2.52 $\pm$ 0.1 & TLE & TLE \\ \hline
+Deep Q-Learning Strategy        & -1.92 $\pm$ 0.09 & -2.93 $\pm$ 0.09 & -6.2 $\pm$ 0.11 & -2.42 $\pm$ 0.1 & -4.88 $\pm$ 0.12 & -22.2 $\pm$ 0.14 & -2.5 $\pm$ 0.11 & -6.43 $\pm$ 0.11 & -53.49 $\pm$ 0.25 \\ \hline
+Threshold Strategy              & -2.18 $\pm$ 0.13 & -3.32 $\pm$ 0.13 & -6.44 $\pm$ 0.13 & -2.58 $\pm$ 0.12 & -5.58 $\pm$ 0.17 & -24.12 $\pm$ 0.19 & -2.99 $\pm$ 0.12 & -7.02 $\pm$ 0.13 & -56.73 $\pm$ 0.29 \\ \hline 
+
+\end{tabular}}
+\end{table}
+
+
 
 \NOTE{A}{5-5, 5-10, 5-25, 20-20, 20-60, 20-400, 50-50, 50-200, 50-2500}
 \NOTE{A}{How to reason about why I use X runs for evaluation? Is there any formal reasoning related to statistical significance? I couldn't find any.}
