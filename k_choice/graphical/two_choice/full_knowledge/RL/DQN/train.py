@@ -41,7 +41,6 @@ def greedy(policy_net, loads, edge, batched=False):
                     return y
 
 
-
 def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
                       print_behaviour=PRINT_BEHAVIOUR):
     with torch.no_grad():
@@ -72,13 +71,13 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
                                         zip(batch.done, batch.next_state) if not done]).to(device)
 
     state_action_values = policy_net(torch.tensor([loads for (loads, _) in batch.state]))
-    state_action_values = state_action_values.gather(1, torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
+    state_action_values = state_action_values.gather(1,
+                                                     torch.as_tensor([[a] for a in batch.action]).to(device)).squeeze()
 
     next_state_values = torch.zeros(batch_size).double().to(device)
     options = target_net(non_final_next_loads)
     next_state_values[non_final_mask] = options.gather(1, non_final_next_edge).max(1)[0].detach()
     expected_state_action_values = next_state_values + torch.as_tensor(batch.reward).to(device)
-
 
     loss = criterion(state_action_values, expected_state_action_values)
 
@@ -90,17 +89,24 @@ def optimize_model(memory, policy_net, target_net, optimizer, batch_size, criter
     optimizer.step()
 
 
-def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,  loss_function=LOSS_FUCNTION,
+def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES,
+          loss_function=LOSS_FUCNTION,
           reward_fun=REWARD_FUN, potential_fun=POTENTIAL_FUN, report_wandb=False, pre_train_episodes=PRE_TRAIN_EPISODES,
-          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, lr=LR, pacing_fun=PACING_FUN, nn_num_lin_layers=NN_NUM_LIN_LAYERS,
-          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ, nn_hidden_size=NN_HIDDEN_SIZE,
-          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL, optimizer_method=OPTIMIZER_METHOD, device=DEVICE):
+          batch_size=BATCH_SIZE, eps_start=EPS_START, eps_end=EPS_END, lr=LR, pacing_fun=PACING_FUN,
+          nn_num_lin_layers=NN_NUM_LIN_LAYERS,
+          eps_decay=EPS_DECAY, optimise_freq=OPTIMISE_FREQ, target_update_freq=TARGET_UPDATE_FREQ,
+          nn_hidden_size=NN_HIDDEN_SIZE,
+          eval_runs=EVAL_RUNS_TRAIN, patience=PATIENCE, print_progress=PRINT_PROGRESS, nn_model=NN_MODEL,
+          optimizer_method=OPTIMIZER_METHOD, device=DEVICE):
     start_time = time.time()
 
     max_possible_load = min(m, m // graph.n + 2 * ceil(sqrt(log(graph.n))))
-    policy_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
-    target_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
-    best_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size, num_lin_layers=nn_num_lin_layers, device=device)
+    policy_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size,
+                          num_lin_layers=nn_num_lin_layers, device=device)
+    target_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size,
+                          num_lin_layers=nn_num_lin_layers, device=device)
+    best_net = nn_model(n=graph.n, max_possible_load=max_possible_load, hidden_size=nn_hidden_size,
+                        num_lin_layers=nn_num_lin_layers, device=device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -123,7 +129,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
         for i in range(m):
             torch.cuda.empty_cache()
             chosen = epsilon_greedy(policy_net=policy_net, loads=loads, edge=edge, steps_done=steps_done,
-                                       eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
+                                    eps_start=eps_start, eps_end=eps_end, eps_decay=eps_decay, device=device)
             old_loads = copy.deepcopy(loads)
             curr_state = (old_loads, edge)
             loads[chosen] += 1
@@ -144,7 +150,8 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
                                batch_size=batch_size, criterion=loss_function, device=device)
         curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=eval_runs)
         if best_eval_score is None or curr_eval_score >= best_eval_score:
-            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun, eval_runs=5 * eval_runs)
+            curr_eval_score = evaluate_q_values(policy_net, graph=graph, m=m, reward=reward_fun,
+                                                eval_runs=5 * eval_runs)
 
         if report_wandb:
             wandb.log({"score": curr_eval_score})
