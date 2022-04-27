@@ -9,9 +9,9 @@ from k_choice.graphical.two_choice.full_knowledge.RL.DQN.evaluate import evaluat
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.train import train
 
-N = 4
+N = 32
 GRAPH = CompleteGraph(N)
-M = 25
+M = 32
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = False
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         "eps_start": {
             'distribution': 'uniform',
             'min': 0.05,
-            'max': 0.5
+            'max': 0.6
         },
         "eps_end": {
             'distribution': 'uniform',
