@@ -16,11 +16,11 @@ from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegu
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 
-GMS = ((Cycle(4), 25), (HyperCube(4), 25), (Cycle(16), 50),
+GMS = ((Cycle(16), 50),
        (HyperCube(16), 50), (Cycle(32), 32), (HyperCube(32), 32), (CompleteGraph(4), 25),
-       (CompleteGraph(16),50),  (CompleteGraph(32), 32))
+       (CompleteGraph(16), 50), (CompleteGraph(32), 32), (Cycle(4), 25), (HyperCube(4), 25))
 
-STRATEGIES = ("greedy", "random", "local_reward_optimiser", "dqn")  # "dp"
+STRATEGIES = ("greedy", "random", "local_reward_optimiser", "dp", "dqn")
 RUNS = 100
 RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
@@ -52,6 +52,8 @@ def compare_strategies(gms=GMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
                 elif strategy_name == "local_reward_optimiser":
                     strategy = LocalRewardOptimiserStrategy(graph=graph, m=m)
                 elif strategy_name == "dp":
+                    if graph.n >= 8:
+                        continue
                     strategy = DPStrategy(graph=graph, m=m, reward_fun=reward_fun)
                 else:
                     raise Exception("No such strategy is known, check spelling!")

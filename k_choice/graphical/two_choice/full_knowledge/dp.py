@@ -9,7 +9,7 @@ from helper.helper import number_of_increasing_partitions
 N = 10
 M = 10
 GRAPH = CompleteGraph(N)
-DICT_LIMIT = 400000  # M * N * number_of_increasing_partitions(N, M)
+DICT_LIMIT = 40000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
 

@@ -1,7 +1,7 @@
 import random
 
 from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
-
+from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
 class RandomRegularGraph(GraphBase):
     def __init__(self, n, d):

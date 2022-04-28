@@ -19,7 +19,11 @@ def analyse_random_regular(n=N, m=M, runs_per_d=RUNS_PER_D, create_plot=CREATE_P
     vals = []
     for d in range(1, n):
         for run in range(runs_per_d):
-            graph = RandomRegularGraph(n=n, d=d)
+            if d < n / 2:
+                graph = RandomRegularGraph(n=n, d=d)
+            else:
+                graph_transposed = RandomRegularGraph(n=n, d=n - 1 - d)
+                graph = graph_transposed.transpose()
             score = run_strategy(graph=graph, m=m, strategy=GreedyStrategy(graph=graph, m=m), reward=MAX_LOAD_REWARD,
                                  print_behaviour=False)
             maxload = -score

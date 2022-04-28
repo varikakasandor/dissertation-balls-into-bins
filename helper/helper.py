@@ -2,9 +2,9 @@ import functools
 
 import numpy as np
 
-N = 20
+N = 16
 M = 50
-K = 3
+K = 1
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
