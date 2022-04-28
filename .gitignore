@@ -8,6 +8,7 @@
 *.out
 *.gz
 *.idea
+*.exe
 
 *conda-environment.yaml
 proposal/main.pdf
