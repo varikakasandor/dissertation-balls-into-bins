@@ -4,9 +4,9 @@ from collections import Counter
 
 from helper.helper import number_of_increasing_partitions
 
-N = 10
-M = 20
-K = 4
+N = 4
+M = 25
+K = 5
 DICT_LIMIT = 10000000  # M * N * K * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -133,7 +133,8 @@ def assert_monotonicity(strategy):
 if __name__ == "__main__":
     start_time = time.time()
 
-    # print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
+    # print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(
+    # tuple([0] * N), 0)}")
     strategy = {}
     print(threshold_dp(tuple([0] * N), K, strategy))
     print(

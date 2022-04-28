@@ -5,8 +5,12 @@ from datetime import datetime
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 20
-M = 400
+N = 50
+M = 200
+
+
+def ZERO_POTENTIAL(loads):
+    return 0
 
 
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
@@ -42,29 +46,29 @@ def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 64
-EPS_START = 0.2
-EPS_END = 0.04
-EPS_DECAY = 4200
-TRAIN_EPISODES = 200
-PRE_TRAIN_EPISODES = 55
-TARGET_UPDATE_FREQ = 20
-MEMORY_CAPACITY = 800
-EVAL_RUNS_TRAIN = 1
+BATCH_SIZE = 32
+EPS_START = 0.25
+EPS_END = 0.07
+EPS_DECAY = 3500
+TRAIN_EPISODES = 1000
+PRE_TRAIN_EPISODES = 65
+TARGET_UPDATE_FREQ = 8
+MEMORY_CAPACITY = 500
+EVAL_RUNS_TRAIN = 6
 EVAL_RUNS_EVAL = 100
-EVAL_PARALLEL_BATCH_SIZE = 16  # 64
-PATIENCE = 5000
+EVAL_PARALLEL_BATCH_SIZE = 64
+PATIENCE = 1000
 USE_NORMALISED = True
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-OPTIMISE_FREQ = 3 * int(sqrt(M))  # TODO: 50 for N=10, M=100
-MAX_THRESHOLD = max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
+OPTIMISE_FREQ = 30
+MAX_THRESHOLD = 8  # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
 LOSS_FUCNTION = nn.SmoothL1Loss()
-LR = 0.0004
-NN_HIDDEN_SIZE = 64
-NN_RNN_NUM_LAYERS = 1
+LR = 0.0045
+NN_HIDDEN_SIZE = 200
+NN_RNN_NUM_LAYERS = 3
 NN_NUM_LIN_LAYERS = 1
 OPTIMIZER_METHOD = torch.optim.Adam
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression",
