@@ -31,7 +31,7 @@ def analyse_random_regular(n=N, m=M, runs_per_d=RUNS_PER_D, create_plot=CREATE_P
 
     if create_plot:
         plt.boxplot(vals)
-        plt.savefig("RandomRegular-Greedy-Analysis.jpg")
+        plt.savefig("data/RandomRegular-Greedy-Analysis.jpg")
 
     df = pd.DataFrame(data=vals, columns=["d", "score"])
     output_path = f'data/{n}_{m}_random_regular_greedy_analysis.csv'

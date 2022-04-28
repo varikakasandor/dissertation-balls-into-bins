@@ -30,7 +30,7 @@ def analyse_local_reward_optimiser(max_n=MAX_N, m=linear, runs_per_n=RUNS_PER_N,
 
     if create_plot:
         plt.boxplot(vals)
-        plt.savefig("LocalRewardOptimiser-Analysis.jpg")
+        plt.savefig("data/LocalRewardOptimiser-Analysis.jpg")
 
     df = pd.DataFrame(data=vals, columns=["n", "max_load"])
     output_path = f'data/local_reward_optimiser_analysis.csv'
