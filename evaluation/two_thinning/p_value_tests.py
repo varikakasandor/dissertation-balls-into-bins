@@ -2,7 +2,7 @@ import pandas as pd
 from scipy.stats import ttest_ind
 
 
-def get_p_value(strategy1, strategy2):
+def two_sample_t_test(strategy1, strategy2):
     scores1 = pd.read_csv(f"data/50_2500_{strategy1}.csv")["score"].tolist()
     scores2 = pd.read_csv(f"data/50_2500_{strategy2}.csv")["score"].tolist()
     test_result = ttest_ind(scores1, scores2)
@@ -10,13 +10,13 @@ def get_p_value(strategy1, strategy2):
 
 
 def dqn_vs_mean_thinning():
-    return get_p_value("dqn", "mean_thinning")
+    return two_sample_t_test("dqn", "mean_thinning")
 
 
 def dqn_vs_threshold():
-    return get_p_value("dqn", "threshold")
+    return two_sample_t_test("dqn", "threshold")
 
 
 if __name__ == "__main__":
-    p_value = dqn_vs_threshold()
-    print(p_value)
+    p_value, t_statistic = dqn_vs_threshold()
+    print(p_value, t_statistic)
