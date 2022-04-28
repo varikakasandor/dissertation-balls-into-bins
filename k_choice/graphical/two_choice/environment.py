@@ -5,15 +5,16 @@ from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import
 from k_choice.graphical.two_choice.strategies.dp_strategy import DPStrategy
 
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
+from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegularGraph
 
-M = 10
-N = 5
-D = 2
-GRAPH = RandomRegularGraph(N, D)
-STRATEGY = DPStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
+M = 5
+N = 32
+D = 10
+GRAPH = HyperCube(N)
+STRATEGY = GreedyStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 REWARD = max
-RUNS = 20
+RUNS = 1000
 PRINT_BEHAVIOUR = False  # True
 
 
