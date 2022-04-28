@@ -16,9 +16,9 @@ from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegu
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 
-GMS = ((Cycle(16), 50),
-       (HyperCube(16), 50), (Cycle(32), 32), (HyperCube(32), 32), (CompleteGraph(4), 25),
-       (CompleteGraph(16), 50), (CompleteGraph(32), 32), (Cycle(4), 25), (HyperCube(4), 25))
+GMS = ((Cycle(4), 25), (HyperCube(4), 25), (CompleteGraph(4), 25),
+       (Cycle(16), 50), (HyperCube(16), 50), (CompleteGraph(16), 50),
+       (Cycle(32), 32), (HyperCube(32), 32), (CompleteGraph(32), 32))
 
 STRATEGIES = ("greedy", "random", "local_reward_optimiser", "dp", "dqn")
 RUNS = 100

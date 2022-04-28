@@ -21,6 +21,10 @@ class LocalRewardOptimiserStrategy(StrategyBase):
             return self.potential_fun(next_loads) - self.potential_fun(self.loads)
 
     def decide(self, bin):
+        curr_max_load = max(self.loads)
+        return self.loads[bin] < curr_max_load
+
+    def decide_general(self, bin):
         reward_accept = self.calc_local_reward(bin)
         reward_reject = 0.0
         for i in range(self.n):

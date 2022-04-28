@@ -10,12 +10,13 @@ K = 4
 DICT_LIMIT = 10000000  # M * N * K * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
+
 def REWARD_FUN(loads):
     return -max(loads)
 
+
 def rindex(l, elem):
     return len(l) - next(i for i, v in enumerate(reversed(l), 1) if v == elem)
-
 
 
 @functools.lru_cache(maxsize=400000)  # m * n * number_of_increasing_partitions(m, n))
@@ -40,14 +41,16 @@ def old_dp(loads_tuple, chosen, n=N, m=M, k=K, rejects_left=K - 1, reward_fun=RE
     reject = 0
     if rejects_left > 1:  # can reject, as there are more choices coming
         for j in range(n):
-            reject += old_dp(tuple(loads), chosen=j, n=n, m=m, k=k, rejects_left=rejects_left - 1, reward_fun=reward_fun)
+            reject += old_dp(tuple(loads), chosen=j, n=n, m=m, k=k, rejects_left=rejects_left - 1,
+                             reward_fun=reward_fun)
         reject /= n
     else:
         for i in range(n):
             loads[i] += 1
             loads_sorted = sorted(loads)
             for j in range(n):
-                reject += old_dp(tuple(loads_sorted), chosen=j, n=n, m=m, k=k, rejects_left=k - 1, reward_fun=reward_fun)
+                reject += old_dp(tuple(loads_sorted), chosen=j, n=n, m=m, k=k, rejects_left=k - 1,
+                                 reward_fun=reward_fun)
             loads[i] -= 1
         reject /= (n * n)
 
@@ -65,7 +68,6 @@ def threshold_dp(loads_tuple, choices_left, strategy, n=N, m=M, k=K, reward_fun=
         strategy[(loads_tuple, choices_left)] = (final_reward, m)
         return final_reward
 
-
     reject_avg = 0
     results = []
     loads_cnt = dict(Counter(loads))
@@ -78,7 +80,8 @@ def threshold_dp(loads_tuple, choices_left, strategy, n=N, m=M, k=K, reward_fun=
         results.append((val, cnt, res))
     reject_avg /= n
     if choices_left > 2:
-        reject_avg = threshold_dp(loads_tuple, choices_left - 1, strategy, n=n, m=m, k=k, reward_fun=reward_fun, dict_limit=dict_limit)
+        reject_avg = threshold_dp(loads_tuple, choices_left - 1, strategy, n=n, m=m, k=k, reward_fun=reward_fun,
+                                  dict_limit=dict_limit)
 
     pref_score = 0
     pref_cnt = 0
@@ -99,7 +102,8 @@ def threshold_dp(loads_tuple, choices_left, strategy, n=N, m=M, k=K, reward_fun=
 
 def find_best_strategy(n=N, m=M, k=K, reward_fun=REWARD_FUN, use_threshold_dp=True, print_behaviour=PRINT_BEHAVIOUR):
     strategy = {}
-    best_expected_score = threshold_dp(tuple([0] * n), k, strategy, n=n, m=m, k=k, reward_fun=reward_fun) if use_threshold_dp \
+    best_expected_score = threshold_dp(tuple([0] * n), k, strategy, n=n, m=m, k=k,
+                                       reward_fun=reward_fun) if use_threshold_dp \
         else old_dp(tuple([0] * n), 0, n=n, m=m, k=k, rejects_left=k - 1, reward_fun=reward_fun)
     if print_behaviour:
         print(
@@ -107,13 +111,33 @@ def find_best_strategy(n=N, m=M, k=K, reward_fun=REWARD_FUN, use_threshold_dp=Tr
     return strategy
 
 
+def assert_monotonicity(strategy):
+    """
+    This confirms that the optimal thresholds for the same load with decreasing number of choices left never increases
+    """
+    strategy_grouped = {}
+    for ((loads_tuple, choices_left), (_, best_threshold)) in strategy.items():
+        if loads_tuple not in strategy_grouped:
+            strategy_grouped[loads_tuple] = []
+        strategy_grouped[loads_tuple].append((choices_left, best_threshold))
+
+    for loads_tuple, l in strategy_grouped.items():
+        for choices_left_a, best_threshold_a in l:
+            for choices_left_b, best_threshold_b in l:
+                if choices_left_a < choices_left_b and best_threshold_a < best_threshold_b:
+                    return False, (loads_tuple, choices_left_a, best_threshold_a, choices_left_b, best_threshold_b)
+
+    return True, None
+
+
 if __name__ == "__main__":
     start_time = time.time()
 
-    #print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
+    # print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
     strategy = {}
-    print(threshold_dp(tuple([0]*N), K, strategy))
+    print(threshold_dp(tuple([0] * N), K, strategy))
     print(
         f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
+    print(assert_monotonicity(strategy))
 
     print("--- %s seconds ---" % (time.time() - start_time))
