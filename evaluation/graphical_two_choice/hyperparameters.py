@@ -167,3 +167,81 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "potential_fun": EXPONENTIAL_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
+
+
+    elif isinstance(graph, CompleteGraph) and graph.n == 4 and m == 25:
+        return {
+            "batch_size": 32,
+            "eps_start": 0.3,
+            "eps_end": 0.08,
+            "eps_decay": 3000,
+            "num_episodes": 1000,
+            "pre_train_episodes": 30,
+            "target_update_freq": 15,
+            "memory_capacity": 650,
+            "eval_runs": 10,
+            "patience": 1000,
+            "print_progress": True,
+            "optimise_freq": 20,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net_complete",
+            "loss_function": nn.SmoothL1Loss(),
+            "lr": 0.005,
+            "nn_hidden_size": 256,
+            "nn_num_lin_layers": 3,
+            "optimizer_method": torch.optim.Adam,
+            "potential_fun": POTENTIAL_FUN_WORST_EDGE,  # TODO: double check
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
+
+
+    elif isinstance(graph, CompleteGraph) and graph.n == 16 and m == 50:
+        return {
+            "batch_size": 64,
+            "eps_start": 0.4,
+            "eps_end": 0.08,
+            "eps_decay": 4500,
+            "num_episodes": 1000,
+            "pre_train_episodes": 65,
+            "target_update_freq": 30,
+            "memory_capacity": 900,
+            "eval_runs": 10,
+            "patience": 1000,
+            "print_progress": True,
+            "optimise_freq": 25,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net_complete",
+            "loss_function": nn.SmoothL1Loss(),
+            "lr": 0.013,
+            "nn_hidden_size": 128,
+            "nn_num_lin_layers": 2,
+            "optimizer_method": torch.optim.Adam,
+            "potential_fun": EXPONENTIAL_POTENTIAL,
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
+    elif isinstance(graph, CompleteGraph) and graph.n == 32 and m == 32:
+        return {
+            "batch_size": 46,
+            "eps_start": 0.3,
+            "eps_end": 0.06,
+            "eps_decay": 3400,
+            "num_episodes": 1000,
+            "pre_train_episodes": 65,
+            "target_update_freq": 25,
+            "memory_capacity": 550,
+            "eval_runs": 10,
+            "patience": 1000,
+            "print_progress": True,
+            "optimise_freq": 35,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net_complete",
+            "loss_function": nn.HuberLoss(),
+            "lr": 0.005,
+            "nn_hidden_size": 160,
+            "nn_num_lin_layers": 3,
+            "optimizer_method": torch.optim.RMSprop,
+            "potential_fun": POTENTIAL_FUN_NEIGHBOUR_AVG,
+            "pacing_fun": EVEN_PACING_FUN
+        }

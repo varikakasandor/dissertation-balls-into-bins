@@ -19,8 +19,9 @@ from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 GMS = ((Cycle(4), 25), (HyperCube(4), 25), (Cycle(16), 50),
        (HyperCube(16), 50), (Cycle(32), 32), (HyperCube(32), 32))  # TODO: (CompleteGraph(4), 25), (CompleteGraph(16),
 # 50),  (CompleteGraph(32), 32)# ns have to be powers of 2
+GMS = ((CompleteGraph(4), 25), (CompleteGraph(16), 50),  (CompleteGraph(32), 32))
 
-STRATEGIES = ("greedy", "random", "local_reward_optimiser", "dp", "dqn")
+STRATEGIES = ("greedy", "random", "local_reward_optimiser", "dqn")  # "dp"
 RUNS = 100
 RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
