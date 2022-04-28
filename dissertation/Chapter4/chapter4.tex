@@ -11,12 +11,19 @@
 
 \NOTE{A}{I am really not sure about the best structure for this chapter.}
 
-\NOTE{A}{Add theoretical results. Maybe implementation?}
-
 \section{General Notes}
 
+In this chapter I provide quantitative and qualitative analysis and comparison of the settings presented in previous chapters.
 
-\NOTE{A}{Note that in this project there is no train or test set, there isn’t any data at all. Nevertheless, it is still important to do evaluation independently of early stopping, due to the Expectation-Maximum Jensen inequality.}
+
+To obtain thorough and statistically significant results, I utilised parallel processing as much as possible for evaluating Deep Q-Learning policies, which are the bottleneck of the evaluation phase. To exploit the parallelism of the GPU even with the inherently sequential MDP, I ran several (usually $64$) independent samples in parallel. Note that this is much simpler for \textsc{Two-Thinning} and \textsc{Graphical Two Choice}, where the number of steps from start to end in the MDP is constant ($m$) in any execution.
+
+
+Even with this evaluation speedup, the usability of Deep Q-Learning for large values of $n$ and $m$ is still limited due to the training time. The largest range for which I successfully trained a RL algorithm in at most a day is $n=1000$, $m=1500$, but I decided to focus on slightly smaller values for the evaluation as that is more illustrative and complementary to the literature available.
+
+
+
+\NOTE{A}{TODO: Note that in this project there is no train or test set, there isn’t any data at all. Nevertheless, it is still important to do evaluation independently of early stopping, due to the Expectation-Maximum Jensen inequality.}
 
 
 \section{Two-Thinning}
@@ -24,17 +31,21 @@
 
 \subsection{Comparison of Strategies}
 
+Now I present a comparison of seven \textsc{Two-Thinning} strategies. I have chosen nine combinations of $n$ (number of bins) and $m$ (number of balls) so that they cover different ranges, and also different balls-bins ratios.
 
 
-\NOTE{A}{Mention that local reward optimiser is just away from max. Add plot showing that it doesn't work very well for larger $n$ and $m$. Add general plots for huge $n$ and $m$.}
-\NOTE{A}{Explain why DP is run experimentally even though there is an exact value for its expected value - the extreme values are very rare which make the comparison less fair for 100 runs}
-\NOTE{A}{State the optimal threshold of the threshold strategy}
+To have acceptable statistical significance but also reasonable runtime, I compared the strategies across $100$ runs. I show the average of scores (maximum load) of the runs and also the $95\%$ confidence interval for the estimated mean score, based on the Central Limit Theorem (CLT). \NOTE{A}{Should I explain more? Any formal statistical reason for choosing the number of runs?}
 
-\NOTE{A}{Add theoretical bounds}
 
-\NOTE{A}{Mention that it might make sense to repeat not just the runs but also the training several times. Depends on what we want to evaluate exactly? Note that the number of hyperparameter tuning iterations can also be considered as training epochs, since hyperparamters and neural network parameters are both actually paramters}
+Note that the Dynamic Programming (DP) Strategy is optimal by definition, but it is too slow for larger values of $n$ and $m$ which I denote by TLE (Time Limit Exceeded). I decided to limit all the algorithms to $12$ hours of training/preparation, declaring anything above that as TLE. Also, even though we have the exact expected maximum load of the DP Strategy, I decided to run it just like the other strategies for fair comparison (e.g. large outliers that the DP Strategy takes into account occur very rarely during execution).
 
-\NOTE{A}{Mention that confidence interval is based on CLT.}
+
+For the Threshold Strategy, I calculated the optimal values by modelling it as a Multi-Armed Bandit problem (covered in II Randomised Algorithms) \cite{katehakis1987multiarmedbandit}, and using an $\epsilon$-greedy strategy with $\epsilon=0.1$ (details omitted).
+
+
+I note that there is merit in not just doing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g. $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls into bins settings, but I decided to stick to a single trained model and essentially evaluate the peak performance. \NOTE{A}{Does it make any sense? This idea came to my mind and I am a bit unsure about it and couldn't find any reference.}. Relatedly, one could consider finding the optimal hyperparameters as a special part of training, but I decided treat it separately, and in particular, not take it into account for the $12$ hour TLE limit.
+
+
 
 \begin{table}[h!]
 \caption{Average maximum load of \textsc{Two-Thinning} strategies with $95\%$ confidence intervals}
@@ -57,23 +68,33 @@ Threshold Strategy              & 2.18 $\pm$ 0.13 & 3.32 $\pm$ 0.13 & 6.44 $\pm$
 \end{table}
 
 
-\NOTE{A}{Do P-value tests.}
+We can see that the Always Accept and Random Strategies are consistently poorly performing. The DP Strategy is not shown to be exactly the best for reasons outlined above. The Threshold Strategy, even though asymptotically shown to be optimal is outperformed by several other strategies. The difference is even more significant for larger $m$, when the constant threshold (on the primary allocations) is too much of a restriction. The Mean Thinning, Local Reward Optimiser and Deep Q-Learning Strategies seem to be comparable to each other. I have calculated the one-sided p-values of a two sample t-test to see if the Deep Q-Learning Strategy is significantly better than the Mean Thinning Strategy for larger values of $n$ and $m$. The difference is significant for most of the cases (the p-values are $\sim 10^{-3}$ for $n=20$, $m=400$, $\sim 10^{-17}$ for $n=50$, $m=50$, $\sim 10^{-5}$ for $n=50$, $m=200$) but more data would be required for $n=50$, $m=2500$. \NOTE{A}{Double check that I am not writing something stupid. In particular, the test I applied assumes that the maximum loads are from a normal distribution and the two distributions have the same variance and none of them are actually true, at least not exactly... How to remedy this?} \NOTE{A}{Should I do some more p-values or this is enough to convince them about the professionalism of this dissertation?}
 
-\NOTE{A}{Try to explain why it is so hard for DQN to learn good policies.}
-
-\NOTE{A}{Reason about why I use X runs for evaluation. Is there any formal reasoning related to statistical significance? I couldn't find any.}
-\NOTE{A}{Should the ``evaluation'' of how the score progression during training be presented in the Implementation or the Evaluation chapter? Add training curve somewhere.}
+\NOTE{A}{Should I say some more, clever bullshit about the table, some general patterns, etc.? Maybe a bit more about the difference between the columns, not between the rows.}
 
 
-\subsection{Deep Q-Learning analysis}
+One of the main conclusions and main surprise of the comparison is that the Local Reward Optimiser Strategy (which rejects only the maximum loads) has similar performance as the Deep Q-Learning Strategy, which was trained to optimise cumulative rewards. This demonstrates that the RL problem underlying \textsc{Two-Thinning} is a tough one, in particular, learning long-term consequences of decisions is difficult, because the impact of a single ball is very subtle. In general, making a small number of bad decisions might not even impact the final maximum load. \NOTE{A}{TODO: elaborate some more? This is a crucial point to make.}
 
+
+\NOTE{A}{Write a bit about the running time of both training and evaluation. DQN would be a bit slower latency-wise but it is bearable. Note that other strategies require no training.}
+
+
+
+\NOTE{A}{Add plot showing that it doesn't work very well for larger $n$ and $m$. Add general plots for huge $n$ and $m$. Also I can include here the tendencies for the theoretical results, e.g. plotting a logarithmic curve. Mention the difficulty in finding the constant factor of those theoretical algorithms.}
+
+
+
+Analysing the optimal strategies for \textsc{Two-Thinning}, I formulated the following lemma.
 
 \begin{lemma}\label{lemma: two-thinning-increasing-threshold}
-The chosen thresholds of an optimal strategy are non-decreasing during an execution. That is, if for $i$th ball the strategy chooses a threshold $x$, then for every $j$th ball of the same game such that $j>i$, a threshold $y\geq x$ is chosen.
+The chosen thresholds of an optimal protocol are non-decreasing during an execution. That is, if for $i$th ball the protocol chooses a threshold $x$, then for every $j$th ball of the same game such that $j>i$, a threshold $y\geq x$ is chosen.
 \end{lemma}
 
 
 \NOTE{A}{Add figure of increasing threshold of DP strategy.}
+
+
+This is a very surprising lemma, because the theoretically asymptotically optimal protocols in the literature don't have this property. We think that this is because they are optimal only up to a constant (or logarithmic) factor, and they are easier to reason about analytically and prove bounds on them (usually these protocols consist of independent phases with different behaviour).
 
 
 \begin{proof}
@@ -84,12 +105,28 @@ The lemma has been verified by the optimal strategy(s) generated by dynamic prog
 \end{proof}
 
 
+
+\NOTE{A}{Show different objective functions as well.}
+
+\subsection{Deep Q-Learning analysis}
+
+
+
+\subsubsection{Threshold ``Spikes'' During Training and During Execution}
+
+
+
 \subsubsection{Training}
 
+\NOTE{A}{There is no overfitting as there is no data, but still performance doesn't improve much after some time.}
 
-\subsubsection{Hyperparameter Importance}
+\NOTE{A}{Explain why after a few epochs the score start to get worse for some time. But also, the strategy after 0 or 1 epochs is pretty good, as it is still a threshold based strategy, and basically random so balances out high and low thresholds.}
 
 
+
+\subsubsection{Hyperparameter Analysis}
+
+\NOTE{A}{Optimal max threshold can be based on theoretical bounds and baseline models (e.g. not worth using a threshold over our target result)}
 
 \section{K-Thinning}
 
@@ -120,6 +157,8 @@ Deep Q-Learning Strategy        & 6.2 $\pm$ 0.11 & 6.77 $\pm$ 0.11 & 7.14 $\pm$ 
 \end{table}
 
 
+\NOTE{A}{Analyse value of K and its impact.}
+
 \begin{lemma} \label{lemma: k-thinning-increasing-threshold}
 In an optimal strategy, it is not possible that it would accept a bin with $x$ choices left, but reject the same bin (with the same loads) with $y<x$ choices left. In other words, an optimal strategy should never become more selective after rejecting some options.
 \end{lemma}
@@ -142,10 +181,10 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 \subsubsection{Training}
 
 
-\subsubsection{Hyperparameter Importance}
+\subsubsection{Hyperparameter Analysis}
 
 
-
+\NOTE{A}{Compare zero potential with max load potential, showing P value that we do need reward shaping.}
 
 
 \section{Graphical Two-Choice}
@@ -194,14 +233,17 @@ I used the dynamic programming algorithm to find the optimal strategy for \texts
 \subsubsection{Training}
 
 
-\subsubsection{Hyperparameter Importance}
+\subsubsection{Hyperparameter Analysis}
 
 
 
-\section{Behavioural Analysis of Two-Thinning (\textit{Extension})}
+\section{Further Analysis of Two-Thinning (\textit{Extension})}
 
 
-\subsection{Threshold ``Spikes'' During Training}
+\subsection{Distribution of the States for an Optimal Strategy}
+
+\NOTE{A}{we can observe an exponentially decreasing function!}
+\NOTE{A}{Entropy is fairly low - this could be used as a speedup for RL training (or even as the curriculum for pretraining)}
 
 
 \subsection{Explaining Trained Models}

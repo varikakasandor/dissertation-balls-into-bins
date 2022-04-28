@@ -5,8 +5,8 @@ from datetime import datetime
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 50
-M = 200
+N = 20
+M = 400
 
 
 def ZERO_POTENTIAL(loads):
@@ -47,32 +47,32 @@ def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 32
-EPS_START = 0.25
-EPS_END = 0.07
+EPS_START = 0.2
+EPS_END = 0.05
 EPS_DECAY = 3500
 TRAIN_EPISODES = 1000
-PRE_TRAIN_EPISODES = 65
-TARGET_UPDATE_FREQ = 8
-MEMORY_CAPACITY = 500
-EVAL_RUNS_TRAIN = 6
-EVAL_RUNS_EVAL = 100
+PRE_TRAIN_EPISODES = 50
+TARGET_UPDATE_FREQ = 20
+MEMORY_CAPACITY = 450
+EVAL_RUNS_TRAIN = 5
+EVAL_RUNS_EVAL = 1000
 EVAL_PARALLEL_BATCH_SIZE = 64
 PATIENCE = 1000
 USE_NORMALISED = True
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-OPTIMISE_FREQ = 30
-MAX_THRESHOLD = 8  # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
+OPTIMISE_FREQ = 25
+MAX_THRESHOLD = 22  # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
-LOSS_FUCNTION = nn.SmoothL1Loss()
-LR = 0.0045
-NN_HIDDEN_SIZE = 200
+LOSS_FUCNTION = nn.MSELoss()
+LR = 0.005
+NN_HIDDEN_SIZE = 128
 NN_RNN_NUM_LAYERS = 3
-NN_NUM_LIN_LAYERS = 1
+NN_NUM_LIN_LAYERS = 2
 OPTIMIZER_METHOD = torch.optim.Adam
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression",
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 REWARD_FUN = MAX_LOAD_REWARD
-POTENTIAL_FUN = MAX_LOAD_POTENTIAL
+POTENTIAL_FUN = EXPONENTIAL_POTENTIAL
 PACING_FUN = EVEN_PACING_FUN
