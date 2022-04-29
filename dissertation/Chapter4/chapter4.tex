@@ -46,7 +46,7 @@ For the Threshold Strategy, I calculated the optimal values by modelling it as a
 I note that there is merit in not just doing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g. $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls into bins settings, but I decided to stick to a single trained model and essentially evaluate the peak performance. \NOTE{A}{Does it make any sense? This idea came to my mind and I am a bit unsure about it and couldn't find any reference.}. Relatedly, one could consider finding the optimal hyperparameters as a special part of training, but I decided treat it separately, and in particular, not take it into account for the $12$ hour TLE limit.
 
 
-
+\NOTE{T}{i would put the caption at the bottom, I think it's more standard.}
 \begin{table}[h!]
 \caption{Average maximum load of \textsc{Two-Thinning} strategies with $95\%$ confidence intervals}
 \label{tab:two-thinning-comparison}
@@ -55,14 +55,14 @@ I note that there is merit in not just doing several runs with the trained train
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
 \hline
                                 & \multicolumn{3}{c|}{$n=5$} & \multicolumn{3}{c|}{$n=20$} & \multicolumn{3}{c|}{$n=50$} \\ \hline
-                                & $m=5$ & $m=10$ & $m=15$ & $m=20$ & $m=60$ & $m=400$ & $m=50$ & $m=200$ & $m=2500$ \\ \hline
-Always Accept Strategy          & 2.26 $\pm$ 0.06 & 3.84 $\pm$ 0.1 & 7.88 $\pm$ 0.14 & 3.26 $\pm$ 0.1 & 6.68 $\pm$ 0.15 & 28.84 $\pm$ 0.32 & 3.87 $\pm$ 0.1 & 9.12 $\pm$ 0.16 & 66.66 $\pm$ 0.5 \\ \hline
-Random Strategy                 & 2.35 $\pm$ 0.07 & 3.72 $\pm$ 0.09 & 7.66 $\pm$ 0.14 & 3.21 $\pm$ 0.1 & 6.67 $\pm$ 0.15 & 28.55 $\pm$ 0.32 & 3.8 $\pm$ 0.1 & 9.02 $\pm$ 0.18 & 66.83 $\pm$ 0.48 \\ \hline
-Local Reward Optimiser Strategy & 1.82 $\pm$ 0.05 & 2.97 $\pm$ 0.05 & 6.08 $\pm$ 0.06 & 2.25 $\pm$ 0.06 & 4.75 $\pm$ 0.08 & 22.46 $\pm$ 0.09 & 2.54 $\pm$ 0.07 & 6.37 $\pm$ 0.07 & 53.98 $\pm$ 0.11 \\ \hline
-Mean Thinning Strategy          & 1.87 $\pm$ 0.07 & 3.1 $\pm$ 0.07 & 6.17 $\pm$ 0.09 & 2.56 $\pm$ 0.08 & 5.12 $\pm$ 0.1 & 22.52 $\pm$ 0.12 & 3.06 $\pm$ 0.08 & 6.79 $\pm$ 0.11 & 53.53 $\pm$ 0.15 \\ \hline
-DP Strategy                     & 1.85 $\pm$ 0.06 & 2.98 $\pm$ 0.07 & 6.06 $\pm$ 0.1 & 2.33 $\pm$ 0.1 & 4.69 $\pm$ 0.11 & TLE & 2.52 $\pm$ 0.1 & TLE & TLE \\ \hline
-Deep Q-Learning Strategy        & 1.92 $\pm$ 0.09 & 2.93 $\pm$ 0.09 & 6.2 $\pm$ 0.11 & 2.42 $\pm$ 0.1 & 4.88 $\pm$ 0.12 & 22.2 $\pm$ 0.14 & 2.5 $\pm$ 0.11 & 6.43 $\pm$ 0.11 & 53.49 $\pm$ 0.25 \\ \hline
-Threshold Strategy              & 2.18 $\pm$ 0.13 & 3.32 $\pm$ 0.13 & 6.44 $\pm$ 0.13 & 2.58 $\pm$ 0.12 & 5.58 $\pm$ 0.17 & 24.12 $\pm$ 0.19 & 2.99 $\pm$ 0.12 & 7.02 $\pm$ 0.13 & 56.73 $\pm$ 0.29 \\ \hline 
+Strategy                                & $m=5$ & $m=10$ & $m=15$ & $m=20$ & $m=60$ & $m=400$ & $m=50$ & $m=200$ & $m=2500$ \\ \hline
+Always Accept          & 2.26 $\pm$ 0.06 & 3.84 $\pm$ 0.1 & 7.88 $\pm$ 0.14 & 3.26 $\pm$ 0.1 & 6.68 $\pm$ 0.15 & 28.84 $\pm$ 0.32 & 3.87 $\pm$ 0.1 & 9.12 $\pm$ 0.16 & 66.66 $\pm$ 0.5 \\ \hline
+Random             & 2.35 $\pm$ 0.07 & 3.72 $\pm$ 0.09 & 7.66 $\pm$ 0.14 & 3.21 $\pm$ 0.1 & 6.67 $\pm$ 0.15 & 28.55 $\pm$ 0.32 & 3.8 $\pm$ 0.1 & 9.02 $\pm$ 0.18 & 66.83 $\pm$ 0.48 \\ \hline
+Local Reward Optimiser & 1.82 $\pm$ 0.05 & 2.97 $\pm$ 0.05 & 6.08 $\pm$ 0.06 & 2.25 $\pm$ 0.06 & 4.75 $\pm$ 0.08 & 22.46 $\pm$ 0.09 & 2.54 $\pm$ 0.07 & 6.37 $\pm$ 0.07 & 53.98 $\pm$ 0.11 \\ \hline
+Mean Thinning          & 1.87 $\pm$ 0.07 & 3.1 $\pm$ 0.07 & 6.17 $\pm$ 0.09 & 2.56 $\pm$ 0.08 & 5.12 $\pm$ 0.1 & 22.52 $\pm$ 0.12 & 3.06 $\pm$ 0.08 & 6.79 $\pm$ 0.11 & 53.53 $\pm$ 0.15 \\ \hline
+DP                   & 1.85 $\pm$ 0.06 & 2.98 $\pm$ 0.07 & 6.06 $\pm$ 0.1 & 2.33 $\pm$ 0.1 & 4.69 $\pm$ 0.11 & TLE & 2.52 $\pm$ 0.1 & TLE & TLE \\ \hline
+Deep Q-Learning        & 1.92 $\pm$ 0.09 & 2.93 $\pm$ 0.09 & 6.2 $\pm$ 0.11 & 2.42 $\pm$ 0.1 & 4.88 $\pm$ 0.12 & 22.2 $\pm$ 0.14 & 2.5 $\pm$ 0.11 & 6.43 $\pm$ 0.11 & 53.49 $\pm$ 0.25 \\ \hline
+Threshold           & 2.18 $\pm$ 0.13 & 3.32 $\pm$ 0.13 & 6.44 $\pm$ 0.13 & 2.58 $\pm$ 0.12 & 5.58 $\pm$ 0.17 & 24.12 $\pm$ 0.19 & 2.99 $\pm$ 0.12 & 7.02 $\pm$ 0.13 & 56.73 $\pm$ 0.29 \\ \hline 
 
 \end{tabular}}
 \end{table}
@@ -73,7 +73,7 @@ We can see that the Always Accept and Random Strategies are consistently poorly 
 \NOTE{A}{Should I say some more, clever bullshit about the table, some general patterns, etc.? Maybe a bit more about the difference between the columns, not between the rows.}
 
 
-One of the main conclusions and main surprise of the comparison is that the Local Reward Optimiser Strategy (which rejects only the maximum loads) has similar performance as the Deep Q-Learning Strategy, which was trained to optimise cumulative rewards. This demonstrates that the RL problem underlying \textsc{Two-Thinning} is a tough one, in particular, learning long-term consequences of decisions is difficult, because the impact of a single ball is very subtle. In general, making a small number of bad decisions might not even impact the final maximum load. \NOTE{A}{TODO: elaborate some more? This is a crucial point to make.}
+One of the main conclusions and main surprise of the comparison is that the Local Reward Optimiser Strategy (which rejects only the maximum loads) has similar performance as the Deep Q-Learning Strategy, which was trained to optimise cumulative rewards. This demonstrates that the RL problem underlying \textsc{Two-Thinning} is a tough\NOTE{T}{language, better: challenging} one, in particular, learning long-term consequences of decisions is difficult, because the impact of a single ball is very subtle. In general, making a small number of bad decisions might not even impact the final maximum load. \NOTE{A}{TODO: elaborate some more? This is a crucial point to make.}
 
 
 \NOTE{A}{Write a bit about the running time of both training and evaluation. DQN would be a bit slower latency-wise but it is bearable. Note that other strategies require no training.}
@@ -94,19 +94,20 @@ The chosen thresholds of an optimal protocol are non-decreasing during an execut
 \NOTE{A}{Add figure of increasing threshold of DP strategy.}
 
 
-This is a very surprising lemma, because the theoretically asymptotically optimal protocols in the literature don't have this property. We think that this is because they are optimal only up to a constant (or logarithmic) factor, and they are easier to reason about analytically and prove bounds on them (usually these protocols consist of independent phases with different behaviour).
+This is a very surprising lemma, because the theoretically asymptotically optimal protocols in the literature do not have this property. We think that this is because they are optimal only up to a constant (or logarithmic) factor, and they are easier to reason about analytically and prove bounds on them (usually these protocols consist of independent phases with different behaviour).
 
 
 \begin{proof}
 
 \NOTE{A}{Do proper proof.}
+\NOTE{T}{Do we really think we have a proof of that?}
 
 The lemma has been verified by the optimal strategy(s) generated by dynamic programming, for several combinations of $n$ and $m$. 
 \end{proof}
 
 
+As discussed in Chapter \ref{preparation}, there are several other reasonable objective functions, such as maximising minimum load, minimising maximum load minus minimum load, minimising variance, and all of those that I have used as potential functions. I do not discuss this any further due to the length constraint on the dissertation, I just note that I found that it is very difficult for Deep Q-Learning to adapt its decisions on such a granular level. 
 
-\NOTE{A}{Show different objective functions as well.}
 
 \subsection{Deep Q-Learning analysis}
 
@@ -128,6 +129,8 @@ The lemma has been verified by the optimal strategy(s) generated by dynamic prog
 
 \NOTE{A}{Optimal max threshold can be based on theoretical bounds and baseline models (e.g. not worth using a threshold over our target result)}
 
+\NOTE{A}{Compare zero potential with max load potential, showing P value that we do need reward shaping.}
+
 \section{K-Thinning}
 
 
@@ -135,7 +138,7 @@ The lemma has been verified by the optimal strategy(s) generated by dynamic prog
 \subsection{Comparison of Strategies}
 
 
-
+\NOTE{T}{make $k$ and $K$ more consistent}
 \begin{table}[h!]
 \caption{Average maximum load of \textsc{K-Thinning} strategies with $95\%$ confidence intervals}
 \label{tab:k-thinning-comparison}
@@ -145,14 +148,13 @@ The lemma has been verified by the optimal strategy(s) generated by dynamic prog
 \hline
                                 & \multicolumn{4}{c|}{$n=5$} & \multicolumn{4}{c|}{$n=25$}\\ \hline
                                 & \multicolumn{4}{c|}{$m=20$} & \multicolumn{4}{c|}{$m=50$}\\ \hline
-                                & $k=2$ & $k=3$ & $k=5$ & $k=10$ & $k=2$ & $k=3$ & $k=5$ & $k=10$ \\ \hline
-Always Accept Strategy          & 7.88 $\pm$ 0.14 & 7.72 $\pm$ 0.11 & 7.81 $\pm$ 0.14 & 7.8 $\pm$ 0.14 & 5.65 $\pm$ 0.19 & 5.81 $\pm$ 0.13 & 5.84 $\pm$ 0.14 & 6.03 $\pm$ 0.16 \\ \hline
-Random Strategy                 & 7.66 $\pm$ 0.14 & 7.76 $\pm$ 0.13 & 7.77 $\pm$ 0.14 & 7.74 $\pm$ 0.14 & 5.77 $\pm$ 0.19 & 5.96 $\pm$ 0.15 & 5.87 $\pm$ 0.15 & 5.72 $\pm$ 0.14 \\ \hline
-Local Reward Optimiser Strategy & 6.08 $\pm$ 0.06 & 5.77 $\pm$ 0.05 & 5.45 $\pm$ 0.06 & 5.13 $\pm$ 0.04 & 4.22 $\pm$ 0.11 & 3.69 $\pm$ 0.06 & 3.21 $\pm$ 0.06 & 3.0 $\pm$ 0.01 \\ \hline
-Mean Thinning Strategy          & 6.17 $\pm$ 0.09 & 5.96 $\pm$ 0.04 & 5.61 $\pm$ 0.06 & 5.15 $\pm$ 0.04 & 4.34 $\pm$ 0.12 & 3.69 $\pm$ 0.07 & 3.15 $\pm$ 0.05 & 3.0 $\pm$ 0.01 \\ \hline
-DP Strategy & 6.06 $\pm$ 0.1   & 5.75 $\pm$ 0.05 & 5.38 $\pm$ 0.05 & 5.1 $\pm$ 0.03 & 4.13 $\pm$ 0.09 & 3.58 $\pm$ 0.07 & 3.15 $\pm$ 0.05 & 3.0 $\pm$ 0.0 \\ \hline Threshold Strategy              & 6.44 $\pm$ 0.13 & 6.27 $\pm$ 0.05 & 6.12 $\pm$ 0.05 & 5.93 $\pm$ 0.05 & 4.72 $\pm$ 0.15 & 4.17 $\pm$ 0.05 & 4.0 $\pm$ 0.05 & 3.94 $\pm$ 0.05 \\ \hline
-Deep Q-Learning Strategy        & 6.2 $\pm$ 0.11 & 6.77 $\pm$ 0.11 & 7.14 $\pm$ 0.14 & 7.14 $\pm$ 0.14 & 4.26 $\pm$ 0.09 & 4.47 $\pm$ 0.09 & 4.21 $\pm$ 0.08 & 3.01 $\pm$ 0.01 \\ \hline 
-
+Strategy                                & $k=2$ & $k=3$ & $k=5$ & $k=10$ & $k=2$ & $k=3$ & $k=5$ & $k=10$ \\ \hline
+Always Accept           & 7.88 $\pm$ 0.14 & 7.72 $\pm$ 0.11 & 7.81 $\pm$ 0.14 & 7.8 $\pm$ 0.14 & 5.65 $\pm$ 0.19 & 5.81 $\pm$ 0.13 & 5.84 $\pm$ 0.14 & 6.03 $\pm$ 0.16 \\ \hline
+Random                 & 7.66 $\pm$ 0.14 & 7.76 $\pm$ 0.13 & 7.77 $\pm$ 0.14 & 7.74 $\pm$ 0.14 & 5.77 $\pm$ 0.19 & 5.96 $\pm$ 0.15 & 5.87 $\pm$ 0.15 & 5.72 $\pm$ 0.14 \\ \hline
+Local Reward Optimiser & 6.08 $\pm$ 0.06 & 5.77 $\pm$ 0.05 & 5.45 $\pm$ 0.06 & 5.13 $\pm$ 0.04 & 4.22 $\pm$ 0.11 & 3.69 $\pm$ 0.06 & 3.21 $\pm$ 0.06 & 3.0 $\pm$ 0.01 \\ \hline
+DP & 6.06 $\pm$ 0.1   & 5.75 $\pm$ 0.05 & 5.38 $\pm$ 0.05 & 5.1 $\pm$ 0.03 & 4.13 $\pm$ 0.09 & 3.58 $\pm$ 0.07 & 3.15 $\pm$ 0.05 & 3.0 $\pm$ 0.0 \\ \hline Threshold              & 6.44 $\pm$ 0.13 & 6.27 $\pm$ 0.05 & 6.12 $\pm$ 0.05 & 5.93 $\pm$ 0.05 & 4.72 $\pm$ 0.15 & 4.17 $\pm$ 0.05 & 4.0 $\pm$ 0.05 & 3.94 $\pm$ 0.05 \\ \hline
+Deep Q-Learning        & 6.2 $\pm$ 0.11 & 6.77 $\pm$ 0.11 & 7.14 $\pm$ 0.14 & 7.14 $\pm$ 0.14 & 4.26 $\pm$ 0.09 & 4.47 $\pm$ 0.09 & 4.21 $\pm$ 0.08 & 3.01 $\pm$ 0.01 \\ \hline 
+Quantile          & 6.17 $\pm$ 0.09 & 5.96 $\pm$ 0.04 & 5.61 $\pm$ 0.06 & 5.15 $\pm$ 0.04 & 4.34 $\pm$ 0.12 & 3.69 $\pm$ 0.07 & 3.15 $\pm$ 0.05 & 3.0 $\pm$ 0.01 \\ \hline
 \end{tabular}}
 \end{table}
 
@@ -184,14 +186,11 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 \subsubsection{Hyperparameter Analysis}
 
 
-\NOTE{A}{Compare zero potential with max load potential, showing P value that we do need reward shaping.}
-
 
 \section{Graphical Two-Choice}
 
 
 \subsection{Comparison of Strategies}
-
 
 \begin{table}[h!]
 \caption{Average maximum load of \textsc{Graphical Two Choice} strategies with $95\%$ confidence intervals}
@@ -202,19 +201,17 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 \hline
                                 & \multicolumn{3}{c|}{$n=4$} & \multicolumn{3}{c|}{$n=16$} & \multicolumn{3}{c|}{$n=32$}\\ \hline
                                 & \multicolumn{3}{c|}{$m=25$} & \multicolumn{3}{c|}{$m=50$} & \multicolumn{3}{c|}{$m=32$}\\ \hline
-                                & Cycle & Clique & Hypercube & Cycle & Clique & Hypercube & Cycle & Clique & Hypercube \\ \hline
-Greedy Strategy & 7.04 $\pm$ 0.03 & 7.04 $\pm$ 0.03 & 7.17 $\pm$ 0.06 & 4.74 $\pm$ 0.08 & 4.47 $\pm$ 0.11 & 4.39 $\pm$ 0.07 & 2.46 $\pm$ 0.1 & 2.34 $\pm$ 0.09 & 2.26 $\pm$ 0.06 \\ \hline
-Random Strategy  & 8.92 $\pm$ 0.17 & 8.81 $\pm$ 0.18 & 8.98 $\pm$ 0.17 & 6.75 $\pm$ 0.17 & 6.64 $\pm$ 0.23 & 6.56 $\pm$ 0.15 & 3.45 $\pm$ 0.13 & 3.64 $\pm$ 0.16 & 3.54 $\pm$ 0.1 \\ \hline
-Local Reward Optimiser Strategy & 7.1 $\pm$ 0.04 & 7.12 $\pm$ 0.05 & 7.29 $\pm$ 0.07 & 4.97 $\pm$ 0.1 & 4.74 $\pm$ 0.12 & 4.75 $\pm$ 0.07 & 2.53 $\pm$ 0.11 & 2.42 $\pm$ 0.1 & 2.46 $\pm$ 0.07 \\ \hline
-DP Strategy & 7.01 $\pm$ 0.02 & 7.01 $\pm$ 0.02 & 7.27 $\pm$ 0.1 & TLE & TLE & TLE & TLE & TLE & TLE \\ \hline
-Deep Q-Learning Strategy & 7.17 $\pm$ 0.07 & 7.17 $\pm$ 0.06 & 7.38 $\pm$ 0.09 & 4.92 $\pm$ 0.15 & 5.71 $\pm$ 0.17 & 6.57 $\pm$ 0.15 & 3.81 $\pm$ 0.18 & 3.59 $\pm$ 0.18 & 4.17 $\pm$ 0.14 \\ \hline 
+Strategy                                & Cycle & Hypercube & Complete & Cycle & Hypercube & Complete & Cycle & Hypercube & Complete \\ \hline
+Greedy  & 7.04 $\pm$ 0.03 & 7.04 $\pm$ 0.03 & 7.17 $\pm$ 0.06 & 4.74 $\pm$ 0.08 & 4.47 $\pm$ 0.11 & 4.39 $\pm$ 0.07 & 2.46 $\pm$ 0.1 & 2.34 $\pm$ 0.09 & 2.26 $\pm$ 0.06 \\ \hline
+Random  & 8.92 $\pm$ 0.17 & 8.81 $\pm$ 0.18 & 8.98 $\pm$ 0.17 & 6.75 $\pm$ 0.17 & 6.64 $\pm$ 0.23 & 6.56 $\pm$ 0.15 & 3.45 $\pm$ 0.13 & 3.64 $\pm$ 0.16 & 3.54 $\pm$ 0.1 \\ \hline
+Local Reward Optimiser & 7.1 $\pm$ 0.04 & 7.12 $\pm$ 0.05 & 7.29 $\pm$ 0.07 & 4.97 $\pm$ 0.1 & 4.74 $\pm$ 0.12 & 4.75 $\pm$ 0.07 & 2.53 $\pm$ 0.11 & 2.42 $\pm$ 0.1 & 2.46 $\pm$ 0.07 \\ \hline
+DP & 7.01 $\pm$ 0.02 & 7.01 $\pm$ 0.02 & 7.27 $\pm$ 0.1 & TLE & TLE & TLE & TLE & TLE & TLE \\ \hline
+Deep Q-Learning & 7.17 $\pm$ 0.07 & 7.17 $\pm$ 0.06 & 7.38 $\pm$ 0.09 & 4.92 $\pm$ 0.15 & 5.71 $\pm$ 0.17 & 6.57 $\pm$ 0.15 & 3.81 $\pm$ 0.18 & 3.59 $\pm$ 0.18 & 4.17 $\pm$ 0.14 \\ \hline 
 
 \end{tabular}}
 \end{table}
 
-
-\NOTE{A}{Does connectedness matter for small graphs? Add analysis for random regular graphs.}
-
+First I prove the most surprising result of this section.
 
 \begin{lemma} \label{lemma: greedy-suboptimal}
 There exist a graph, such that the Greedy strategy is suboptimal with respect to the expected final maximum load of \textsc{Graphical Two Choice}.
@@ -227,13 +224,37 @@ It is enough to show that there is a state $s$ (i.e. a load vector $v$, edge $e$
 I used the dynamic programming algorithm to find the optimal strategy for \textsc{Graphical Two Choice}, and then I searched the strategy for a state where it disagrees with Greedy. I found a very small counterexample for the Cycle graph with $n=4$ bins $m=6$ balls. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $l=(2,0,1,0)$, $e=(2,3)$, i.e. there is an edge between the second and third bin. The reason why it is better to choose bin $3$ even though it has larger load than bin $2$ is that after that, from load vector $(2,0,2,0)$ with $2$ balls remaining we can definitely avoid having a maximum load $3$ by always placing the ball in an even-indexed bin. On the other hand, from load vector $(2,1,1,0)$, if both of the remaining edges are $(1,2)$, then there will be a maximum load of at least $3$ using whatever strategy. Therefore, the expected final maximum load of choosing bin $3$ is $2.0$, while that of bin $2$ is between $2.0$ and $3.0$.
 \end{proof}
 
+
+We can see from the table, that for $n=4$ and $m=25$, even though Greedy is not optimal for the Cycle graph but it is for the Clique graph, the optimal strategy for the Cycle graph (provided by the DP Strategy) still has a lower expected maximum load than Greedy has for the Clique graph. This is a very important observation, because it indicates that the constraint that not all the pairs of nodes can be sampled (e.g. due to geographical reasons) is not just a constraint, but it can even improve the performance.
+
+
+Also, even though Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from DP), it proved to be an impossible challenge for RL to exploit the weaknesses of Greedy. In fact, for $n=m=32$, Deep Q-Learning is not even superior to the Random Strategy, which is equivalent to \textsc{One-Choice} for any regular graph.
+
+
+
+\NOTE{A}{Does connectedness matter for small graphs? Add analysis for random regular graphs.}
+
 \subsection{Deep Q-Learning analysis}
+
+To better understand the difficulty in finding an optimal strategy, I extended the Cycle graph counterexample from Lemma \ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the edge going between the $2$nd and $3$rd nodes. 
+
+
+\begin{figure}[h!] \label{greedy-counterexample-analysed}
+    \centering
+    \includegraphics[scale=1.0]{Chapter4/Figs/0a0b_4_25_analysis.png}
+    \caption{The optimal decisions for the Cycle graph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $2$-$3$. Green means choosing the $2$nd bin is better, red means choosing the $3$rd bin is better, and $x$ means they have the same expected score.}
+\end{figure}
+
+
+We can see in the figure that the green region contains the counterexamples to the Greedy strategy, but there is an even larger region where the greedy choice is correct, and characterising the shapes of the regions is difficult. By using a neighbourhood average based potential function for Deep Q-Learning, the agent is guided towards choosing $2$rd bin, and by using a graph-oblivious maximum load potential, the agent is guided towards choosing the $3$rd bin. Therefore, neither of the potential functions is perfect. Since I used the the neighbourhood average based potential function, the resulting algorithm is better at avoiding the pitfalls of Greedy, but in the more dominant red region it tends to make bad decisions. \NOTE{A}{I haven't actually checked this last sentence... Maybe not even needed?}
 
 
 \subsubsection{Training}
 
 
 \subsubsection{Hyperparameter Analysis}
+
+
 
 
 

@@ -287,7 +287,7 @@ The runtime of this algorithm is $k$ times the runtime of the dynamic programmin
 
 \subsection{Other Strategies}
 
-The same kind of strategies are possible for \textsc{K-Thinning} as for \textsc{Two-Thinning}, with some adjustments.
+Similar kind of strategies are possible for \textsc{K-Thinning} as for \textsc{Two-Thinning}, with some adjustments.
 
 \paragraph{Always Accept Strategy} Same as for \textsc{Two-Thinning}.
 
@@ -296,14 +296,13 @@ The same kind of strategies are possible for \textsc{K-Thinning} as for \textsc{
 
 
 
-\paragraph{Mean Thinning Strategy} A natural extension of the Mean Thinning Strategy\NOTE{D}{This is not exactly mean-thinning, it is more median quantile. In mean-thinning you compare the load to the mean.} of \textsc{Two-Thinning} is to accept a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding threshold with $x$ choices left, we solve the following equation for $y$:\NOTE{D}{So $y$ is a quantile?}
+\paragraph{Quantile Strategy} This strategy accepts a ball if there is less than $0.5$ probability of getting a better offer at later choices. To find this corresponding quantile with $x$ choices left, we solve the following equation for the quantile $y$:
 
 \begin{equation} \label{meankthinning}
-    P(better) = 1 - (\frac{n-y}{n})^x = \frac{1}{2}
+1 - (\frac{n-y}{n})^x = \frac{1}{2}
 \end{equation}
-\NOTE{D}{Do you need $P(better)$?}
 
-which gives $y = n * (1 - 2^{-\frac{1}{x}})$, and then the threshold is $v[y]$ where $v$ is the sorted load vector. \NOTE{A}{Explain better?}
+which gives $y = n * (1 - 2^{-\frac{1}{x}})$, and then the threshold is $v[\floor{y}]$ where $v$ is the sorted load vector. \NOTE{A}{Explain better?}. Note that we could instead extend the Mean Thinning Strategy from \textsc{Two-Thinning} directly, but I do not consider that any further as that does not adapt to $k$.
 
 
 \paragraph{Local Reward Optimiser Strategy} Choosing according to the expected immediate reward based on the reward function outlined above would lead to rejecting any bin with maximum load, and accepting otherwise.
@@ -362,7 +361,7 @@ Here I list the types of graphs on which I evaluate the algorithms. It is import
 \subsection{Dynamic Programming}
 
 
-We can observe the same difficulties about \textsc{Graphical Two-Choice} for dynamic programming just like for RL. The main speedup for the dynamic programming algorithm for \textsc{Two-Thinning} was to look only at sorted loads. This is not possible here, as two bins with the same load are not interchangeable. Using load vectors as states, denoting by $G$ the graph, by $E$ its edges, and assuming that the nodes are numbered from $0$ to $n-1$, we get the following recurrence relation:
+We can observe the same difficulties about \textsc{Graphical Two-Choice} for dynamic programming just like for RL. The main speedup for the dynamic programming algorithm for \textsc{Two-Thinning} was to look only at sorted loads. This is not possible here, as two bins with the same load are not interchangeable. Using load vectors as states, denoting by $G$ the graph, by $E$ its edges, and assuming that the nodes are numbered from $0$ to $n-1$, we get the following recurrence relation: \NOTE{T}{$x \sim y$ is enough, $x \sim y \in G$ looks a bit ood}
 
 
 \begin{equation} \label{eq:graphicaltwochoice-dynamicprogramming}

@@ -1,4 +1,5 @@
 import time
+import csv
 
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
@@ -6,9 +7,9 @@ from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
 from helper.helper import number_of_increasing_partitions
 
-N = 10
-M = 10
-GRAPH = CompleteGraph(N)
+N = 4
+M = 35
+GRAPH = Cycle(N)
 DICT_LIMIT = 40000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -24,11 +25,13 @@ def dp(loads_tuple, memo, strategy, graph=GRAPH, m=M, reward_fun=REWARD_FUN, dic
     if sum(loads) == m:
         return reward_fun(loads)
 
+
     next_vals = []
     for node in range(graph.n):
         loads[node] += 1
         next_vals.append(dp(tuple(loads), memo, strategy, reward_fun=reward_fun, graph=graph, m=m))
         loads[node] -= 1
+
 
     avg = 0
     for (x, y) in graph.edge_list:
@@ -51,13 +54,21 @@ def find_best_strategy(graph=GRAPH, m=M, reward_fun=REWARD_FUN, print_behaviour=
     return strategy
 
 
+def analyse_0x0y(strategy, n=N, m=M):
+    table = [[strategy[(0, i, 0, j), (1, 2)] if i + j < m else 9 for j in range(m)] for i in range(m)]
+    with open(f"../../../../evaluation/graphical_two_choice/data/counterexample_analysis_{n}_{m}.csv", "w", newline='') as my_csv:
+        csvWriter = csv.writer(my_csv, delimiter=',')
+        csvWriter.writerows(table)
+
 if __name__ == "__main__":
     start_time = time.time()
-    score, strategy = find_best_strategy()
+    strategy = find_best_strategy()
 
 
-    # for ((loads, (x, y)), decision) in strategy.items():
-    #    if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):
-    #        print(loads, (x, y), decision)
+    """for ((loads, (x, y)), decision) in strategy.items():
+        if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):
+            print(loads, (x, y), decision)"""
+
+    analyse_0x0y(strategy)
 
     print("--- %s seconds ---" % (time.time() - start_time))

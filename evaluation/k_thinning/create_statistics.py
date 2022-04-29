@@ -7,7 +7,7 @@ import scipy.stats as st
 from helper.helper import flatten
 
 NMKS = ((5, 25, 2), (5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 2), (20, 50, 3), (20, 50, 5), (20, 50, 10))
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
+STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "quantile", "dp", "threshold", "dqn")
 
 
 def calculate_statistics(n, m, k, strategy, alpha=0.95):

@@ -3,7 +3,7 @@ import random
 from k_thinning.strategies.always_accept_strategy import AlwaysAcceptStrategy
 from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from k_thinning.strategies.random_strategy import RandomStrategy
-from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
+from k_thinning.strategies.quantile_strategy import QuantileStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 from k_thinning.strategies.dp_strategy import DPStrategy
 

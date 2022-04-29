@@ -10,6 +10,11 @@ M = 25
 K = 5
 
 
+
+def NO_POTENTIAL(loads):
+    return 0
+
+
 def EXPONENTIAL_POTENTIAL(loads, alpha=0.5):
     t = sum(loads)
     n = len(loads)

@@ -3,9 +3,9 @@ from math import floor
 from k_thinning.strategies.strategy_base import StrategyBase
 
 
-class MeanThinningStrategy(StrategyBase):
+class QuantileStrategy(StrategyBase):
     def __init__(self, n, m, k):
-        super(MeanThinningStrategy, self).__init__(n, m, k)
+        super(QuantileStrategy, self).__init__(n, m, k)
 
     def decide(self, bin):
         threshold_idx = self.n * (1 - 2 ** (-1 / self.choices_left))

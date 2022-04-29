@@ -9,12 +9,12 @@ from k_thinning.strategies.always_accept_strategy import AlwaysAcceptStrategy
 from k_thinning.strategies.dp_strategy import DPStrategy
 from k_thinning.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 from k_thinning.strategies.local_reward_optimiser_strategy import LocalRewardOptimiserStrategy
-from k_thinning.strategies.mean_thinning_strategy import MeanThinningStrategy
+from k_thinning.strategies.quantile_strategy import QuantileStrategy
 from k_thinning.strategies.random_strategy import RandomStrategy
 from k_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 
 NMKS = ((5, 25, 3), (5, 25, 5), (5, 25, 10), (20, 50, 3), (20, 50, 5), (20, 50, 10))  # (5, 25, 2), (20, 50, 2) they are analysed for two-thinning already
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "threshold", "dqn")
+STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "quantile", "dp", "threshold", "dqn")
 RUNS = 100
 RE_TRAIN_DQN = 1
 PRINT_BEHAVIOUR = False
@@ -46,8 +46,8 @@ def compare_strategies(nmks=NMKS, runs=RUNS, strategies=STRATEGIES, reward_fun=R
                     strategy = AlwaysAcceptStrategy(n=n, m=m, k=k)
                 elif strategy_name == "random":
                     strategy = RandomStrategy(n=n, m=m, k=k)
-                elif strategy_name == "mean_thinning":
-                    strategy = MeanThinningStrategy(n=n, m=m, k=k)
+                elif strategy_name == "quantile":
+                    strategy = QuantileStrategy(n=n, m=m, k=k)
                 elif strategy_name == "local_reward_optimiser":
                     strategy = LocalRewardOptimiserStrategy(n=n, m=m, k=k)
                 elif strategy_name == "threshold":

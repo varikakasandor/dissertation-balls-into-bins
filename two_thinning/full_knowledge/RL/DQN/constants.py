@@ -9,7 +9,7 @@ N = 20
 M = 400
 
 
-def ZERO_POTENTIAL(loads):
+def NO_POTENTIAL(loads):
     return 0
 
 
