@@ -5,6 +5,7 @@ from math import exp, ceil, log
 
 import torch.optim as optim
 import wandb
+from matplotlib import pyplot as plt
 
 from helper.replay_memory import ReplayMemory, Transition
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
@@ -116,6 +117,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
     steps_done = 0
     best_eval_score = None
     not_improved = 0
+    eval_scores = []
 
     start_loads = []
     for start_size in reversed(range(m)):  # pretraining (i.e. curriculum learning)
@@ -156,6 +158,7 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
         if report_wandb:
             wandb.log({"score": curr_eval_score})
 
+        eval_scores.append(curr_eval_score)
         if best_eval_score is None or curr_eval_score >= best_eval_score:
             best_eval_score = curr_eval_score
             best_net.load_state_dict(policy_net.state_dict())
@@ -174,6 +177,11 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
         if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
+    eval_max_loads = [-x for x in eval_scores]
+    plt.plot(eval_max_loads)
+    plt.xlabel("episode")
+    plt.ylabel(f"average maximum load over {5 * eval_runs} runs")
+    plt.savefig(f"../../../../../../evaluation/graphical_two_choice/data/training_progression_{graph.name}_{graph.n}_{m}.png")
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 
