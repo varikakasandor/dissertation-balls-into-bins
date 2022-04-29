@@ -24,7 +24,7 @@ def analyse_random_regular(n=N, m=M, runs_per_d=RUNS_PER_D):
             else:
                 graph_transposed = RandomRegularGraph(n=n, d=n - 1 - d)
                 graph = graph_transposed.transpose()
-            score = run_strategy(graph=graph, m=m, strategy=GreedyStrategy(graph=graph, m=m), reward=MAX_LOAD_REWARD,
+            score = run_strategy(graph=graph, m=m, strategy=GreedyStrategy(graph=graph, m=m), reward_fun=MAX_LOAD_REWARD,
                                  print_behaviour=False)
             maxload = -score
             vals.append([d, maxload])

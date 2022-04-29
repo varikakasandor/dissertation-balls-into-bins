@@ -8,17 +8,19 @@ from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegularGraph
 
-M = 5
+M = 32
 N = 32
-D = 10
-GRAPH = HyperCube(N)
+D = 2
+GRAPH = RandomRegularGraph(n=N, d=D)
 STRATEGY = GreedyStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
-REWARD = max
 RUNS = 1000
-PRINT_BEHAVIOUR = False  # True
+PRINT_BEHAVIOUR = True
+
+def REWARD_FUN(x):
+    return -max(x)
 
 
-def run_strategy(graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behaviour=PRINT_BEHAVIOUR):
+def run_strategy(graph=GRAPH, m=M, strategy=STRATEGY, reward_fun=REWARD_FUN, print_behaviour=PRINT_BEHAVIOUR):
     loads = [0] * graph.n
     random_edges = random.choices(graph.edge_list, k=m)
     for i in range(m):
@@ -36,15 +38,15 @@ def run_strategy(graph=GRAPH, m=M, strategy=STRATEGY, reward=REWARD, print_behav
 
         loads[chosen_bin] += 1
 
-    score = reward(loads)
+    score = reward_fun(loads)
     return score
 
 
-def run_strategy_multiple_times(graph=GRAPH, m=M, runs=RUNS, strategy=STRATEGY, reward=REWARD,
+def run_strategy_multiple_times(graph=GRAPH, m=M, runs=RUNS, strategy=STRATEGY, reward_fun=REWARD_FUN,
                                 print_behaviour=PRINT_BEHAVIOUR):
     scores = []
     for _ in range(runs):
-        score = run_strategy(graph=graph, m=m, strategy=strategy, reward=reward, print_behaviour=print_behaviour)
+        score = run_strategy(graph=graph, m=m, strategy=strategy, reward_fun=reward_fun, print_behaviour=print_behaviour)
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs

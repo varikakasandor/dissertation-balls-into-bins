@@ -131,6 +131,8 @@ As discussed in Chapter \ref{preparation}, there are several other reasonable ob
 
 \NOTE{A}{Compare zero potential with max load potential, showing P value that we do need reward shaping.}
 
+\NOTE{A}{Explain how the wandb importance tool works.}
+
 \section{K-Thinning}
 
 
@@ -191,9 +193,8 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 
 
 \subsection{Comparison of Strategies}
-
 \begin{table}[h!]
-\caption{Average maximum load of \textsc{Graphical Two Choice} strategies with $95\%$ confidence intervals}
+\caption{Average maximum load of \textsc{Graphical Two Choice} strategies with $95\%$ confidence intervals\protect\footnotemark}
 \label{tab:graphical-two-choice-comparison}
 \centering
 \resizebox{\textwidth}{!}{%
@@ -211,6 +212,8 @@ Deep Q-Learning & 7.17 $\pm$ 0.07 & 7.17 $\pm$ 0.06 & 7.38 $\pm$ 0.09 & 4.92 $\p
 \end{tabular}}
 \end{table}
 
+\footnotetext{Note that for $n=4$, Cycle and Hypercube are the same graphs.}
+
 First I prove the most surprising result of this section.
 
 \begin{lemma} \label{lemma: greedy-suboptimal}
@@ -225,14 +228,26 @@ I used the dynamic programming algorithm to find the optimal strategy for \texts
 \end{proof}
 
 
-We can see from the table, that for $n=4$ and $m=25$, even though Greedy is not optimal for the Cycle graph but it is for the Clique graph, the optimal strategy for the Cycle graph (provided by the DP Strategy) still has a lower expected maximum load than Greedy has for the Clique graph. This is a very important observation, because it indicates that the constraint that not all the pairs of nodes can be sampled (e.g. due to geographical reasons) is not just a constraint, but it can even improve the performance.
+We can see from the table, that for $n=4$ and $m=25$, even though Greedy is not optimal for the Cycle graph but it is for the Clique graph, the optimal strategy for the Cycle graph (provided by the DP Strategy) still has a lower expected maximum load than Greedy has for the Clique graph. This is an important observation, because it indicates that the constraint that not all the pairs of nodes can be sampled (e.g. due to geographical reasons) is not just a constraint, but it can even improve the performance in some special cases.
 
 
-Also, even though Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from DP), it proved to be an impossible challenge for RL to exploit the weaknesses of Greedy. In fact, for $n=m=32$, Deep Q-Learning is not even superior to the Random Strategy, which is equivalent to \textsc{One-Choice} for any regular graph.
+For larger graphs, however, Greedy tends to perform better on the Clique graph than on the others. Hypothesising that its performance depends on the sparsity of the graph, I also analysed the relationship between the degree $d$ of the graph and how well Greedy performs on it. I created $1000$ random regular graphs for each degree $1\leq d \leq 31$ of the $n=m=32$ case. 
 
 
 
-\NOTE{A}{Does connectedness matter for small graphs? Add analysis for random regular graphs.}
+\begin{figure}[h!] \label{greedy-random-regular-analysis}
+    \centering
+    \includegraphics[scale=1.0]{Chapter4/Figs/Greedy_degree_analysis.png}
+    \caption{Relating the degree of the graph to the performance of Greedy}
+\end{figure}
+
+
+We can see that indeed smaller degrees hurt Greedy, but after around $d=15$, the performance no longer improves. \NOTE{A}{Why does it perform worse on smaller degree graphs? Give some intuition. Also for why it plateaus. What effect might connectedness have on the performance? Does it matter e.g. for $d=2$ how many components the graph has? Future work...}
+
+
+
+Even though Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from DP), it proved to be an impossible challenge for RL to exploit the weaknesses of Greedy. In fact, for $n=m=32$, Deep Q-Learning is not even superior to the Random Strategy, which is equivalent to \textsc{One-Choice} for any regular graph.
+
 
 \subsection{Deep Q-Learning analysis}
 
@@ -251,12 +266,31 @@ We can see in the figure that the green region contains the counterexamples to t
 
 \subsubsection{Training}
 
+I present the training curve for the Hypercube graph with $n=4$ and $m=25$, but the pattern is similar for other cases too.
+
+
+\begin{figure}[h!] \label{graphical-two-choice-hyperparameter-importance}
+    \centering
+    \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_hypercube_4_25.png}
+    \caption{\textsc{Graphical Two Choice} Training Curve}
+\end{figure}
+
+We can see that unlike for \textsc{Two-Thinning}, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
+
+
 
 \subsubsection{Hyperparameter Analysis}
 
+I present the hyperparameter importance analysis for the Hypercube graph with $n=4$ and $m=25$, but the order is similar for other cases too.
+
+\begin{figure}[h!] \label{graphical-two-choice-hyperparameter-importance}
+    \centering
+    \includegraphics[scale=0.4]{Chapter4/Figs/graphical_two_choice_hypercube_4_25_importance.png}
+    \caption{\textsc{Graphical Two Choice} Hyperparameter Importance}
+\end{figure}
 
 
-
+Unlike the ``use\textunderscore threshold'' parameter for \textsc{Two-Thinning}, there is no very important hyperparameter (in fact, the trained scores are within a $0.4$ range for each analysed combination). The negative correlation of ``hidden\textunderscore size'' and ``num\textunderscore lin\textunderscore layers'' with the score shows that adding complexity to the neural network doesn't help.
 
 \section{Further Analysis of Two-Thinning (\textit{Extension})}
 

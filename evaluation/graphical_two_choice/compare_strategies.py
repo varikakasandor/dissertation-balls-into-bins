@@ -42,7 +42,7 @@ def compare_strategies(gms=GMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
                     strategy = FullKnowledgeDQNStrategy(graph=graph, m=m, use_pre_trained=False, **hyperparameters)
                     curr_scores = run_strategy_multiple_times(graph=graph, m=m, runs=runs // re_train_dqn,
                                                               strategy=strategy,
-                                                              reward=reward_fun, print_behaviour=print_behaviour)
+                                                              reward_fun=reward_fun, print_behaviour=print_behaviour)
                     scores.extend(curr_scores)
             else:
                 if strategy_name == "greedy":
@@ -58,7 +58,7 @@ def compare_strategies(gms=GMS, runs=RUNS, strategies=STRATEGIES, reward_fun=REW
                 else:
                     raise Exception("No such strategy is known, check spelling!")
 
-                scores = run_strategy_multiple_times(graph=graph, m=m, runs=runs, strategy=strategy, reward=reward_fun,
+                scores = run_strategy_multiple_times(graph=graph, m=m, runs=runs, strategy=strategy, reward_fun=reward_fun,
                                                      print_behaviour=print_behaviour)
 
             df = pd.DataFrame(data=scores, columns=["score"])
