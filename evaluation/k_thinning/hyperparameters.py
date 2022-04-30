@@ -4,7 +4,37 @@ from k_thinning.full_knowledge.RL.DQN.constants import *
 
 
 def get_dqn_hyperparameters(n, m, k):
-    if n == 5 and m == 25 and k == 3:
+    if n == 5 and m == 25 and k == 2:
+        return {
+            "batch_size": 32,
+            "eps_start": 0.21,
+            "eps_end": 0.035,
+            "eps_decay": 3000,
+            "num_episodes": 1000,  # TODO
+            "pre_train_episodes": 60,  # TODO
+            "target_update_freq": 18,
+            "memory_capacity": 650,
+            "eval_runs": 10,
+            "eval_parallel_batch_size": 64,
+            "patience": 1000,
+            "use_normalised": True,
+            "print_progress": True,
+            "optimise_freq": 10,
+            "max_threshold": 8,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net",
+            "loss_function": nn.MSELoss(),
+            "lr": 0.004,
+            "nn_hidden_size": 128,
+            "nn_rnn_num_layers": 2,
+            "nn_num_lin_layers": 3,
+            "optimizer_method": torch.optim.SGD,
+            "potential_fun": STD_POTENTIAL,
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
+
+    elif n == 5 and m == 25 and k == 3:
         return {
             "batch_size": 32,
             "eps_start": 0.21,
@@ -88,6 +118,35 @@ def get_dqn_hyperparameters(n, m, k):
             "nn_num_lin_layers": 3,
             "optimizer_method": torch.optim.Adam,
             "potential_fun": STD_POTENTIAL,
+            "pacing_fun": EVEN_PACING_FUN
+        }
+
+    elif n == 20 and m == 50 and k == 2:
+        return {
+            "batch_size": 32,
+            "eps_start": 0.4,
+            "eps_end": 0.055,
+            "eps_decay": 3200,
+            "num_episodes": 1000,  # TODO
+            "pre_train_episodes": 40,  # TODO
+            "target_update_freq": 28,
+            "memory_capacity": 650,
+            "eval_runs": 10,
+            "eval_parallel_batch_size": 64,
+            "patience": 1000,
+            "use_normalised": True,
+            "print_progress": True,
+            "optimise_freq": 30,
+            "max_threshold": 4,
+            "nn_model": GeneralNet,
+            "nn_type": "general_net",
+            "loss_function": nn.SmoothL1Loss(),
+            "lr": 0.005,
+            "nn_hidden_size": 128,
+            "nn_rnn_num_layers": 2,
+            "nn_num_lin_layers": 3,
+            "optimizer_method": torch.optim.Adam,
+            "potential_fun": EXPONENTIAL_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 

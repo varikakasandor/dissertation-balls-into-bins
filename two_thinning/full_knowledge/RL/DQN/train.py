@@ -72,7 +72,7 @@ def evaluate_q_values(model, n=N, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TR
                 if print_behaviour:
                     print(f"With loads {loads} the trained model chose {a}")
                 randomly_selected = random.randrange(n)
-                if loads[randomly_selected] <= a: # TODO: add normalised version
+                if loads[randomly_selected] <= a:  # TODO: add normalised version
                     loads[randomly_selected] += 1
                 else:
                     loads[random.randrange(n)] += 1
@@ -89,7 +89,8 @@ def calc_number_of_jumps(thresholds, delta=4):
     return num_jumps
 
 
-def analyse_threshold_progression(model, ep, save_folder, delta, max_threshold, n=N, m=M, use_normalised=USE_NORMALISED):
+def analyse_threshold_progression(model, ep, save_folder, delta, max_threshold, n=N, m=M,
+                                  use_normalised=USE_NORMALISED):
     with torch.no_grad():
         loads = [0] * n
         thresholds = []
@@ -153,7 +154,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     max_possible_load = m // n + ceil(sqrt(
         log(n))) if nn_model == FullTwoThinningClippedRecurrentNetFC else m  # based on the two-thinning paper, this can be achieved!
-    max_threshold = max_threshold - m // n if use_normalised else max_threshold # !!!
+    max_threshold = max_threshold - m // n if use_normalised else max_threshold  # !!!
     nn_max_threshold = 2 * max_threshold if use_normalised else max_threshold
 
     policy_net = nn_model(n=n, max_threshold=nn_max_threshold, max_possible_load=max_possible_load,
@@ -214,17 +215,22 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                                batch_size=batch_size, criterion=loss_function,
                                device=device)
 
-        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=eval_runs,
+        curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun,
+                                                   eval_runs=eval_runs,
                                                    batch_size=eval_parallel_batch_size, use_normalised=use_normalised)
         if best_eval_score is None or curr_eval_score > best_eval_score:
-            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold, reward=reward_fun, eval_runs=5 * eval_runs,
-                                                       batch_size=eval_parallel_batch_size, use_normalised=use_normalised)  # only update the best if it is really better, so run more tests
+            curr_eval_score = evaluate_q_values_faster(policy_net, n=n, m=m, max_threshold=max_threshold,
+                                                       reward=reward_fun, eval_runs=5 * eval_runs,
+                                                       batch_size=eval_parallel_batch_size,
+                                                       use_normalised=use_normalised)  # only update the best if it is really better, so run more tests
         if report_wandb:
             wandb.log({"score": curr_eval_score})
 
         eval_scores.append(curr_eval_score)
         delta = max_threshold if use_normalised else max_threshold // 2
-        threshold_jumps.append(analyse_threshold_progression(policy_net, ep, save_path, delta=delta, max_threshold=max_threshold, use_normalised=use_normalised))
+        threshold_jumps.append(
+            analyse_threshold_progression(policy_net, ep, save_path, delta=delta, max_threshold=max_threshold,
+                                          use_normalised=use_normalised))
 
         if best_eval_score is None or curr_eval_score > best_eval_score:
             best_eval_score = curr_eval_score
@@ -254,6 +260,14 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
 
     scaled_threshold_jumps = scale(np.array(threshold_jumps))
     scaled_eval_scores = scale(np.array(eval_scores))
+
+    eval_max_loads = [-x for x in eval_scores]
+    plt.clf()
+    plt.plot(eval_max_loads)
+    plt.xlabel("episode")
+    plt.ylabel(f"average maximum load over {5 * eval_runs} runs")
+    plt.savefig(
+        f"../../../../evaluation/two_thinning/data/training_progression_{n}_{m}.png")
 
     plt.clf()
     plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps,

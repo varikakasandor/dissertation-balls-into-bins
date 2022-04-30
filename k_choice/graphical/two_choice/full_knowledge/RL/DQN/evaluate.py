@@ -1,4 +1,5 @@
 import os
+from math import ceil, log
 
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.constants import *
 from k_choice.graphical.two_choice.full_knowledge.RL.DQN.neural_network import FullGraphicalTwoChoiceFCNet
@@ -13,13 +14,11 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
     return best_model_path
 
 
-def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullGraphicalTwoChoiceFCNet if nn_type in ["fc_cycle", "fc_hypercube", "fc_random"] else \
-        GeneralNet if nn_type in ["general_net_cycle", "general_net_hypercube", "general_net_random"] else \
-            GeneralNet
-
+def load_best_model(n=N, m=M, max_possible_load=None, hidden_size=128, num_lin_layers=3, nn_type=NN_TYPE, device=DEVICE):
+    max_possible_load = max_possible_load if max_possible_load is not None else min(m, m // n + 2 * ceil(sqrt(log(n))))
+    model = GeneralNet
     try:
-        best_model = model(n=n, max_possible_load=m, device=device)
+        best_model = model(n=n, max_possible_load=max_possible_load, hidden_size=hidden_size, num_lin_layers=num_lin_layers, device=device)
         best_model.load_state_dict(torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type)))
         best_model.eval()
         return best_model

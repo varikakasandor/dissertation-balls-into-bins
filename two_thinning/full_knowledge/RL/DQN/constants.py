@@ -50,7 +50,7 @@ BATCH_SIZE = 32
 EPS_START = 0.2
 EPS_END = 0.05
 EPS_DECAY = 3500
-TRAIN_EPISODES = 1000
+TRAIN_EPISODES = 350
 PRE_TRAIN_EPISODES = 50
 TARGET_UPDATE_FREQ = 20
 MEMORY_CAPACITY = 450
@@ -62,7 +62,7 @@ USE_NORMALISED = True
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 25
-MAX_THRESHOLD = 22  # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
+MAX_THRESHOLD = 22 # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
 LOSS_FUCNTION = nn.MSELoss()
@@ -74,5 +74,5 @@ OPTIMIZER_METHOD = torch.optim.Adam
 SAVE_PATH = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "training_progression",
                  f'{str(datetime.now().strftime("%Y_%m_%d %H_%M_%S_%f"))}_{N}_{M}')
 REWARD_FUN = MAX_LOAD_REWARD
-POTENTIAL_FUN = EXPONENTIAL_POTENTIAL
+POTENTIAL_FUN = MAX_LOAD_POTENTIAL
 PACING_FUN = EVEN_PACING_FUN

@@ -12,7 +12,7 @@ from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 from two_thinning.strategies.random_strategy import RandomStrategy
 
 N = 50
-M = 50
+M = 2500
 STRATEGY = LocalRewardOptimiserStrategy(N, M)
 RUNS = 100
 PRINT_BEHAVIOUR = True

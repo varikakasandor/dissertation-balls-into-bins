@@ -34,12 +34,11 @@ def greedy(policy_net, loads, edge, batched=False):
             pass
         else:
             x, y = edge
-            with torch.no_grad():
-                vals = policy_net(torch.as_tensor(loads).unsqueeze(0)).squeeze(0).detach()
-                if vals[x] >= vals[y]:
-                    return x
-                else:
-                    return y
+            vals = policy_net(torch.as_tensor(loads).unsqueeze(0)).squeeze(0).detach()
+            if vals[x] >= vals[y]:
+                return x
+            else:
+                return y
 
 
 def evaluate_q_values(model, graph: GraphBase, m=M, reward=REWARD_FUN, eval_runs=EVAL_RUNS_TRAIN,
