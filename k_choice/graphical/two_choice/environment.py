@@ -7,11 +7,12 @@ from k_choice.graphical.two_choice.strategies.dp_strategy import DPStrategy
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
 from k_choice.graphical.two_choice.graphs.random_regular_graph import RandomRegularGraph
+from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
-M = 32
-N = 32
+M = 25
+N = 4
 D = 2
-GRAPH = RandomRegularGraph(n=N, d=D)
+GRAPH = CompleteGraph(n=N)
 STRATEGY = GreedyStrategy(GRAPH, M)  # , use_pre_trained=False) Greedy(GRAPH, M) #
 RUNS = 1000
 PRINT_BEHAVIOUR = True

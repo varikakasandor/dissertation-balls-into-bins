@@ -1,5 +1,9 @@
 import time
 from math import log2
+from os.path import abspath, join, dirname
+
+import pandas as pd
+import scipy
 
 from helper.helper import number_of_increasing_partitions
 from collections import Counter
@@ -7,8 +11,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 5
-M = 5
+N = 20
+M = 60
 DICT_LIMIT = 6000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -181,7 +185,7 @@ def find_probability_dp(loads_tuple, reach_probabilities, strategy, n=N):
     return p_reach
 
 
-def analyse_probability_distribution(threshold_strategy, include_intermediate_states=True, n=N, m=M):
+def analyse_probability_distribution(threshold_strategy, include_intermediate_states=True, take_log=True, density=True, n=N, m=M):
     reach_probabilities = {}
     for loads_tuple in threshold_strategy:
         find_probability_dp(loads_tuple, reach_probabilities, threshold_strategy, n=n)
@@ -204,16 +208,32 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     final_probs_entropy = entropy(final_probs, base=2)
     print(f"The entropy of the final load vectors is {final_probs_entropy}")
 
-    if include_intermediate_states:
-        all_probs = list(reach_probabilities.values())
-        plt.hist(all_probs, bins=100)
+    raw_plot_probs = list(reach_probabilities.values()) if include_intermediate_states else final_probs
+    plot_probs = [log2(x) for x in raw_plot_probs] if take_log else raw_plot_probs
+
+    _, bins, _ = plt.hist(plot_probs, bins=100, density=density)
+    """a, b, floc, fscale = scipy.stats.beta.fit(plot_probs)
+    best_fit_line = scipy.stats.gamma.pdf(bins, a, b, floc, fscale)
+    plt.plot(bins, best_fit_line)"""
+
+    if take_log:
+        plt.axvline(x=log2(1/len(raw_plot_probs)), color="red", label="log of average probability")
+        plt.xlabel("log probability")
     else:
-        plt.hist(final_probs, bins=100)
-    plt.show()
+        plt.axvline(x=1 / len(raw_plot_probs), color="red", label="average probability")
+        plt.xlabel("probability")
+    plt.ylabel("count")
+    plt.legend()
+    included_str = "all" if include_intermediate_states else "final"
+    log_str = "log" if take_log else "linear"
+    density_str = "density" if density else "count"
+    file_name = f"state_distribution_all{n}_{m}_{included_str}_{log_str}_{density_str}.png"
+    save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "two_thinning", "data", file_name)
+    plt.savefig(save_path)
 
 
 if __name__ == "__main__":
     start_time = time.time()
     strategy = find_best_strategy()
-    analyse_probability_distribution(strategy, include_intermediate_states=False)
+    analyse_probability_distribution(strategy, include_intermediate_states=True, take_log=True, density=False)
     print("--- %s seconds ---" % (time.time() - start_time))
