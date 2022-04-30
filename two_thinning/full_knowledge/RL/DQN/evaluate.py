@@ -12,19 +12,16 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
     return best_model_path
 
 
-def load_best_model(n=N, m=M, nn_type=NN_TYPE, device=DEVICE):
-    model = FullTwoThinningOneHotNet if nn_type == "one_hot" else (
-        FullTwoThinningRecurrentNet if nn_type == "rnn" else (
-            FullTwoThinningRecurrentNetFC if nn_type == "rnn_fc" else (
-                FullTwoThinningClippedRecurrentNetFC if nn_type == "rnn_clipped_fc" else (
-                    GeneralNet if nn_type == "general_net" else FullTwoThinningNet))))
+def load_best_model(n=N, m=M, nn_type=NN_TYPE, max_threshold=None, max_possible_load=None, device=DEVICE):
+    model = GeneralNet
+    max_threshold_range = range(m+1) if max_threshold is None else range(max_threshold, max_threshold+1)
+    max_possible_load_range = range(m+1) if max_possible_load is None else range(max_possible_load, max_possible_load+1)
 
-    for max_threshold in range(m + 1):
-        for max_possible_load in range(m + 1):
+    for max_threshold in max_threshold_range:
+        for max_possible_load in max_possible_load_range:
             try:
                 state_dict = torch.load(get_best_model_path(n=n, m=m, nn_type=nn_type))
-                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load,
-                                   hidden_size=64, device=device)
+                best_model = model(n=n, max_threshold=max_threshold, max_possible_load=max_possible_load, device=device)
                 best_model.load_state_dict(state_dict)
                 best_model.eval()
                 return best_model

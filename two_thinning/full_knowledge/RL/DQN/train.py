@@ -261,14 +261,6 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     scaled_threshold_jumps = scale(np.array(threshold_jumps))
     scaled_eval_scores = scale(np.array(eval_scores))
 
-    eval_max_loads = [-x for x in eval_scores]
-    plt.clf()
-    plt.plot(eval_max_loads)
-    plt.xlabel("episode")
-    plt.ylabel(f"average maximum load over {5 * eval_runs} runs")
-    plt.savefig(
-        f"../../../../evaluation/two_thinning/data/training_progression_{n}_{m}.png")
-
     plt.clf()
     plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps,
              label="normalised number of threshold jumps")

@@ -31,11 +31,9 @@ class FullKnowledgeDQNStrategy(StrategyBase):
 
     def decide(self, bin):
         a = greedy(self.model, self.loads)
-        self.curr_thresholds.append(a)
-        if self.use_normalised:
-            return self.loads[bin] <= sum(self.loads) / len(self.loads) + a - self.max_threshold
-        else:
-            return self.loads[bin] <= a
+        threshold = sum(self.loads) / len(self.loads) + a - self.max_threshold if self.use_normalised else a
+        self.curr_thresholds.append(threshold)
+        return self.loads[bin] <= threshold
 
     def note(self, bin):
         pass

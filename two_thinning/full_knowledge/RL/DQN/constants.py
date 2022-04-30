@@ -5,8 +5,8 @@ from datetime import datetime
 from two_thinning.full_knowledge.RL.DQN.neural_network import *
 from helper.helper import std
 
-N = 20
-M = 400
+N = 5
+M = 10
 
 
 def NO_POTENTIAL(loads):
@@ -47,13 +47,13 @@ def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 32
-EPS_START = 0.2
+EPS_START = 0.25
 EPS_END = 0.05
 EPS_DECAY = 3500
-TRAIN_EPISODES = 350
+TRAIN_EPISODES = 100
 PRE_TRAIN_EPISODES = 50
-TARGET_UPDATE_FREQ = 20
-MEMORY_CAPACITY = 450
+TARGET_UPDATE_FREQ = 25
+MEMORY_CAPACITY = 500
 EVAL_RUNS_TRAIN = 5
 EVAL_RUNS_EVAL = 1000
 EVAL_PARALLEL_BATCH_SIZE = 64
@@ -62,10 +62,10 @@ USE_NORMALISED = True
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
 OPTIMISE_FREQ = 25
-MAX_THRESHOLD = 22 # max(3, M // N + ceil(sqrt(log(N))))  # Should be given in absolute domain even if normalised domain if USE_NORMALISED=True
+MAX_THRESHOLD = 3
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
-LOSS_FUCNTION = nn.MSELoss()
+LOSS_FUCNTION = nn.SmoothL1Loss()
 LR = 0.005
 NN_HIDDEN_SIZE = 128
 NN_RNN_NUM_LAYERS = 3

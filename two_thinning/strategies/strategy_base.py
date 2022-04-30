@@ -62,8 +62,8 @@ class StrategyBase(metaclass=ABCMeta):
         # threshold
         x = np.arange(self.m)
         plt.plot(x, np.array(self.curr_thresholds), label="threshold")
-        plt.plot(x, np.array(self.max_loads), label="max load")
-        plt.plot(x, np.array(self.offered_loads), label="offered load")
+        # plt.plot(x, np.array(self.max_loads), label="max load")
+        # plt.plot(x, np.array(self.offered_loads), label="offered load")
         plt.title("Threshold progression")
         plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")

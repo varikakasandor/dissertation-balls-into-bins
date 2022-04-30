@@ -152,7 +152,7 @@ class FullTwoThinningClippedRecurrentNetFC(nn.Module):
 
 class GeneralNet(nn.Module):
 
-    def __init__(self, n, max_threshold, max_possible_load, hidden_size=64, rnn_num_layers=1, num_lin_layers=1,
+    def __init__(self, n, max_threshold, max_possible_load, hidden_size=128, rnn_num_layers=3, num_lin_layers=2,
                  device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         super(GeneralNet, self).__init__()
         self.n = n
