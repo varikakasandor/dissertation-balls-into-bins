@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def csv_to_latex(inp_path, out_path, precision=2):
+def csv_to_latex(inp_path, out_path):
     latex_str = ""
     df = pd.read_csv(inp_path)
     for _, row_series in df.iterrows():
@@ -11,8 +11,8 @@ def csv_to_latex(inp_path, out_path, precision=2):
         row_str = ""
         row_str += index + " & "
         for i in range(len(row) // 2):
-            truncated_mean = str(round(row[2 * i], precision))
-            truncated_confidence = str(round(row[2 * i + 1], precision))
+            truncated_mean = str("{:0.2f}".format(abs(row[2 * i])))
+            truncated_confidence = str("{:0.2f}".format(row[2 * i + 1]))
             row_str += truncated_mean + " $\\pm$ " + truncated_confidence
             if 2 * i + 1 != len(row) - 1:
                 row_str += " & "

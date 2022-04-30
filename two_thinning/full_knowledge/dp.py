@@ -12,7 +12,7 @@ import numpy as np
 from scipy.stats import entropy
 
 N = 20
-M = 60
+M = 20
 DICT_LIMIT = 6000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -192,8 +192,10 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
 
     max_likelihood_final_prob = 0
     final_probs = []
+    max_load_distribution = [0] * (m + 1)
     for loads_tuple, p in reach_probabilities.items():
         if sum(loads_tuple) == m:
+            max_load_distribution[max(loads_tuple)] += p
             final_probs.append(p)
             if p > max_likelihood_final_prob:
                 max_likelihood_final_prob = p
@@ -227,7 +229,16 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     included_str = "all" if include_intermediate_states else "final"
     log_str = "log" if take_log else "linear"
     density_str = "density" if density else "count"
-    file_name = f"state_distribution_all{n}_{m}_{included_str}_{log_str}_{density_str}.png"
+    file_name = f"state_distribution_{n}_{m}_{included_str}_{log_str}_{density_str}.png"
+    save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "two_thinning", "data", file_name)
+    plt.savefig(save_path)
+
+    plt.clf()
+    plt.plot(max_load_distribution)
+    plt.xlabel("maximum load")
+    plt.ylabel("probability")
+    plt.xticks(np.arange(0, 21, 2))
+    file_name = f"max_load_distribution_{n}_{m}.png"
     save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "two_thinning", "data", file_name)
     plt.savefig(save_path)
 
