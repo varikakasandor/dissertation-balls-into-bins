@@ -208,6 +208,13 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
         if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
+    max_loads = [-x for x in eval_scores]
+    plt.plot(max_loads)
+    plt.xlabel("episode")
+    plt.ylabel("average maximum load over 25 runs")
+    file_name = f"training_progression_{n}_{m}_{k}"
+    training_save_path = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "k_thinning", "data", file_name)
+    plt.savefig(training_save_path)
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 

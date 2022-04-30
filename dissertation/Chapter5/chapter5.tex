@@ -10,13 +10,22 @@
 
 
 
-
 \section{Applicability of RL to Balls into Bins}
 \NOTE{A}{Analysis of Balls into Bins using RL. The original title suggests that it is actually applicable.}
 
-\NOTE{A}{Mention that DQN requires very precise and extensive hyperparamter tuning.}
+As we have seen for each of the three settings, the difference between good and bad decisions are very subtle, which make RL very challenging to apply. Even with all the tricks I tried, it couldn't consistently outperform simpler heuristic strategies, such as the Local Reward Optimiser Strategy. Also, in order to get acceptable results, extensive and precise hyperparameter tuning was necessary in most cases. \NOTE{A}{Write something positive as well?}
 
-\section{What would I do differently?}
 
+
+\section{Lessons Learnt}
+
+I experienced the rich nature of RL, and I realised that it is a very complex field, which I would like to learn more about in the future. 
+
+Even though the project was planned to focus more on RL, we also obtained several theoretical insights via analysing strategies. This required me to deeply understand the nature of balls into bins, about which I learnt a lot by background reading, and exchanging ideas with my expert supervisors. 
 
 \section{Future Work}
+
+Apart from the ideas mentioned in other chapters, it is definitely possible to try other ideas for improving RL, and hopefully get closer to the optimal strategies. For examples, Graph Neural Networks could be tried for the \textsc{Graphical Two-Choice} setting, or instead of Deep Q-Learning, other RL algortihms, such as Policy Gradients could be experimented with. 
+
+
+Also, we left some open theoretical questions (conjectures), and by analysing the optimal (DP) strategies more closely, several other properties might be derived, that could even help the design of simple yet effective strategies.

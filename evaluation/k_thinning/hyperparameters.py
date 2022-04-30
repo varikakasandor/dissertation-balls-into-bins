@@ -10,7 +10,7 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.21,
             "eps_end": 0.035,
             "eps_decay": 3000,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 60,  # TODO
             "target_update_freq": 18,
             "memory_capacity": 650,
@@ -40,14 +40,14 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.21,
             "eps_end": 0.035,
             "eps_decay": 3000,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 60,  # TODO
             "target_update_freq": 18,
             "memory_capacity": 650,
             "eval_runs": 10,
             "eval_parallel_batch_size": 64,
             "patience": 1000,
-            "use_normalised": True,
+            "use_normalised": False,
             "print_progress": True,
             "optimise_freq": 10,
             "max_threshold": 7,
@@ -69,14 +69,14 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.15,
             "eps_end": 0.06,
             "eps_decay": 3000,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 20,  # TODO
             "target_update_freq": 20,
             "memory_capacity": 650,
             "eval_runs": 10,
             "eval_parallel_batch_size": 64,
             "patience": 1000,
-            "use_normalised": True,
+            "use_normalised": False,
             "print_progress": True,
             "optimise_freq": 10,
             "max_threshold": 6,
@@ -98,14 +98,14 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.26,
             "eps_end": 0.09,
             "eps_decay": 2500,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 20,  # TODO
             "target_update_freq": 18,
             "memory_capacity": 650,
             "eval_runs": 10,
             "eval_parallel_batch_size": 64,
             "patience": 1000,
-            "use_normalised": True,
+            "use_normalised": False,
             "print_progress": True,
             "optimise_freq": 30,
             "max_threshold": 6,
@@ -156,14 +156,14 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.4,
             "eps_end": 0.055,
             "eps_decay": 3200,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 40,  # TODO
             "target_update_freq": 28,
             "memory_capacity": 650,
             "eval_runs": 10,
             "eval_parallel_batch_size": 64,
             "patience": 1000,
-            "use_normalised": True,
+            "use_normalised": False,
             "print_progress": True,
             "optimise_freq": 30,
             "max_threshold": 3,
@@ -185,14 +185,14 @@ def get_dqn_hyperparameters(n, m, k):
             "eps_start": 0.2,
             "eps_end": 0.06,
             "eps_decay": 4300,
-            "num_episodes": 1000,  # TODO
+            "num_episodes": 300,  # TODO: set back to 1000
             "pre_train_episodes": 40,  # TODO
             "target_update_freq": 24,
             "memory_capacity": 650,
             "eval_runs": 10,
             "eval_parallel_batch_size": 64,
             "patience": 1000,
-            "use_normalised": True,
+            "use_normalised": False,
             "print_progress": True,
             "optimise_freq": 40,
             "max_threshold": 3,

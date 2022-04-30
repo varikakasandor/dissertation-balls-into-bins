@@ -13,7 +13,7 @@ def get_best_model_path(n=N, m=M, k=K, nn_type=NN_TYPE):
 
 
 def load_best_model(n=N, m=M, k=K, nn_type=NN_TYPE, device=DEVICE):
-    model = FullKThinningRecurrentNet  # FullTwoThinningOneHotNet if nn_type == "one_hot" else (FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
+    model = GeneralNet  # FullTwoThinningOneHotNet if nn_type == "one_hot" else (FullTwoThinningRecurrentNet if nn_type == "rnn" else FullTwoThinningNet)
 
     for max_threshold in range(m + 1):
         try:

@@ -22,6 +22,7 @@ To obtain thorough and statistically significant results, I utilised parallel pr
 Even with this evaluation speedup, the usability of Deep Q-Learning for large values of $n$ and $m$ is still limited due to the training time. The largest range for which I successfully trained a RL algorithm in at most a day is $n=1000$, $m=1500$, but I decided to focus on slightly smaller values for the evaluation as that is more illustrative and complementary to the literature available.
 
 
+For illustration purposes I will usually pick out a specific value of $n$ and $m$, but my conclusions hold in general, unless I state otherwise.
 
 \NOTE{A}{TODO: Note that in this project there is no train or test set, there isn’t any data at all. Nevertheless, it is still important to do evaluation independently of early stopping, due to the Expectation-Maximum Jensen inequality.}
 
@@ -89,7 +90,7 @@ The chosen thresholds of an optimal protocol are non-decreasing during an execut
 \end{lemma}
 
 
-\begin{figure}[h!] \label{dp-increasing-threshold}
+\begin{figure}[hbt!] \label{dp-increasing-threshold}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/dp_increasing_threshold.png}
     \caption{A run of the DP Strategy showing the increasing threshold property}
@@ -112,7 +113,7 @@ The main observation is that there is a big gap between the probabilities of rea
 
 
 
-\begin{figure}[h!] \label{two-thinning-state-distribution}
+\begin{figure}[hbt!] \label{two-thinning-state-distribution}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/state_distribution_20_20_all_log_count.png}
     \caption{The distribution of the probabilities of the states for $n=m=20$, using the DP strategy. Due to the skewness of the distribution, the values are shown on a log-scale.}
@@ -125,7 +126,7 @@ In future work, the presence of many small probability states could be exploited
 In many real-world applications it does not suffice if the maximum load is low in expectation, the variance of the maximum load should also be small. Agreeing with theoretical results for other strategies (e.g. Threshold Strategy), the DP strategy also has a centralised distribution of the final maximum load:
 
 
-\begin{figure}[h!] \label{two-thinning-maxload-distribution}
+\begin{figure}[hbt!] \label{two-thinning-maxload-distribution}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/max_load_distribution_20_20.png}
     \caption{The distribution of the maximum loads for $n=m=20$, using the DP strategy.}
@@ -154,7 +155,7 @@ The Weights and Biases tool provides an analysis of the importance of hyperparam
 I present the hyperparameter importance analysis of $200$ runs for the $n=20$ and $m=40$ case, but the pattern is similar for other cases too.
 
 
-\begin{figure}[h!] \label{two-thinning-hyperparameter-importance}
+\begin{figure}[hbt!] \label{two-thinning-hyperparameter-importance}
     \centering
     \includegraphics[scale=0.4]{Chapter4/Figs/Hyperparameter_importance_20_400.png}
     \caption{\textsc{Two-Thinning} Hyperparameter Importance}
@@ -168,7 +169,7 @@ We can see that the most important hyperparameter is to use the normalised domai
 \subsubsection{Training}
 
 
-\begin{figure}[h!] \label{two-thinning-training-curve}
+\begin{figure}[hbt!] \label{two-thinning-training-curve}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_20_400.png}
     \caption{\textsc{Two-Thinning} Training Curve $n=20$, $m=400$}
@@ -180,7 +181,7 @@ We can see that the improvement during training decays very quickly, and the age
 
 Motivated by the fact that in the normalised domain, a constant $0$ threshold is the Mean Thinning Strategy, I tried to see if this simple strategy can be improved by choosing another constant ``offset'', not $0$.:
 
-\begin{figure}[h!] \label{two-thinning-training-curve}
+\begin{figure}[hbt!] \label{two-thinning-constant-offset}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/offset_analysis_50_2500.png}
     \caption{Comparing constant offset strategies for $n=50$, $m=2500$}
@@ -192,7 +193,7 @@ On the figure we can see that for $n=50$, $m=2500$, the best offset is $1$. It h
 The Deep-Q Learning algorithm, which is as shown above, statistically significantly better than Mean-Thinning, actually often learns a strategy close to a constant offset strategy.
 
 
-\begin{figure}[h!] \label{two-thinning-training-curve}
+\begin{figure}[hbt!] \label{two-thinning-dqn-thresholds}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/dqn_learnt_thresholds.png}
     \caption{Analysis of the chosen thresholds of the Deep Q-Learning Strategy for $n=20$, $m=400$. Note that this plot shows only a single run, and the actual load vectors are not displayed.}
@@ -210,6 +211,9 @@ The sporadic ``jumps'' are very challenging for the agent to get rid of, because
 \subsection{Comparison of Strategies}
 
 
+Since the drawback (TLE) of the DP Strategy has already been highlighted for \textsc{Two-Thinning}, I decided to focus on smaller cases here where a full comparison is feasible and highlight other patterns related to the value of $K$.
+
+
 \NOTE{T}{make $k$ and $K$ more consistent}
 \begin{table}[h!]
 \label{tab:k-thinning-comparison}
@@ -224,15 +228,20 @@ Always Accept & 7.82 $\pm$ 0.25 & 7.70 $\pm$ 0.25 & 7.70 $\pm$ 0.24 & 7.73 $\pm$
 Random & 7.69 $\pm$ 0.26 & 7.62 $\pm$ 0.23 & 7.69 $\pm$ 0.23 & 7.70 $\pm$ 0.23 & 6.02 $\pm$ 0.24 & 5.86 $\pm$ 0.22 & 5.83 $\pm$ 0.20 & 5.70 $\pm$ 0.18 \\ \hline Local Reward Optimiser & 6.12 $\pm$ 0.10 & 5.73 $\pm$ 0.09 & 5.42 $\pm$ 0.10 & 5.13 $\pm$ 0.07 & 4.11 $\pm$ 0.09 & 3.73 $\pm$ 0.09 & 3.21 $\pm$ 0.08 & 3.00 $\pm$ 0.00 \\ \hline
 Quantile & 6.24 $\pm$ 0.12 & 6.01 $\pm$ 0.05 & 5.60 $\pm$ 0.10 & 5.16 $\pm$ 0.07 & 4.39 $\pm$ 0.14 & 3.76 $\pm$ 0.11 & 3.15 $\pm$ 0.08 & 3.00 $\pm$ 0.00 \\ \hline
 DP & 6.09 $\pm$ 0.09 & 5.69 $\pm$ 0.09 & 5.41 $\pm$ 0.10 & 5.12 $\pm$ 0.06 & 4.15 $\pm$ 0.08 & 3.50 $\pm$ 0.10 & 3.16 $\pm$ 0.07 & 3.00 $\pm$ 0.00 \\ \hline
+Deep Q-Learning  & 6.34 $\pm$ 0.15 & 6.08 $\pm$ 0.12 & 5.83 $\pm$ 0.15 & 5.20 $\pm$ 0.08 & 4.44 $\pm$ 0.12 & 4.02 $\pm$ 0.10 & 3.46 $\pm$ 0.10 & 3.01 $\pm$ 0.02 \\ \hline 
 Threshold & 6.67 $\pm$ 0.15 & 6.31 $\pm$ 0.11 & 6.08 $\pm$ 0.07 & 5.95 $\pm$ 0.09 & 4.45 $\pm$ 0.12 & 4.18 $\pm$ 0.08 & 4.01 $\pm$ 0.07 & 3.94 $\pm$ 0.08 \\ \hline
-Deep Q-Learning & 6.74 $\pm$ 0.18 & 6.73 $\pm$ 0.15 & 7.08 $\pm$ 0.17 & 7.38 $\pm$ 0.22 & 4.44 $\pm$ 0.12 & 4.38 $\pm$ 0.11 & 4.25 $\pm$ 0.13 & 3.01 $\pm$ 0.02 \\ \hline 
 \end{tabular}}
 
 \caption{Average maximum load of \textsc{K-Thinning} strategies with $95\%$ confidence intervals}
 \end{table}
 
 
-\NOTE{A}{Analyse value of K and its impact.}
+Intuitively, the larger $k$ is, the better a strategy can do, and the table confirms it for most of the strategies. We can see from the table that the Quantile and Local Reward Optimiser strategies are almost as good as the DP Strategy for most values of $n$, $m$ and $k$, even though neither of those strategies consider future rewards. For large $k$ ($5$ or $10$) and not too large $n$, strategies can control with high probability where to place the ball. Nevertheless, this kind of advantage is much easier to exploit by a manual algorithm, than to learn by Deep Q-Learning.
+
+
+
+Now I present an intuitive lemma about any optimal strategy.
+
 
 \begin{lemma} \label{lemma: k-thinning-increasing-threshold}
 In an optimal strategy, it is not possible that it would accept a bin with $x$ choices left, but reject the same bin (with the same loads) with $y<x$ choices left. In other words, an optimal strategy should never become more selective after rejecting some options.
@@ -253,11 +262,32 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 \subsection{Deep Q-Learning analysis}
 
 
-\subsubsection{Training}
-
 
 \subsubsection{Hyperparameter Analysis}
 
+
+\begin{figure}[hbt!] \label{k-thinning-hyperparameter-analysis}
+    \centering
+    \includegraphics[scale=0.4]{Chapter4/Figs/Hyperparameter_analysis_5_25_3.png}
+    \caption{Hyperparamter Importance Analysis for \textsc{K-Thinning} with $n=5$, $m=25$, $k=3$.}
+\end{figure}
+
+We can observe that Deep Q-Learning cannot exploit the normalised load domain trick for \textsc{K-Thinning} as much as for \textsc{Two-Thinning}.\NOTE{A}{Mention some bullshit possible reason?}  On the other hand, the analysis suggests more frequent optimisation update steps and more curriculum learning (pretraining) episodes. 
+
+
+\subsubsection{Training}
+
+
+\begin{figure}[hbt!] \label{k-thinning-training-curve}
+    \centering
+    \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_5_25_3.png}
+    \caption{\textsc{K-Thinning} Training Curve $n=5$, $m=25$, $k=3$. \protect \footnotemark }
+\end{figure}
+
+
+\footnotetext{The last 800 episodes are not shown, as no more significant improvement has happened.}
+
+The training progression for \textsc{K-Thinning} is very similar to \textsc{Two-Thinning}, so I don't discuss it any further.
 
 
 \section{Graphical Two-Choice}
@@ -307,7 +337,7 @@ For larger graphs, however, Greedy tends to perform better on the Clique graph t
 
 
 
-\begin{figure}[h!] \label{greedy-random-regular-analysis}
+\begin{figure}[hbt!] \label{greedy-random-regular-analysis}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/Greedy_degree_analysis.png}
     \caption{Relating the degree of the graph to the performance of Greedy}
@@ -326,7 +356,7 @@ Even though Greedy is shown to be suboptimal in some cases, it is still by far t
 To better understand the difficulty in finding an optimal strategy, I extended the Cycle graph counterexample from Lemma \ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the edge going between the $2$nd and $3$rd nodes. 
 
 
-\begin{figure}[h!] \label{greedy-counterexample-analysed}
+\begin{figure}[hbt!] \label{greedy-counterexample-analysed}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/0a0b_4_25_analysis.png}
     \caption{The optimal decisions for the Cycle graph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $2$-$3$. Green means choosing the $2$nd bin is better, red means choosing the $3$rd bin is better, and $x$ means they have the same expected score.}
@@ -336,7 +366,7 @@ To better understand the difficulty in finding an optimal strategy, I extended t
 We can see in the figure that the green region contains the counterexamples to the Greedy strategy, but there is an even larger region where the greedy choice is correct, and characterising the shapes of the regions is difficult. By using a neighbourhood average based potential function for Deep Q-Learning, the agent is guided towards choosing $2$rd bin, and by using a graph-oblivious maximum load potential, the agent is guided towards choosing the $3$rd bin. Therefore, neither of the potential functions is perfect. For reference, here are the exact decisions made by the trained Deep Q-Learning strategy: \NOTE{A}{I am not sure if I should include it or not... It doesn't look very promising.}
 
 
-\begin{figure}[h!] \label{greedy-counterexample-analysed-for-dqn}
+\begin{figure}[hbt!] \label{greedy-counterexample-analysed-for-dqn}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/0a0b_4_25_analysis_dqn.png}
     \caption{The decisions made by the Deep Q-Learning strategy for the Cycle graph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $2$-$3$. Green means choosing the $2$nd bin is better, red means choosing the $3$rd bin is better, and $x$ means they have the same expected score.}
@@ -346,26 +376,11 @@ We can see in the figure that the green region contains the counterexamples to t
 We can see that the network couldn't learn the exact pattern, though there is some resemblance.
 
 
-\subsubsection{Training}
-
-I present the training curve for the Hypercube graph with $n=4$ and $m=25$, but the pattern is similar for other cases too.
-
-
-\begin{figure}[h!] \label{graphical-two-choice-hyperparameter-importance}
-    \centering
-    \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_hypercube_4_25.png}
-    \caption{\textsc{Graphical Two Choice} Training Curve}
-\end{figure}
-
-We can see that unlike for \textsc{Two-Thinning}, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
-
-
-
 \subsubsection{Hyperparameter Analysis}
 
 I present the hyperparameter importance analysis of $200$ runs for the Hypercube graph with $n=4$ and $m=25$, but the order is similar for other cases too.
 
-\begin{figure}[h!] \label{graphical-two-choice-hyperparameter-importance}
+\begin{figure}[hbt!] \label{graphical-two-choice-hyperparameter-importance}
     \centering
     \includegraphics[scale=0.4]{Chapter4/Figs/graphical_two_choice_hypercube_4_25_importance.png}
     \caption{\textsc{Graphical Two Choice} Hyperparameter Importance}
@@ -373,3 +388,17 @@ I present the hyperparameter importance analysis of $200$ runs for the Hypercube
 
 
 Unlike the ``use\textunderscore threshold'' parameter for \textsc{Two-Thinning}, there is no very important hyperparameter (in fact, the trained scores are within a $0.4$ range for each analysed combination). The negative correlation of ``hidden\textunderscore size'' and ``num\textunderscore lin\textunderscore layers'' with the score shows that adding complexity to the neural network doesn't help.
+
+
+\subsubsection{Training}
+
+I present the training curve for the Hypercube graph with $n=4$ and $m=25$, but the pattern is similar for other cases too.
+
+
+\begin{figure}[hbt!] \label{graphical-two-choice-hyperparameter-importance}
+    \centering
+    \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_hypercube_4_25.png}
+    \caption{\textsc{Graphical Two Choice} Training Curve}
+\end{figure}
+
+We can see that unlike for \textsc{Two-Thinning}, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
