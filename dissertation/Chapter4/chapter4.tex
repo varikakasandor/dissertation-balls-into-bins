@@ -44,7 +44,7 @@ Note that the Dynamic Programming (DP) Strategy is optimal by definition, but it
 For the Threshold Strategy, I calculated the optimal values by modelling it as a Multi-Armed Bandit problem (covered in II Randomised Algorithms) \cite{katehakis1987multiarmedbandit}, and using an $\epsilon$-greedy strategy with $\epsilon=0.1$ (details omitted).
 
 
-I note that there is merit in not just doing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g. $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls into bins settings, but I decided to stick to a single trained model and essentially evaluate the peak performance. \NOTE{A}{Does it make any sense? This idea came to my mind and I am a bit unsure about it and couldn't find any reference.}. Relatedly, one could consider finding the optimal hyperparameters as a special part of training, but I decided treat it separately, and in particular, not take it into account for the $12$ hour TLE limit.
+I note that there is merit in not just doing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g. $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls-into-bins settings, but I decided to stick to a single trained model and essentially evaluate the peak performance. \NOTE{A}{Does it make any sense? This idea came to my mind and I am a bit unsure about it and couldn't find any reference.}. Relatedly, one could consider finding the optimal hyperparameters as a special part of training, but I decided treat it separately, and in particular, not take it into account for the $12$ hour TLE limit.
 
 
 \begin{table}[h!]
@@ -133,7 +133,8 @@ In many real-world applications it does not suffice if the maximum load is low i
 \end{figure}
 
 
-As discussed in Chapter \ref{preparation}, another direction is to optimise for objective functions other than the maximum load, such as maximising minimum load, minimising maximum load minus minimum load, minimising variance, and all of those that I have used as potential functions. I do not discuss this any further due to the length constraint on the dissertation (and most of the literature also focuses purely on the maximum load), I just note that I found that it is very difficult for Deep Q-Learning to adapt its decisions on such a granular level. 
+% Say something about optimising other objective functions, not the maximum load? Say that it is very hard for RL to learn at such a granular level.
+
 
 
 \subsection{Deep Q-Learning analysis}

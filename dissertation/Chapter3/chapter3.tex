@@ -32,7 +32,7 @@ There are two ways to formulate the \TwoThinning setting as a MDP. One is to tre
 \begin{lemma} \label{lemma: thresholdproperty}
 At a load vector $v$, the optimal policy doesn't reject a primary bin with load $x$, if it would accept a primary bin with load $y>x$. That is, the optimal strategy is always a threshold strategy, that rejects above a load value $z$ and accepts otherwise.
 \end{lemma}
-\NOTE{D}{Consider an arbitrary load vector $x^t$ at time step $t$. Then there exists a decision function $f$ achieving the optimal expected gap at $m$, such that for any $i, j$ with $x_j < x_i$, we have $f(x^t, i) = 1 \Rightarrow f(x^t, j) = 1$.}\NOTE{T}{Yes, the formulation of the lemma is not good. The writing should be more formal, and it should be more formal.}
+\NOTE{D}{Consider an arbitrary load vector $x^t$ at time step $t$. Then there exists a strategy $f$ achieving the optimal expected gap at $m$, such that for any $i, j$ with $x_j < x_i$, we have $f(x^t, i) = 1 \Rightarrow f(x^t, j) = 1$.}\NOTE{T}{Yes, the formulation of the lemma is not good. The writing should be more formal, and it should be more formal.}
 
 \NOTE{D}{Have you checked if there is a load vector, where it is better to use with probability $p_A$ threshold $f_a$ and with probability $1 - p_A$ threshold $f_b$?}
 
@@ -90,7 +90,7 @@ There are plenty of more ideas in the literature to improve the training of DQN,
 \subsection{Ideas Implemented for Improvement} \label{improvementideas}
 
 
-In this section I outline ideas independent of DQN that I used to improve the performance of my RL algorithm. Some of these are well-known general ideas in RL, while others are specific to the \TwoThinning Balls into Bins setting. I will highlight why each of the ideas were worth considering for this setting.\NOTE{D}{Condense}
+In this section I outline ideas independent of DQN that I used to improve the performance of my RL algorithm. Some of these are well-known general ideas in RL, while others are specific to the \TwoThinning balls-into-bins setting. I will highlight why each of the ideas were worth considering for this setting.\NOTE{D}{Condense}
 
 
 \subsubsection{Reward Shaping} \label{rewardshaping}
@@ -105,7 +105,7 @@ As discussed in Chapter \ref{preparation}, the most direct way to formulate the 
     \item
     $\Phi(v)=-std(v)$\NOTE{D}{$\mathrm{std}$}, where $std(v)$ is the standard deviation of the load vector. This is an extension\NOTE{D}{These are substantially different, right?} of the previous idea, which differentiates between cases when the max load hasn't increased - it is much better if the ball is allocated in the most underloaded bin than if in the second most overloaded.\NOTE{D}{Try to condense into one sentence}
     \item
-    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - avg(v))}$\NOTE{D}{Maybe $\overline{v}$ or $\mathrm{avg}(v)$}, where $\alpha$ is a hyperparameter\NOTE{T}{use cdot for product, not star}. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for Balls into Bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}\NOTE{D}{This is not a bad thing}. As a relevant example,\NOTE{D}{Mention that this is a smoother version of the first one} if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.\NOTE{D}{!! In the general case if $\Phi < c$, then $maxload(v) \leq \frac{1}{\alpha}\log c$}
+    $\Phi(v)=\sum_{x\in v} e^{\alpha * (x - avg(v))}$\NOTE{D}{Maybe $\overline{v}$ or $\mathrm{avg}(v)$}, where $\alpha$ is a hyperparameter\NOTE{T}{use cdot for product, not star}. The motivation for this is similar to the previous one. This function is called the exponential potential function, and it has first been introduced as a useful tool in proving bounds for balls-into-bins settings \cite{ghosh1999exponentialpotential} \NOTE{A}{I feel that I have way too many entries in the bibliography overall, and I am not reusing them efficiently.}\NOTE{D}{This is not a bad thing}. As a relevant example,\NOTE{D}{Mention that this is a smoother version of the first one} if the exponential potential of a load vector $v$ is $O(len(v))$, it follows that $maxload(v) < (avg(v)+log(len(v)))$.\NOTE{D}{!! In the general case if $\Phi < c$, then $maxload(v) \leq \frac{1}{\alpha}\log c$}
     \NOTE{D}{A diagram might be helpful here for different values of $\alpha$}
 \end{itemize}
 
@@ -169,11 +169,11 @@ Now I prove a small lemma limiting the possible improvements of an exact dynamic
 
 
 \begin{lemma} \label{lemma: everystatereachable}
-For any load vector $v$ with $0\leq k\leq m$ balls in it, and any decision function (strategy), there is a non-zero probability of reaching $v$ during an execution.
+For any load vector $v$ with $0\leq k\leq m$ balls in it, and any strategy, there is a non-zero probability of reaching $v$ during an execution.
 \end{lemma}
 
 \begin{proof}
-    Simply observe that if the primary and secondary bins are the same, then whatever decision function is used, the ball will be allocated in that bin. Therefore, for any sequence of allocations there is a nonzero probability, and since any load vector can be reached by adding the balls one by one e.g. from left to right, all load vectors have a nonzero probability. \NOTE{A}{Isn't it too trivial? I mean it wasn't for me, but reading it now it seems trivial.}
+    Simply observe that if the primary and secondary bins are the same, then whatever strategy is used, the ball will be allocated in that bin. Therefore, for any sequence of allocations there is a nonzero probability, and since any load vector can be reached by adding the balls one by one e.g. from left to right, all load vectors have a nonzero probability. \NOTE{A}{Isn't it too trivial? I mean it wasn't for me, but reading it now it seems trivial.}
 \end{proof}
 \NOTE{A}{A more interesting question is what would happen if we disallow the two choices to be the same. Then, there are several load vectors that the optimal policy can avoid, e.g. (0,0,0,0,m,0,0). How can we characterise these vectors?}
 \NOTE{T}{I'm not sure you could reduce the space by that much. I think you can probably still get load vectors like (m/2,m/2,0,...,0).}
@@ -329,7 +329,7 @@ To tackle the sparse rewards problem, we could use any of the potential function
 
 \begin{itemize}
     \item 
-    $\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])$ \NOTE{A}{Why doesn't the argument go below the word "max"?}\NOTE{D}{Because it is inline. You can change to \[\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])\]}, i.e. finding the worst edge, where no matter what decision function is used, an already highly loaded bin will be chosen.
+    $\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])$ \NOTE{A}{Why doesn't the argument go below the word "max"?}\NOTE{D}{Because it is inline. You can change to \[\Phi(v)=\max_{x\sim y \in E} \min(v[x], v[y])\]}, i.e. finding the worst edge, where no matter what strategy is used, an already highly loaded bin will be chosen.
     \item
     $\Phi(v)=\max_{x \in [n]} \frac{v[x]+\sum_{x\sim y \in E}v[y]}{deg(x)+1}$, i.e. finding the neighbourhood with the largest average. We will see this idea again in Section \ref{graphical-otherstrategies}.\NOTE{D}{Replace sentence with (see \cref{graphical-otherstrategies})}
 \end{itemize}

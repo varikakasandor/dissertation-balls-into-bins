@@ -7,15 +7,20 @@
 
 \usepackage[capitalise]{cleveref} % For referencing sections, theorems, lemmas, etc
 \usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section] % make sure \theoremstyle is right above
+
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
 \usepackage{float}
 
 \newcommand{\OneChoice}{\textsc{One-Choice} } 
-\newcommand{\TwoChoice}{\textsc{Two-Choice} } 
+\newcommand{\TwoChoice}{\textsc{Two-Choice} }
+\newcommand{\KChoice}{$k$-\textsc{Choice} } 
 \newcommand{\TwoThinning}{\textsc{Two-Thinning} } 
-\newcommand{\KThinning}{\textsc{K-Thinning} } 
+\newcommand{\KThinning}{$k$-\textsc{Thinning} } 
 \newcommand{\GraphicalTwoChoice}{\textsc{Graphical Two-Choice} }
 \newcommand{\GraphicalTwoThinning}{\textsc{Graphical Two-Thinning} }
 
