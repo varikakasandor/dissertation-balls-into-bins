@@ -16,7 +16,7 @@
 In this chapter I provide quantitative and qualitative analysis and comparison of the settings presented in previous chapters.
 
 
-To obtain thorough and statistically significant results, I utilised parallel processing as much as possible for evaluating Deep Q-Learning policies, which are the bottleneck of the evaluation phase. To exploit the parallelism of the GPU even with the inherently sequential MDP, I ran several (usually $64$) independent samples in parallel. Note that this is much simpler for \textsc{Two-Thinning} and \textsc{Graphical Two Choice}, where the number of steps from start to end in the MDP is constant ($m$) in any execution.
+To obtain thorough and statistically significant results, I utilised parallel processing as much as possible for evaluating Deep Q-Learning policies, which are the bottleneck of the evaluation phase. To exploit the parallelism of the GPU even with the inherently sequential MDP, I ran several (usually $64$) independent samples in parallel. Note that this is much simpler for \TwoThinning and \GraphicalTwoChoice, where the number of steps from start to end in the MDP is constant ($m$) in any execution.
 
 
 Even with this evaluation speedup, the usability of Deep Q-Learning for large values of $n$ and $m$ is still limited due to the training time. The largest range for which I successfully trained a RL algorithm in at most a day is $n=1000$, $m=1500$, but I decided to focus on slightly smaller values for the evaluation as that is more illustrative and complementary to the literature available.
@@ -32,7 +32,7 @@ For illustration purposes I will usually pick out a specific value of $n$ and $m
 
 \subsection{Comparison of Strategies}
 
-Now I present a comparison of seven \textsc{Two-Thinning} strategies. I have chosen nine combinations of $n$ (number of bins) and $m$ (number of balls) so that they cover different ranges, and also different balls-bins ratios.
+Now I present a comparison of seven \TwoThinning strategies. I have chosen nine combinations of $n$ (number of bins) and $m$ (number of balls) so that they cover different ranges, and also different balls-bins ratios.
 
 
 To have acceptable statistical significance but also reasonable runtime, I compared the strategies across $100$ runs. I show the average of scores (maximum load) of the runs and also the $95\%$ confidence interval for the estimated mean score, based on the Central Limit Theorem (CLT). \NOTE{A}{Should I explain more? Any formal statistical reason for choosing the number of runs?}
@@ -63,7 +63,7 @@ DP & 1.85 $\pm$ 0.06 & 2.98 $\pm$ 0.07 & 6.06 $\pm$ 0.10 & 2.33 $\pm$ 0.10 & 4.6
 Threshold & 2.18 $\pm$ 0.13 & 3.32 $\pm$ 0.13 & 6.44 $\pm$ 0.13 & 2.58 $\pm$ 0.12 & 5.58 $\pm$ 0.17 & 24.12 $\pm$ 0.19 & 2.99 $\pm$ 0.12 & 7.02 $\pm$ 0.13 & 56.73 $\pm$ 0.29 \\ \hline 
 
 \end{tabular}}
-\caption{Average maximum load of \textsc{Two-Thinning} strategies with $95\%$ confidence intervals}
+\caption{Average maximum load of \TwoThinning strategies with $95\%$ confidence intervals}
 \end{table}
 
 
@@ -72,7 +72,7 @@ We can see that the Always Accept and Random Strategies are consistently poorly 
 \NOTE{A}{Should I say some more, clever bullshit about the table, some general patterns, etc.? Maybe a bit more about the difference between the columns, not between the rows.}
 
 
-One of the main surprises of the comparison is that the Local Reward Optimiser Strategy (which rejects only the maximum loads) has similar performance as the Deep Q-Learning Strategy, which was trained to optimise cumulative rewards. This suggests that the RL problem underlying \textsc{Two-Thinning} is a challenging one, in particular, learning long-term consequences of decisions is difficult, because the impact of a single ball is very subtle. In general, making a small number of bad decisions might not even impact the final maximum load. \NOTE{A}{TODO: elaborate some more? This is a crucial point to make.}
+One of the main surprises of the comparison is that the Local Reward Optimiser Strategy (which rejects only the maximum loads) has similar performance as the Deep Q-Learning Strategy, which was trained to optimise cumulative rewards. This suggests that the RL problem underlying \TwoThinning is a challenging one, in particular, learning long-term consequences of decisions is difficult, because the impact of a single ball is very subtle. In general, making a small number of bad decisions might not even impact the final maximum load. \NOTE{A}{TODO: elaborate some more? This is a crucial point to make.}
 
 
 \NOTE{A}{Write a bit about the running time of both training and evaluation. DQN would be a bit slower latency-wise but it is bearable. Note that other strategies require no training.}
@@ -83,7 +83,7 @@ One of the main surprises of the comparison is that the Local Reward Optimiser S
 
 \subsection{Optimal Strategy Analysis}
 
-Analysing the optimal strategies for \textsc{Two-Thinning}, I formulated the following lemma.
+Analysing the optimal strategies for \TwoThinning, I formulated the following lemma.
 
 \begin{lemma}\label{lemma: two-thinning-increasing-threshold}
 The chosen thresholds of an optimal protocol are non-decreasing during an execution. That is, if for $i$th ball the protocol chooses a threshold $x$, then for every $j$th ball of the same game such that $j>i$, a threshold $y\geq x$ is chosen.
@@ -158,7 +158,7 @@ I present the hyperparameter importance analysis of $200$ runs for the $n=20$ an
 \begin{figure}[hbt!] \label{two-thinning-hyperparameter-importance}
     \centering
     \includegraphics[scale=0.4]{Chapter4/Figs/Hyperparameter_importance_20_400.png}
-    \caption{\textsc{Two-Thinning} Hyperparameter Importance}
+    \caption{\TwoThinning Hyperparameter Importance}
 \end{figure}
 
 
@@ -172,7 +172,7 @@ We can see that the most important hyperparameter is to use the normalised domai
 \begin{figure}[hbt!] \label{two-thinning-training-curve}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_20_400.png}
-    \caption{\textsc{Two-Thinning} Training Curve $n=20$, $m=400$}
+    \caption{\TwoThinning Training Curve $n=20$, $m=400$}
 \end{figure}
 
 
@@ -211,7 +211,7 @@ The sporadic ``jumps'' are very challenging for the agent to get rid of, because
 \subsection{Comparison of Strategies}
 
 
-Since the drawback (TLE) of the DP Strategy has already been highlighted for \textsc{Two-Thinning}, I decided to focus on smaller cases here where a full comparison is feasible and highlight other patterns related to the value of $K$.
+Since the drawback (TLE) of the DP Strategy has already been highlighted for \TwoThinning, I decided to focus on smaller cases here where a full comparison is feasible and highlight other patterns related to the value of $K$.
 
 
 \NOTE{T}{make $k$ and $K$ more consistent}
@@ -232,7 +232,7 @@ Deep Q-Learning  & 6.34 $\pm$ 0.15 & 6.08 $\pm$ 0.12 & 5.83 $\pm$ 0.15 & 5.20 $\
 Threshold & 6.67 $\pm$ 0.15 & 6.31 $\pm$ 0.11 & 6.08 $\pm$ 0.07 & 5.95 $\pm$ 0.09 & 4.45 $\pm$ 0.12 & 4.18 $\pm$ 0.08 & 4.01 $\pm$ 0.07 & 3.94 $\pm$ 0.08 \\ \hline
 \end{tabular}}
 
-\caption{Average maximum load of \textsc{K-Thinning} strategies with $95\%$ confidence intervals}
+\caption{Average maximum load of \KThinning strategies with $95\%$ confidence intervals}
 \end{table}
 
 
@@ -249,7 +249,7 @@ In an optimal strategy, it is not possible that it would accept a bin with $x$ c
 
 
 \begin{proof}
-Note that Lemma \ref{lemma: thresholdproperty} generalises to \textsc{K-Thinning} as well - an optimal strategy must base its decisions on a threshold.
+Note that Lemma \ref{lemma: thresholdproperty} generalises to \KThinning as well - an optimal strategy must base its decisions on a threshold.
 
 
 \NOTE{A}{TODO: add real proof}.
@@ -269,10 +269,10 @@ Using the dynamic programming algorithm, that creates the optimal strategy(s), I
 \begin{figure}[hbt!] \label{k-thinning-hyperparameter-analysis}
     \centering
     \includegraphics[scale=0.4]{Chapter4/Figs/Hyperparameter_analysis_5_25_3.png}
-    \caption{Hyperparamter Importance Analysis for \textsc{K-Thinning} with $n=5$, $m=25$, $k=3$.}
+    \caption{Hyperparamter Importance Analysis for \KThinning with $n=5$, $m=25$, $k=3$.}
 \end{figure}
 
-We can observe that Deep Q-Learning cannot exploit the normalised load domain trick for \textsc{K-Thinning} as much as for \textsc{Two-Thinning}.\NOTE{A}{Mention some bullshit possible reason?}  On the other hand, the analysis suggests more frequent optimisation update steps and more curriculum learning (pretraining) episodes. 
+We can observe that Deep Q-Learning cannot exploit the normalised load domain trick for \KThinning as much as for \TwoThinning.\NOTE{A}{Mention some bullshit possible reason?}  On the other hand, the analysis suggests more frequent optimisation update steps and more curriculum learning (pretraining) episodes. 
 
 
 \subsubsection{Training}
@@ -281,13 +281,13 @@ We can observe that Deep Q-Learning cannot exploit the normalised load domain tr
 \begin{figure}[hbt!] \label{k-thinning-training-curve}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_5_25_3.png}
-    \caption{\textsc{K-Thinning} Training Curve $n=5$, $m=25$, $k=3$. \protect \footnotemark }
+    \caption{\KThinning Training Curve $n=5$, $m=25$, $k=3$. \protect \footnotemark }
 \end{figure}
 
 
 \footnotetext{The last 800 episodes are not shown, as no more significant improvement has happened.}
 
-The training progression for \textsc{K-Thinning} is very similar to \textsc{Two-Thinning}, so I don't discuss it any further.
+The training progression for \KThinning is very similar to \TwoThinning, so I don't discuss it any further.
 
 
 \section{Graphical Two-Choice}
@@ -311,7 +311,7 @@ Deep Q-Learning & 7.17 $\pm$ 0.07 & 7.17 $\pm$ 0.06 & 7.38 $\pm$ 0.09 & 4.92 $\p
 
 \end{tabular}}
 
-\caption{Average maximum load of \textsc{Graphical Two Choice} strategies with $95\%$ confidence intervals\protect\footnotemark}
+\caption{Average maximum load of \GraphicalTwoChoice strategies with $95\%$ confidence intervals\protect\footnotemark}
 \end{table}
 
 \footnotetext{Note that for $n=4$, Cycle and Hypercube are the same graphs.}
@@ -319,14 +319,14 @@ Deep Q-Learning & 7.17 $\pm$ 0.07 & 7.17 $\pm$ 0.06 & 7.38 $\pm$ 0.09 & 4.92 $\p
 First I prove the most surprising result of this section.
 
 \begin{lemma} \label{lemma: greedy-suboptimal}
-There exist a graph, such that the Greedy strategy is suboptimal with respect to the expected final maximum load of \textsc{Graphical Two Choice}.
+There exist a graph, such that the Greedy strategy is suboptimal with respect to the expected final maximum load of \GraphicalTwoChoice.
 \end{lemma}
 
 \begin{proof}
 It is enough to show that there is a state $s$ (i.e. a load vector $v$, edge $e$) where is is better to choose the bin with the larger load. This suffices because there is a non-zero probability of reaching $s$, and hence a strategy which agree with Greedy everywhere else except for this state has a strictly better expected score.
 
 
-I used the dynamic programming algorithm to find the optimal strategy for \textsc{Graphical Two Choice}, and then I searched the strategy for a state where it disagrees with Greedy. I found a very small counterexample for the Cycle graph with $n=4$ bins $m=6$ balls. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $l=(2,0,1,0)$, $e=(2,3)$, i.e. there is an edge between the second and third bin. The reason why it is better to choose bin $3$ even though it has larger load than bin $2$ is that after that, from load vector $(2,0,2,0)$ with $2$ balls remaining we can definitely avoid having a maximum load $3$ by always placing the ball in an even-indexed bin. On the other hand, from load vector $(2,1,1,0)$, if both of the remaining edges are $(1,2)$, then there will be a maximum load of at least $3$ using whatever strategy. Therefore, the expected final maximum load of choosing bin $3$ is $2.0$, while that of bin $2$ is between $2.0$ and $3.0$.
+I used the dynamic programming algorithm to find the optimal strategy for \GraphicalTwoChoice, and then I searched the strategy for a state where it disagrees with Greedy. I found a very small counterexample for the Cycle graph with $n=4$ bins $m=6$ balls. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $l=(2,0,1,0)$, \NOTE{A}{Change order into 0,a,0,b to make it consistent with the extension later.} $e=(2,3)$, i.e. there is an edge between the second and third bin. The reason why it is better to choose bin $3$ even though it has larger load than bin $2$ is that after that, from load vector $(2,0,2,0)$ with $2$ balls remaining we can definitely avoid having a maximum load $3$ by always placing the ball in an even-indexed bin. On the other hand, from load vector $(2,1,1,0)$, if both of the remaining edges are $(1,2)$, then there will be a maximum load of at least $3$ using whatever strategy. Therefore, the expected final maximum load of choosing bin $3$ is $2.0$, while that of bin $2$ is between $2.0$ and $3.0$.
 \end{proof}
 
 
@@ -348,7 +348,7 @@ We can see that indeed smaller degrees hurt Greedy, but after around $d=15$, the
 
 
 
-Even though Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from DP), it proved to be an impossible challenge for RL to exploit the weaknesses of Greedy. In fact, for $n=m=32$, Deep Q-Learning is not even superior to the Random Strategy, which is equivalent to \textsc{One-Choice} for any regular graph.
+Even though Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from DP), it proved to be an impossible challenge for RL to exploit the weaknesses of Greedy. In fact, for $n=m=32$, Deep Q-Learning is not even superior to the Random Strategy, which is equivalent to \OneChoice for any regular graph.
 
 
 \subsection{Deep Q-Learning analysis}
@@ -383,11 +383,11 @@ I present the hyperparameter importance analysis of $200$ runs for the Hypercube
 \begin{figure}[hbt!] \label{graphical-two-choice-hyperparameter-importance}
     \centering
     \includegraphics[scale=0.4]{Chapter4/Figs/graphical_two_choice_hypercube_4_25_importance.png}
-    \caption{\textsc{Graphical Two Choice} Hyperparameter Importance}
+    \caption{\GraphicalTwoChoice Hyperparameter Importance}
 \end{figure}
 
 
-Unlike the ``use\textunderscore threshold'' parameter for \textsc{Two-Thinning}, there is no very important hyperparameter (in fact, the trained scores are within a $0.4$ range for each analysed combination). The negative correlation of ``hidden\textunderscore size'' and ``num\textunderscore lin\textunderscore layers'' with the score shows that adding complexity to the neural network doesn't help.
+Unlike the ``use\textunderscore threshold'' parameter for \TwoThinning, there is no very important hyperparameter (in fact, the trained scores are within a $0.4$ range for each analysed combination). The negative correlation of ``hidden\textunderscore size'' and ``num\textunderscore lin\textunderscore layers'' with the score shows that adding complexity to the neural network doesn't help.
 
 
 \subsubsection{Training}
@@ -398,7 +398,7 @@ I present the training curve for the Hypercube graph with $n=4$ and $m=25$, but 
 \begin{figure}[hbt!] \label{graphical-two-choice-hyperparameter-importance}
     \centering
     \includegraphics[scale=1.0]{Chapter4/Figs/training_progression_hypercube_4_25.png}
-    \caption{\textsc{Graphical Two Choice} Training Curve}
+    \caption{\GraphicalTwoChoice Training Curve}
 \end{figure}
 
-We can see that unlike for \textsc{Two-Thinning}, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
+We can see that unlike for \TwoThinning, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
