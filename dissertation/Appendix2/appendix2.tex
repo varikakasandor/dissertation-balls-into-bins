@@ -12,7 +12,7 @@ Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + Q(s_{t+1}, a')) - Q(s_t,a
 
 $a'$ is also sampled according to the $\epsilon$-greedy technique, and it is not chosen greedily to be the best estimate like in Q-Learning. Then, naturally, the next chosen action will be exactly $a'$.
 
-Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy \cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our settings.
+Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy ~\cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our settings.
 
 \section{Monte Carlo Methods}
 
@@ -23,7 +23,7 @@ While Q- and Sarsa-Learning update their estimates based on other estimates (fro
 Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[G_t - Q(s_t,a_t)]
 \end{equation}
 
-The problem with this approach is slow training. The reason is partly that if any exploration action (the case with probability $\epsilon$) is taken after timestep $t$, then, $Q(s_t,a_t)$ cannot be updated, since the new estimate doesn't necessarily reflect the estimated optimal value. Overall, Monte Carlo methods are rarely used in practice but they can be combined with Q-Learning (see e.g. the recent \cite{wang2018montecarloqlearning}), which is an option I do not consider any further.
+The problem with this approach is slow training. The reason is partly that if any exploration action (the case with probability $\epsilon$) is taken after timestep $t$, then, $Q(s_t,a_t)$ cannot be updated, since the new estimate doesn't necessarily reflect the estimated optimal value. Overall, Monte Carlo methods are rarely used in practice but they can be combined with Q-Learning (see e.g. the recent ~\cite{wang2018montecarloqlearning}), which is an option I do not consider any further.
 
 \section{Policy Gradient}
 
@@ -31,4 +31,4 @@ Policy gradient methods are in contrast with the methods outlined above because 
 
 
 
-From the several policy gradient related approaches, I implemented the so-called Actor-Critic method \cite{grondman2012actorcritic} and it didn't provide superior results to Deep Q-Learning or Sarsa-Learning. As explained in \cite{bhandari2019policygradientconvergence}, policy gradient methods might converge to a local maximum, not the global optimum policy, and they might requires more time to converge. Policy gradient methods are still an active area of research, and while their usecase in unknown environments with state aliasing (where a stochastic strategy is desired) is clear, they are not yet the most widely used in full-knowledge scenarios like ours (i.e.\ where the exact current state is known).
+From the several policy gradient related approaches, I implemented the so-called Actor-Critic method ~\cite{grondman2012actorcritic} and it didn't provide superior results to Deep Q-Learning or Sarsa-Learning. As explained in ~\cite{bhandari2019policygradientconvergence}, policy gradient methods might converge to a local maximum, not the global optimum policy, and they might requires more time to converge. Policy gradient methods are still an active area of research, and while their usecase in unknown environments with state aliasing (where a stochastic strategy is desired) is clear, they are not yet the most widely used in full-knowledge scenarios like ours (i.e.\ where the exact current state is known).

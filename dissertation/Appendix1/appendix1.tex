@@ -27,7 +27,7 @@ learning rate             &     0.005 \\
 DQN - hidden state size of RNN               &     128 \\ 
 DQN - number of hidden layers of RNN         &     3 \\ 
 DQN - number of linear layers after RNN     &     2 \\
-potential function            &    negative maximum load \\
+potential function            &    $\Phi_{max}$ \\
 number of curriculum learning episodes            & 50 \\ 
 using normalised domain               &     true \\ 
 \bottomrule
@@ -66,7 +66,7 @@ learning rate             &     0.005 \\
 DQN - hidden state size of RNN               &     128 \\ 
 DQN - number of hidden layers of RNN         &     2 \\ 
 DQN - number of linear layers after RNN     &     3 \\
-potential function            &    exponential potential \\
+potential function            &    $\Phi_{exp}$ with $\alpha=0.5$ \\
 number of curriculum learning episodes            & 40 \\ 
 using normalised domain               &     true \\ 
 \bottomrule
@@ -98,7 +98,7 @@ optimiser        &     Adam \\
 learning rate             &     0.005 \\
 DQN - hidden state size               &     128 \\ 
 DQN - number of linear layers     &     2 \\
-potential function            &    neighbourhood potential \\
+potential function            &    $\Phi_{neigh}$ \\
 number of curriculum learning episodes            & 50 \\ 
 \bottomrule
 \end{tabular}

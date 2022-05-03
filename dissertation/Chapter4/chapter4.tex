@@ -43,7 +43,7 @@ To have acceptable statistical significance but also reasonable runtime, I compa
 Note that the Dynamic Programming (DP) Strategy is optimal by definition, but it is too slow for larger values of $n$ and $m$ which I denote by TLE (Time Limit Exceeded)\NOTE{D}{Time Limit Exceeded (TLE)}. I decided to limit all the algorithms to $12$ hours of training/preparation, declaring anything above that as TLE.\NOTE{D}{The limit was set to $12$ hours of training/precomputation.} Also, even though we have the exact expected maximum load of the DP Strategy, I decided to run it just like the other strategies for fair comparison (e.g.\ large outliers that the DP Strategy takes into account occur very rarely during execution).
 
 
-For the Threshold Strategy, I calculated the optimal values by modelling it as a Multi-Armed Bandit problem (covered in II Randomised Algorithms) \cite{katehakis1987multiarmedbandit}, and using an $\epsilon$-greedy strategy with $\epsilon=0.1$ (details omitted).
+For the Threshold Strategy, I calculated the optimal values by modelling it as a Multi-Armed Bandit problem (covered in II Randomised Algorithms) ~\cite{katehakis1987multiarmedbandit}, and using an $\epsilon$-greedy strategy with $\epsilon=0.1$ (details omitted).
 
 
 I note that there is merit in not just doing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g.\ $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic\NOTE{D}{This should not matter if the algorithm is trained for long enough, right? Also, it is more standard that you train multiple models and you keep one (by seeing its performance on evaluation data. And this one you thoroughly test.}. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls-into-bins settings, but I decided to stick to a single trained model and essentially evaluate the peak performance. \NOTE{A}{Does it make any sense? This idea came to my mind and I am a bit unsure about it and couldn't find any reference.} \NOTE{T}{It makes some sense... But again I would then make the random bin choices identical for all these runs.}. Relatedly, one could consider finding the optimal hyperparameters as a special part of training, but I decided treat it separately, and in particular, not take it into account for the $12$ hour TLE limit.\NOTE{D}{I don't understand this sentence.}
@@ -161,7 +161,7 @@ In many real-world applications it does not suffice if the maximum load is low i
 \NOTE{A}{Compare zero potential with max load potential, showing P value that we do need reward shaping.}
 
 
-The Weights and Biases tool provides an analysis of the importance of hyperparameters. It calculates the correlation coefficient between the hyperparameters and the score for each hyperparameter (green is positive, red is negative). To capture interactions between hyperparameters and also non-linear relationships, it also provides an importance score which is calculated based on Random Forests \cite{biewald2020wandb}.
+The Weights and Biases tool provides an analysis of the importance of hyperparameters. It calculates the correlation coefficient between the hyperparameters and the score for each hyperparameter (green is positive, red is negative). To capture interactions between hyperparameters and also non-linear relationships, it also provides an importance score which is calculated based on Random Forests ~\cite{biewald2020wandb}.
 
 
 I present the hyperparameter importance analysis\NOTE{D}{Mention which figure} of $200$ runs for the $n=20$ and $m=40$ case, \NOTE{D}{which is indicative of the other cases too}but the pattern is similar for other cases too.
@@ -174,7 +174,7 @@ I present the hyperparameter importance analysis\NOTE{D}{Mention which figure} o
 \end{figure}
 \NOTE{T}{very hard to read...}
 \NOTE{D}{Again, summarise in bullet points}
-We can see that the most important hyperparameter is to use the normalised domain. As discussed earlier, this helps because in the normalised domain, a constant threshold is already a reasonable strategy (see e.g.\ Mean Thinning). Also, limiting the maximum threshold that the agent can use restricts the search space, and fosters learning. As can be seen in Appendix \ref{hyperparameters}, the ideal maximum threshold is around the target expected maximum load we want to achieve (which can be estimated based on theoretical results).
+We can see that the most important hyperparameter is to use the normalised domain. As discussed earlier, this helps because in the normalised domain, a constant threshold is already a reasonable strategy (see e.g.\ Mean Thinning). Also, limiting the maximum threshold that the agent can use restricts the search space, and fosters learning. As can be seen in Appendix ~\ref{hyperparameters}, the ideal maximum threshold is around the target expected maximum load we want to achieve (which can be estimated based on theoretical results).
 
 
 
@@ -188,7 +188,7 @@ We can see that the most important hyperparameter is to use the normalised domai
 \end{figure}
 \NOTE{T}{Maybe if you do some averaging to the plot, one could see a bit more the learning progress. For example, you could take the average maximum load over the first $x$ episodes.}
 
-We can see that the improvement during training decays very quickly, and the agent is close to its best already at the start. This is again due to the normalised load domain outlined above - I plotted the training curve without the normalised load domain trick, and that shows a much more usual training progression, though leading to a worse optimum. The oscillations are due to both the inherent randomness in evaluation and the agent trying to change its policy in a wrong way.
+We can see that the improvement during training decays very quickly, and the agent is close to its best already at the start. This is again due to the normalised load domain outlined above -- I plotted the training curve without the normalised load domain trick, and that shows a much more usual training progression, though leading to a worse optimum. The oscillations are due to both the inherent randomness in evaluation and the agent trying to change its policy in a wrong way.
 
 
 Motivated by the fact that in the normalised domain, a constant $0$ threshold is the Mean Thinning Strategy, I tried to see if this simple strategy can be improved by choosing another constant ``offset'', not $0$.:\NOTE{D}{Refer to the figure rather than using ``:''}
@@ -268,7 +268,7 @@ In an optimal strategy, it is not possible that it would accept a bin with $x$ c
 
 
 \begin{proof}
-Note that Lemma \ref{lemma: thresholdproperty} generalises to \KThinning as well - an optimal strategy must base its decisions on a threshold.
+Note that Lemma ~\ref{lemma: thresholdproperty} generalises to \KThinning as well -- an optimal strategy must base its decisions on a threshold.
 
 
 \NOTE{A}{TODO: add real proof}.
@@ -375,7 +375,7 @@ Even though Greedy is shown to be suboptimal in some cases, it is still by far t
 
 \subsection{Deep Q-Learning analysis}
 
-To better understand the difficulty in finding an optimal strategy, I extended the Cycle graph counterexample from Lemma \ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the edge going between the $2$nd and $3$rd nodes. 
+To better understand the difficulty in finding an optimal strategy, I extended the Cycle graph counterexample from Lemma ~\ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the edge going between the $2$nd and $3$rd nodes. 
 
 
 \begin{figure}[hbt!] \label{greedy-counterexample-analysed}
