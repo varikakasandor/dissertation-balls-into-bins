@@ -13,6 +13,9 @@
 \section{Applicability of RL to Balls-into-Bins}
 \NOTE{A}{Analysis of balls-into-bins using RL. The original title suggests that it is actually applicable.}
 
+\NOTE{D}{Mention the three success criteria and whether the were achieved and to what extend. Give references to the various sections.}
+\NOTE{D}{Also, mention what extra you did achieve.}
+
 As we have seen for each of the three settings, the difference between good and bad decisions are very subtle, which make RL very challenging to apply. Even with all the tricks I tried, it couldn't consistently outperform simpler heuristic strategies, such as the Local Reward Optimiser Strategy. Also, in order to get acceptable results, extensive and precise hyperparameter tuning was necessary in most cases. \NOTE{A}{Write something positive as well?}
 
 
@@ -28,7 +31,6 @@ Even though the project was planned to focus more on RL, we also obtained severa
 Apart from the ideas mentioned in other chapters, it is definitely possible to try other ideas for improving RL, and hopefully get closer to the optimal strategies. For examples, Graph Neural Networks could be tried for the \textsc{Graphical Two-Choice} setting, or instead of Deep Q-Learning, other RL algortihms, such as Policy Gradients could be experimented with. 
 
 
-Also, we left some open theoretical questions (conjectures), and by analysing the optimal (DP) strategies more closely, several other properties might be derived, that could even help the design of simple yet effective strategies.
+Also, we left some open theoretical questions (conjectures)\NOTE{T}{Good, I would suggest to transform the lemmas you cannot prove into conjecture!}, and by analysing the optimal strategies more closely, several other properties might observed, that could even help the design of simple, robust yet effective strategies. Another idea is to use explainable AI techniques to derive strategies from the (hidden representation of the) NNs, or even directly use interpretable NNs \cite{vacareanu2022explainableAI1} \cite{tang2022explainableAI2}.
 
-
-On a more practical note, future work should consider extending and analysing the discussed settings into more realistic and more challenging ones, e.g. as discussed in Chapter \ref{introduction}, the servers would usually synchronize their loads less frequently. \NOTE{A}{Give another example?}
+On a more practical note, future work should consider extending and analysing the discussed settings into more realistic and more challenging ones, e.g.\ as discussed in Chapter \ref{introduction}, the servers would usually synchronize their loads less frequently. \NOTE{A}{Give another example?}
