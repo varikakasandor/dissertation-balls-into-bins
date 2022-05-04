@@ -11,7 +11,11 @@ class DPStrategy(StrategyBase):
     def decide(self, bin):
         sorted_loads = tuple(sorted(self.loads))
         _, threshold = self.strategy[sorted_loads]
-        self.curr_thresholds.append(threshold)
+        if self.curr_thresholds and threshold < self.curr_thresholds[-1]:
+            self.curr_thresholds.append(self.curr_thresholds[-1])
+        else:
+            self.curr_thresholds.append(threshold)
+
         return self.loads[bin] <= threshold  # either accept is better (-1) or it doesn't matter (0)
 
     def note(self, bin):

@@ -1,6 +1,5 @@
-
 \newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
-% \newcommand{\NOTE}[2]{}
+%\newcommand{\NOTE}[2]{}
 \usepackage{mathtools}
 \usepackage[flushleft]{threeparttable}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -20,15 +19,22 @@
 \usepackage{float}
 \usepackage{svg}
 \usepackage{graphicx}
+\usepackage{enumitem}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 
-\newcommand{\OneChoice}{\textsc{One-Choice} } 
-\newcommand{\TwoChoice}{\textsc{Two-Choice} }
-\newcommand{\KChoice}{$k$-\textsc{Choice} } 
-\newcommand{\TwoThinning}{\textsc{Two-Thinning} } 
-\newcommand{\KThinning}{$k$-\textsc{Thinning} } 
-\newcommand{\GraphicalTwoChoice}{\textsc{Graphical Two-Choice} }
-\newcommand{\GraphicalTwoThinning}{\textsc{Graphical Two-Thinning} }
+\newcommand{\OneChoice}{\textsc{One-Choice}\xspace} 
+\newcommand{\TwoChoice}{\textsc{Two-Choice}\xspace}
+\newcommand{\KChoice}{$k$-\textsc{Choice}\xspace} 
+\newcommand{\TwoThinning}{\textsc{Two-Thinning}\xspace} 
+\newcommand{\KThinning}{$k$-\textsc{Thinning}\xspace} 
+\newcommand{\GraphicalTwoChoice}{\textsc{Graphical Two-Choice}\xspace}
+\newcommand{\GraphicalTwoThinning}{\textsc{Graphical Two-Thinning}\xspace}
+
+\newcommand{\CompleteGraph}{complete graph} 
+\newcommand{\CycleGraph}{cycle graph} 
+\newcommand{\HypercubeGraph}{hypercube graph} 
+\newcommand{\RandomRegularGraph}{random regular graph} 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

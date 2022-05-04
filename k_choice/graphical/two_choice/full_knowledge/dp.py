@@ -7,8 +7,8 @@ from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
 from helper.helper import number_of_increasing_partitions
 
-N = 4
-M = 35
+N = 2
+M = 3
 GRAPH = Cycle(N)
 DICT_LIMIT = 40000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
@@ -49,6 +49,7 @@ def find_best_strategy(graph=GRAPH, m=M, reward_fun=REWARD_FUN, print_behaviour=
     memo = {}
     strategy = {}
     score = dp(tuple([0] * graph.n), memo, strategy, reward_fun=reward_fun, graph=graph, m=m)
+    print(memo.keys())
     if print_behaviour:
         print(f"With {N} bins and {M} balls on a {GRAPH}, the best achievable expected maximum load is {-score}")
     return strategy
@@ -64,11 +65,10 @@ if __name__ == "__main__":
     start_time = time.time()
     strategy = find_best_strategy()
 
-
     """for ((loads, (x, y)), decision) in strategy.items():
         if ((loads[x] < loads[y]) and decision == 1) or ((loads[y] < loads[x]) and decision == -1):
             print(loads, (x, y), decision)"""
 
-    analyse_0x0y(strategy)
+    #analyse_0x0y(strategy)
 
     print("--- %s seconds ---" % (time.time() - start_time))

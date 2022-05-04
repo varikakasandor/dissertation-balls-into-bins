@@ -3,6 +3,62 @@
 \chapter{Hyperparameters}\label{hyperparameters} 
 
 
+\section{List of Hyperparameters}
+
+
+\NOTE{A}{Reorder in a more systematic way?}
+\NOTE{A}{TODO: add usual values and/or reasons?}
+\NOTE{A}{Should I add the ranges and options I used during the hyperparamter search?}
+\begin{itemize} 
+    \item batch size: the number of samples to take from the experience replay buffer using which the DQN is updated.
+    
+    \item $\epsilon$-start: for the $\epsilon$-greedy technique, it is common practice to gradually decrease $\epsilon$ during training. The reason is that after some training, less exploration is needed, as the best actions already start to take shape. I decrease $\epsilon$ according a negative exponential function, starting from $\epsilon$-start.
+    
+    \item $\epsilon$-decay: the decay parameter of the negative exponential function.\NOTE{T}{maybe better to use some formulas here?}
+    
+    \item $\epsilon$-end: as training goes on, $\epsilon$ converges to $\epsilon$-end.
+     
+    
+    \item target update frequency: after every how many episodes is the target network synchronised with the main network.
+    
+    \item optimising frequency: this controls after every how many steps (i.e.\ actions) is the main network updated. Not updating it after every step is both a speed-up, and can control the reuse of samples in the experience replay buffer.
+    
+    \item memory capacity: the maximum size of the experience replay buffer.
+    
+    \item evaluation runs during training: to determine if the current model is better than the best one so far, I run this many full executions of the game with the current model, and average the scores. Note that this is very costly, as one execution of the game is equivalent to a full episode of training.
+    
+    \item maximum threshold of DQN: as mentioned in Section ~\ref{DQN}, the DQN is restricted to using only thresholds below this limit. A reasonable choice of this maximum threshold is around the target expected maximum load we expect to get, which can be estimated e.g.\ by the performance of simpler protocols, such as \OneChoice or \TwoChoice, or by theoretical results.
+    
+    \item loss function: the loss function to use between the current Q-value estimate and the new (``target'') Q-value estimate. \NOTE{A}{Explain better.}
+    
+    \item optimiser: the optimiser used for updating the neural network. \NOTE{A}{Update my code to include this as well.}
+    
+    \item learning rate: the learning rate of the optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
+    
+    \item DQN -- hidden state size of RNN: this is the determines into how many numbers does the DQN have to ``compress'' the information about the load vector.
+    
+    \item DQN -- number of hidden layers of RNN: even though the main property of RNNs is that they process sequences, they can also have depth as well with any number of hidden layers.
+    
+    \item DQN -- number of linear layers after RNN: at least one layer is needed to bring the result to the right shape, but I allow more as well.
+    
+    \item potential function: some of the potential functions are only applicable to certain settings (e.g.\ \GraphicalTwoChoice).
+    
+    \item number of curriculum learning episodes: using curriculum as pretraining, this hyperparameter determines the overall number of episodes in pretraining.
+    
+    \item using normalised domain: this is a boolean choosing between normalised and absolute domain.
+    
+    
+
+
+\end{itemize}
+
+
+Note that the number of training episodes and the patience interval used for early stopping are not included in the hyperparameter search explicitly. This is because there isn't an optimal value for them based only on the score, as the score only improves by adding more episodes and not stopping early -- it just takes more time. Therefore, I have run a first phase of the hyperparameter optimisation finding a sweetspot for the number of episodes, where the difference between the strength of different hyperparameters is already apparent (though the score could potentially improve by training longer), but it is still feasible to do several runs in a few hours. Then, during the main optimisation phase I have used a fixed number of episodes, and I didn't use early stopping.
+
+
+\section{Final Hyperparameter Values}
+
+
 
 \begin{table}[h!]\label{tab:two-thinning-hyperparameters}
 \begin{threeparttable}

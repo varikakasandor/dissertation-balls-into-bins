@@ -12,9 +12,9 @@ from two_thinning.strategies.the_threshold_strategy import TheThresholdStrategy
 from two_thinning.strategies.random_strategy import RandomStrategy
 
 N = 5
-M = 10
+M = 25
 STRATEGY = LocalRewardOptimiserStrategy(N, M)
-RUNS = 100
+RUNS = 3
 PRINT_BEHAVIOUR = False
 
 def REWARD_FUN(loads):
@@ -40,7 +40,7 @@ def run_strategy(time_stamp, run_id, n=N, m=M, strategy=STRATEGY, reward=REWARD_
         loads[final_choice] += 1
 
     score = reward(loads)
-    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, run_id)
+    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, f"{run_id}.pdf")
     strategy.create_analyses_(save_path=save_path)
     return score
 
@@ -55,7 +55,7 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
         scores.append(score)
         strategy.reset_()
     avg_score = sum(scores) / runs
-    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, "summary")
+    save_path = join(dirname(dirname(abspath(__file__))), "evaluation", "analyses", time_stamp, "summary.pdf")
     strategy.create_summary_(save_path)
     if print_behaviour:
         print(f"The average score of this strategy is {avg_score}")
@@ -64,7 +64,7 @@ def run_strategy_multiple_times(n=N, m=M, runs=RUNS, strategy=STRATEGY, reward=R
 
 
 if __name__ == "__main__":
-    run_strategy_multiple_times(strategy=FullKnowledgeDQNStrategy(n=N, m=M, use_pre_trained=False))  # I don't understand why it shows
+    run_strategy_multiple_times(strategy=DPStrategy(n=N, m=M))  # I don't understand why it shows
     # yellow, whereas it runs fine
     # scores = {alpha: run_strategy_multiple_times(
     # strategy=LocalRewardOptimiserStrategy(n=N, m=M, potential_fun=lambda x: EXPONENTIAL_POTENTIAL(x, alpha=alpha)),
