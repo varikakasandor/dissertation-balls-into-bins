@@ -14,7 +14,7 @@ def calculate_statistics(n, m, k, strategy, alpha=0.95):
     read_path = f"data/{n}_{m}_{k}_{strategy}.csv"  # if k > 2 else f"../two_thinning/data/{n}_{m}_{strategy}.csv"
     if exists(read_path):
         df = pd.read_csv(read_path)
-        scores = np.array(df["score"].to_list())[-100:]
+        scores = -np.array(df["score"].to_list())[-500:]
         mean = np.mean(scores)
         sem = st.sem(scores)
         if sem > 0:

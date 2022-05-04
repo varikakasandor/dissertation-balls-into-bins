@@ -1,7 +1,18 @@
 import pandas as pd
 
+NAME_DICT = {
+    "dqn": "Deep Q-Learning",
+    "always_accept": "Always Accept",
+    "random": "Random",
+    "threshold": "Threshold",
+    "dp": "DP",
+    "mean_thinning": "Mean Thinning",
+    "local_reward_optimiser": "Local Reward Optimiser",
+    "quantile": "Quantile",
+    "greedy": "Greedy",
+}
 
-def csv_to_latex(inp_path, out_path):
+def csv_to_latex(inp_path, out_path, top_highlight=3, name_dict=NAME_DICT):
     latex_str = ""
     df = pd.read_csv(inp_path)
     for _, row_series in df.iterrows():
@@ -9,11 +20,22 @@ def csv_to_latex(inp_path, out_path):
         index = indexandrow[0]
         row = indexandrow[1:]
         row_str = ""
-        row_str += index + " & "
+        row_str += name_dict[index] + " & "
         for i in range(len(row) // 2):
-            truncated_mean = str("{:0.2f}".format(abs(row[2 * i])))
-            truncated_confidence = str("{:0.2f}".format(row[2 * i + 1]))
-            row_str += truncated_mean + " $\\pm$ " + truncated_confidence
+            avg = row[2 * i]
+            if avg != -1:
+                contestants = df.iloc[:, 2 * i + 1].tolist()
+                conf = row[2 * i + 1]
+                better_cnt = len([x for x in contestants if x != -1 and x < avg])
+                need_bf = better_cnt < top_highlight and avg != -1
+                start_bf = "\\textbf{" if need_bf else ""
+                end_bf = "}" if need_bf else ""
+                truncated_mean_str = str("{:0.2f}".format(avg))
+                truncated_conf_str = str("{:0.2f}".format(conf))
+                pm_str = " $\\pm$ "
+                row_str += start_bf + truncated_mean_str + pm_str + truncated_conf_str + end_bf
+            else:
+                row_str += "TLE"
             if 2 * i + 1 != len(row) - 1:
                 row_str += " & "
 
@@ -25,6 +47,7 @@ def csv_to_latex(inp_path, out_path):
 
 
 if __name__ == "__main__":
-    csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex")
+    csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex", top_highlight=1)
     csv_to_latex("../evaluation/k_thinning/data/comparison.csv", "../evaluation/k_thinning/data/comparison.tex")
-    csv_to_latex("../evaluation/graphical_two_choice/data/comparison.csv", "../evaluation/graphical_two_choice/data/comparison.tex")
+    csv_to_latex("../evaluation/graphical_two_choice/data/comparison.csv",
+                 "../evaluation/graphical_two_choice/data/comparison.tex")

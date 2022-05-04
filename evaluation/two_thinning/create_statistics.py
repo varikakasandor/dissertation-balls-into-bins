@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 
 NMS = ((5, 5), (5, 10), (5, 25), (20, 20), (20, 60), (20, 400), (50, 50), (50, 200), (50, 2500))
-STRATEGIES = ("always_accept", "random", "local_reward_optimiser", "mean_thinning", "dp", "dqn", "threshold")
+STRATEGIES = ("always_accept", "local_reward_optimiser", "mean_thinning", "dp", "dqn", "threshold")
 
 
 def calculate_statistics(n, m, strategy, alpha=0.95):
     read_path = f"data/{n}_{m}_{strategy}.csv"
     if exists(read_path):
         df = pd.read_csv(read_path)
-        scores = np.array(df["score"].to_list())
+        scores = -np.array(df["score"].to_list())[-500:]
         mean = np.mean(scores)
         """lower = np.percentile(scores, 2.5)
         upper = np.percentile(scores, 97.5)"""
