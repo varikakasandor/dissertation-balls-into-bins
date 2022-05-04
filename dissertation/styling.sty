@@ -1,5 +1,5 @@
-\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
-%\newcommand{\NOTE}[2]{}
+%\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
+\newcommand{\NOTE}[2]{}
 \usepackage{mathtools}
 \usepackage[flushleft]{threeparttable}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -9,7 +9,7 @@
 \usepackage{amsthm}
 \usepackage{xcolor}
 
-
+\urlstyle{same}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section] % make sure \theoremstyle is right above
 
@@ -22,7 +22,7 @@
 \usepackage{enumitem}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
-
+\usepackage[labelfont=bf]{caption}
 \newcommand{\OneChoice}{\textsc{One-Choice}\xspace} 
 \newcommand{\TwoChoice}{\textsc{Two-Choice}\xspace}
 \newcommand{\KChoice}{$k$-\textsc{Choice}\xspace} 
@@ -31,10 +31,10 @@
 \newcommand{\GraphicalTwoChoice}{\textsc{Graphical Two-Choice}\xspace}
 \newcommand{\GraphicalTwoThinning}{\textsc{Graphical Two-Thinning}\xspace}
 
-\newcommand{\CompleteGraph}{complete graph} 
-\newcommand{\CycleGraph}{cycle graph} 
-\newcommand{\HypercubeGraph}{hypercube graph} 
-\newcommand{\RandomRegularGraph}{random regular graph} 
+\newcommand{\CompleteGraph}{complete graph\xspace} 
+\newcommand{\CycleGraph}{cycle graph\xspace} 
+\newcommand{\HypercubeGraph}{hypercube graph\xspace} 
+\newcommand{\RandomRegularGraph}{random regular graph\xspace} 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
