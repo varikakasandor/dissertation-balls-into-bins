@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,6 +15,7 @@ class StrategyBase(metaclass=ABCMeta):
         self.max_loads = []
         self.offered_loads = []
         self.thresholds = []
+        plt.rcParams['font.size'] = '14'
 
     @abstractmethod
     def decide(self, bin):
@@ -67,7 +69,7 @@ class StrategyBase(metaclass=ABCMeta):
         plt.title("Threshold progression")
         plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")
-        plt.legend()
+        plt.legend(loc='upper left')
         plt.savefig(save_path)
 
     def create_summary_plot(self, save_path):  # Helper function for those strategies which decide based on a

@@ -1,15 +1,15 @@
 import pandas as pd
 
 NAME_DICT = {
-    "dqn": "Deep Q-Learning",
-    "always_accept": "Always Accept",
-    "random": "Random",
-    "threshold": "Threshold",
-    "dp": "DP",
-    "mean_thinning": "Mean Thinning",
-    "local_reward_optimiser": "Local Reward Optimiser",
-    "quantile": "Quantile",
-    "greedy": "Greedy",
+    "dqn": "\\DQN",
+    "always_accept": "\\AlwaysAccept",
+    "random": "\\Random",
+    "threshold": "\\Threshold",
+    "dp": "\\DP",
+    "mean_thinning": "\\MeanThinning",
+    "local_reward_optimiser": "\\LocalRewardOptimiser",
+    "quantile": "\\Quantile",
+    "greedy": "\\Greedy",
 }
 
 def csv_to_latex(inp_path, out_path, top_highlight=3, name_dict=NAME_DICT):
@@ -47,7 +47,6 @@ def csv_to_latex(inp_path, out_path, top_highlight=3, name_dict=NAME_DICT):
 
 
 if __name__ == "__main__":
-    csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex", top_highlight=1)
-    csv_to_latex("../evaluation/k_thinning/data/comparison.csv", "../evaluation/k_thinning/data/comparison.tex")
-    csv_to_latex("../evaluation/graphical_two_choice/data/comparison.csv",
-                 "../evaluation/graphical_two_choice/data/comparison.tex")
+    # csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex", top_highlight=1)
+    csv_to_latex("../evaluation/k_thinning/data/comparison.csv", "../evaluation/k_thinning/data/comparison.tex", top_highlight=1)
+    # csv_to_latex("../evaluation/graphical_two_choice/data/comparison.csv", "../evaluation/graphical_two_choice/data/comparison.tex")
