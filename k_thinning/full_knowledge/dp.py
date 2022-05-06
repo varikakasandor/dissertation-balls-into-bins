@@ -1,11 +1,16 @@
 import functools
 import time
 from collections import Counter
+from math import log, ceil
+from os.path import abspath, dirname, join
+
+import numpy as np
+from matplotlib import pyplot as plt
 
 from helper.helper import number_of_increasing_partitions
 
-N = 4
-M = 25
+N = 5
+M = 30
 K = 5
 DICT_LIMIT = 10000000  # M * N * K * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
@@ -130,15 +135,94 @@ def assert_monotonicity(strategy):
     return True, None
 
 
+def get_predecessors(loads_tuple, choices_left, strategy, n=N, k=K):
+    loads = list(loads_tuple)
+    unique_loads = list(Counter(loads))
+    predecessors = []
+    if choices_left == k:
+        for prev_choices_left in range(2, k + 1):
+            for val in unique_loads:
+                if val == 0:
+                    continue
+                first_occurrence = loads.index(val)
+                loads[first_occurrence] -= 1
+                prev_loads_tuple = tuple(loads)
+                _, prev_threshold = strategy[(prev_loads_tuple, prev_choices_left)]
+                cnt_above_threshold = len([x for x in prev_loads_tuple if x > prev_threshold])
+                cnt_prev = prev_loads_tuple.count(val - 1)
+                if prev_choices_left == 2:
+                    step_probability = cnt_prev / n + cnt_above_threshold / n * cnt_prev / n if val - 1 <= prev_threshold else \
+                        cnt_above_threshold / n * cnt_prev / n
+                else:
+                    step_probability = cnt_prev / n if val - 1 <= prev_threshold else 0
+                predecessors.append(((prev_loads_tuple, prev_choices_left), step_probability))
+                loads[first_occurrence] += 1
+    else:
+        _, prev_threshold = strategy[(loads_tuple, choices_left + 1)]
+        cnt_above_threshold = len([x for x in loads_tuple if x > prev_threshold])
+        step_probability = cnt_above_threshold / n
+        predecessors.append(((loads_tuple, choices_left + 1), step_probability))
+    return predecessors
+
+
+def find_probability_dp(loads_tuple, choices_left, reach_probabilities, strategy, n=N, k=K):
+    if (loads_tuple, choices_left) in reach_probabilities:
+        return reach_probabilities[(loads_tuple, choices_left)]
+
+    if loads_tuple == tuple([0] * n) and choices_left == k:
+        return 1
+
+    p_reach = 0
+    for (prev_loads_tuple, prev_choices_left), p_move in get_predecessors(loads_tuple, choices_left, strategy, n, k):
+        p_reach += p_move * find_probability_dp(prev_loads_tuple, prev_choices_left, reach_probabilities, strategy, n=n, k=k)
+
+    reach_probabilities[(loads_tuple, choices_left)] = p_reach
+    return p_reach
+
+
+def analyse_k(n=N, m=M, max_k=10, reward_fun=REWARD_FUN, use_threshold_dp=True, print_behaviour=False):
+    plt.rcParams['font.size'] = '14'
+    plt.clf()
+
+    smallest_achievable = ceil(m / n)
+    max_load_min = smallest_achievable - 1
+    max_load_max = smallest_achievable + 3
+    plot_range = range(max_load_min, max_load_max + 1)
+
+    for k in range(2, max_k + 1):
+        threshold_strategy = find_best_strategy(n=n, m=m, k=k, reward_fun=reward_fun, use_threshold_dp=use_threshold_dp,
+                                                print_behaviour=print_behaviour)
+        reach_probabilities = {}
+        for (loads_tuple, choices_left) in threshold_strategy:
+            find_probability_dp(loads_tuple, choices_left, reach_probabilities, threshold_strategy, n=n, k=k)
+        max_load_distribution = [0] * (m + 1)
+        for (loads_tuple, choices_left), p in reach_probabilities.items():
+            if sum(loads_tuple) == m:
+                max_load_distribution[max(loads_tuple)] += p
+
+        raw_max_distribution = max_load_distribution[max_load_min:(max_load_max+1)]
+        # log_max_distribution = [log(x) for x in max_load_distribution[max_load_min:(max_load_max+1)]]
+        # cdf = list(np.cumsum(max_load_distribution[max_load_min:(max_load_max+1)]))
+        to_plot = raw_max_distribution
+        plt.plot(plot_range, to_plot, label=f"k={k}")
+
+    plt.xlabel("maximum load")
+    plt.ylabel("probability")
+    plt.xticks(plot_range)
+    plt.legend()
+    file_name = f"max_load_distribution_{n}_{m}.pdf"
+    save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "k_thinning", "data", file_name)
+    plt.savefig(save_path)
+
+
 if __name__ == "__main__":
     start_time = time.time()
 
-    # print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(
-    # tuple([0] * N), 0)}")
-    strategy = {}
+    """strategy = {}
     print(threshold_dp(tuple([0] * N), K, strategy))
-    print(
-        f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
-    print(assert_monotonicity(strategy))
+    print(f"With {M} balls and {N} bins the best achievable expected maximum load with {K}-thinning is {old_dp(tuple([0] * N), 0)}")
+    print(assert_monotonicity(strategy))"""
+
+    analyse_k()
 
     print("--- %s seconds ---" % (time.time() - start_time))

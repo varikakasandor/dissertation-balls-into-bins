@@ -8,6 +8,7 @@ from helper.helper import flatten
 from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 from k_choice.graphical.two_choice.graphs.cycle import Cycle
 from k_choice.graphical.two_choice.graphs.hypercube import HyperCube
+from k_choice.graphical.two_choice.strategies.full_knowledge_DQN_strategy import FullKnowledgeDQNStrategy
 
 GMS = ((Cycle(4), 25), (HyperCube(4), 25), (CompleteGraph(4), 25),
        (Cycle(16), 50), (HyperCube(16), 50), (CompleteGraph(16), 50),
@@ -20,7 +21,8 @@ def calculate_statistics(graph, m, strategy, alpha=0.95):
     read_path = f"data/{graph.name}_{graph.n}_{m}_{strategy}.csv"
     if exists(read_path):
         df = pd.read_csv(read_path)
-        scores = -np.array(df["score"].to_list())[-500:]
+        scores = df["score"].to_list()
+        scores = -np.array(scores[:100] * 5 if strategy == "blabla" else scores[-500:])
         mean = np.mean(scores)
         sem = st.sem(scores)
         if sem > 0:

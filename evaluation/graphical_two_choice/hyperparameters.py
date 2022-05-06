@@ -87,7 +87,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 128,
             "nn_num_lin_layers": 2,
             "optimizer_method": torch.optim.Adagrad,
-            "potential_fun": EXPONENTIAL_POTENTIAL,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -112,7 +112,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 256,
             "nn_num_lin_layers": 2,
             "optimizer_method": torch.optim.RMSprop,
-            "potential_fun": EXPONENTIAL_POTENTIAL,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -138,7 +138,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 256,
             "nn_num_lin_layers": 3,
             "optimizer_method": torch.optim.RMSprop,
-            "potential_fun": POTENTIAL_FUN_NEIGHBOUR_AVG,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -164,7 +164,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 128,
             "nn_num_lin_layers": 2,
             "optimizer_method": torch.optim.Adam,
-            "potential_fun": EXPONENTIAL_POTENTIAL,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -190,7 +190,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 256,
             "nn_num_lin_layers": 3,
             "optimizer_method": torch.optim.Adam,
-            "potential_fun": POTENTIAL_FUN_WORST_EDGE,  # TODO: double check
+            "potential_fun": MAX_LOAD_POTENTIAL,  # TODO: double check
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -217,7 +217,7 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 128,
             "nn_num_lin_layers": 2,
             "optimizer_method": torch.optim.Adam,
-            "potential_fun": EXPONENTIAL_POTENTIAL,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }
 
@@ -242,6 +242,6 @@ def get_dqn_hyperparameters(graph: GraphBase, m):
             "nn_hidden_size": 160,
             "nn_num_lin_layers": 3,
             "optimizer_method": torch.optim.RMSprop,
-            "potential_fun": POTENTIAL_FUN_NEIGHBOUR_AVG,
+            "potential_fun": MAX_LOAD_POTENTIAL,
             "pacing_fun": EVEN_PACING_FUN
         }

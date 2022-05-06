@@ -1,5 +1,5 @@
-%\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
-\newcommand{\NOTE}[2]{}
+\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
+% \newcommand{\NOTE}[2]{}
 \usepackage{mathtools}
 \usepackage[flushleft]{threeparttable}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -8,6 +8,7 @@
 \usepackage[capitalise]{cleveref} % For referencing sections, theorems, lemmas, etc
 \usepackage{amsthm}
 \usepackage{xcolor}
+\usepackage{tikz-qtree}
 
 \urlstyle{same}
 \theoremstyle{definition}
@@ -16,6 +17,9 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem*{remark}{Remark}
+
 \usepackage{float}
 \usepackage{svg}
 \usepackage{graphicx}
@@ -36,5 +40,19 @@
 \newcommand{\HypercubeGraph}{hypercube graph\xspace} 
 \newcommand{\RandomRegularGraph}{random regular graph\xspace} 
 
+
+\newcommand{\DQN}{Deep Q-Learning\xspace} 
+\newcommand{\AlwaysAccept}{Always Accept\xspace} 
+\newcommand{\Random}{Random\xspace} 
+\newcommand{\Threshold}{Threshold\xspace} 
+\newcommand{\DP}{DP\xspace} 
+\newcommand{\MeanThinning}{Mean-Thinning\xspace} 
+\newcommand{\LocalRewardOptimiser}{Local Reward Optimiser\xspace}
+\newcommand{\Quantile}{Quantile\xspace} 
+\newcommand{\Greedy}{Greedy\xspace} 
+
+
+\newcommand{\NumberofRuns}{$500$\xspace} 
+\newcommand{\NumberofHyperparameterIterations}{$200$\xspace}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -11,8 +11,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy.stats import entropy
 
-N = 50
-M = 50
+N = 5
+M = 25
 DICT_LIMIT = 6000000  # M * N * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
 
@@ -213,6 +213,7 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     raw_plot_probs = list(reach_probabilities.values()) if include_intermediate_states else final_probs
     plot_probs = [log2(x) for x in raw_plot_probs] if take_log else raw_plot_probs
 
+    plt.rcParams['font.size'] = '14'
     _, bins, _ = plt.hist(plot_probs, bins=100, density=density)
     """a, b, floc, fscale = scipy.stats.beta.fit(plot_probs)
     best_fit_line = scipy.stats.gamma.pdf(bins, a, b, floc, fscale)
@@ -229,7 +230,7 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     included_str = "all" if include_intermediate_states else "final"
     log_str = "log" if take_log else "linear"
     density_str = "density" if density else "count"
-    file_name = f"state_distribution_{n}_{m}_{included_str}_{log_str}_{density_str}.png"
+    file_name = f"state_distribution_{n}_{m}_{included_str}_{log_str}_{density_str}.pdf"
     save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "two_thinning", "data", file_name)
     plt.savefig(save_path)
 
@@ -238,7 +239,7 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
     plt.xlabel("maximum load")
     plt.ylabel("probability")
     plt.xticks(np.arange(0, 21, 2))
-    file_name = f"max_load_distribution_{n}_{m}.png"
+    file_name = f"max_load_distribution_{n}_{m}.pdf"
     save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "two_thinning", "data", file_name)
     plt.savefig(save_path)
 
@@ -246,5 +247,5 @@ def analyse_probability_distribution(threshold_strategy, include_intermediate_st
 if __name__ == "__main__":
     start_time = time.time()
     strategy = find_best_strategy()
-    #analyse_probability_distribution(strategy, include_intermediate_states=True, take_log=True, density=False)
+    analyse_probability_distribution(strategy, include_intermediate_states=True, take_log=True, density=False)
     print("--- %s seconds ---" % (time.time() - start_time))

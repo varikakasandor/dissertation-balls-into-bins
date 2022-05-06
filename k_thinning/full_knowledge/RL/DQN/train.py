@@ -208,12 +208,29 @@ def train(n=N, m=M, k=K, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPI
         if ep % target_update_freq == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
-    max_loads = [-x for x in eval_scores]
-    plt.plot(max_loads)
+    plt.rcParams['font.size'] = '14'
+
+    final_max_loads = [-x for x in eval_scores]
+    file_name = f"training_progression_{n}_{m}_{k}.pdf"
+    training_save_path = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation",
+                              "k_thinning", "data", file_name)
+
+    plt.plot(final_max_loads)
     plt.xlabel("episode")
     plt.ylabel("average maximum load over 25 runs")
-    file_name = f"training_progression_{n}_{m}_{k}"
-    training_save_path = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation", "k_thinning", "data", file_name)
+    plt.savefig(training_save_path)
+
+    plt.clf()
+
+    rolling_window_max_loads = [sum([final_max_loads[j] for j in range(i, i + 10)]) / 10 for i in
+                                range(len(final_max_loads) - 10)]
+    file_name = f"training_progression_rolling_window_{n}_{m}_{k}.pdf"
+    training_save_path = join(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))), "evaluation",
+                              "k_thinning", "data", file_name)
+
+    plt.plot(rolling_window_max_loads)
+    plt.xlabel("episode")
+    plt.ylabel("average maximum load over 25 runs")
     plt.savefig(training_save_path)
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net

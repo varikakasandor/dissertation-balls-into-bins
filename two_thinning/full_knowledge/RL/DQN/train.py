@@ -105,11 +105,12 @@ def analyse_threshold_progression(model, ep, save_folder, delta, max_threshold, 
             else:
                 loads[random.randrange(n)] += 1
         plt.clf()
+        plt.rcParams['font.size'] = '14'
         plt.plot(list(range(m)), thresholds)
-        plt.xlabel("Index of ball")
+        plt.xlabel("Ball")
         plt.ylabel("Chosen threshold")
-        plt.title(f"Epoch {ep}")
-        plt.savefig(join(save_folder, f"Epoch {ep}.png"))
+        # plt.title(f"Epoch {ep}")
+        plt.savefig(join(save_folder, f"Epoch {ep}.pdf"))
         return calc_number_of_jumps(thresholds, delta=delta)
 
 
@@ -258,9 +259,19 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
                     print("You pressed the wrong button, it has no effect. Training continues.")"""
             target_net.load_state_dict(policy_net.state_dict())
 
+
+    final_max_loads = [-x for x in eval_scores]
+    rolling_window_max_loads = [sum([final_max_loads[j] for j in range(i, i+10)])/10 for i in range(len(final_max_loads)-10)]
+    plt.clf()
+    plt.rcParams['font.size'] = '14'
+    plt.plot(rolling_window_max_loads)
+    plt.xlabel("episode")
+    plt.ylabel("average maximum load over 25 runs")
+    plt.savefig(join(save_path, "training_progression.pdf"))
+
+    """
     scaled_threshold_jumps = scale(np.array(threshold_jumps))
     scaled_eval_scores = scale(np.array(eval_scores))
-
     plt.clf()
     plt.plot(list(range(len(scaled_threshold_jumps))), scaled_threshold_jumps,
              label="normalised number of threshold jumps")
@@ -268,7 +279,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     plt.title(f"Training Progression")
     plt.xlabel("Epoch")
     plt.legend()
-    plt.savefig(join(save_path, "training_progression.png"))
+    plt.savefig(join(save_path, "training_progression.png"))"""
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 

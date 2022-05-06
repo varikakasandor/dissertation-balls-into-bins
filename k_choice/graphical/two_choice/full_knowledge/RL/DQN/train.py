@@ -2,6 +2,7 @@ import time
 import copy
 import random
 from math import exp, ceil, log
+from os.path import join, dirname, abspath
 
 import torch.optim as optim
 import wandb
@@ -177,10 +178,13 @@ def train(graph: GraphBase = GRAPH, m=M, memory_capacity=MEMORY_CAPACITY, num_ep
             target_net.load_state_dict(policy_net.state_dict())
 
     eval_max_loads = [-x for x in eval_scores]
+    plt.rcParams['font.size'] = '14'
     plt.plot(eval_max_loads)
     plt.xlabel("episode")
     plt.ylabel(f"average maximum load over {5 * eval_runs} runs")
-    plt.savefig(f"../../../../../../evaluation/graphical_two_choice/data/training_progression_{graph.name}_{graph.n}_{m}.png")
+    save_file_name = f"training_progression_{graph.name}_{graph.n}_{m}.pdf"
+    save_path = join(dirname(dirname(dirname(dirname(dirname(dirname(dirname(abspath(__file__)))))))), "evaluation", "graphical_two_choice", "data", save_file_name)
+    plt.savefig(save_path)
     print(f"--- {(time.time() - start_time)} seconds ---")
     return best_net
 
