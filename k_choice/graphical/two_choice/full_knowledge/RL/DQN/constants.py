@@ -10,7 +10,7 @@ from k_choice.graphical.two_choice.graphs.graph_base import GraphBase
 from k_choice.graphical.two_choice.graphs.complete_graph import CompleteGraph
 
 N = 32  # TODO: for N=3 test if it converges to Greedy
-GRAPH = CompleteGraph(N)
+GRAPH = HyperCube(N)
 M = 32
 
 
@@ -62,28 +62,28 @@ def EVEN_PACING_FUN(start_size, graph=GRAPH, m=M, all_episodes=1000):
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 64
-EPS_START = 0.4
-EPS_END = 0.065
-EPS_DECAY = 2900
-PRE_TRAIN_EPISODES = 75
-TRAIN_EPISODES = 500
-TARGET_UPDATE_FREQ = 8
-MEMORY_CAPACITY = 800
-EVAL_RUNS_TRAIN = 10
+BATCH_SIZE = 56
+EPS_START = 0.467
+EPS_END = 0.075
+EPS_DECAY = 4038
+PRE_TRAIN_EPISODES = 20
+TRAIN_EPISODES = 2000
+TARGET_UPDATE_FREQ = 22
+MEMORY_CAPACITY = 615
+EVAL_RUNS_TRAIN = 8
 EVAL_RUNS_EVAL = 100
 EVAL_PARALLEL_BATCH_SIZE = 32
 PATIENCE = 1000
 PRINT_BEHAVIOUR = False
 PRINT_PROGRESS = True
-OPTIMISE_FREQ = 10
-LOSS_FUCNTION = nn.HuberLoss()
-LR = 0.004
-NN_HIDDEN_SIZE = 128
-NN_NUM_LIN_LAYERS = 2
-OPTIMIZER_METHOD = torch.optim.RMSprop
+OPTIMISE_FREQ = 15
+LOSS_FUCNTION = nn.L1Loss()
+LR = 0.0044
+NN_HIDDEN_SIZE = 91
+NN_NUM_LIN_LAYERS = 1
+OPTIMIZER_METHOD = torch.optim.Adam
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net_hypercube"  # not actually NN_TYPE but also what graph we use
 REWARD_FUN = MAX_LOAD_REWARD
-POTENTIAL_FUN = MAX_LOAD_POTENTIAL
+POTENTIAL_FUN = EXPONENTIAL_POTENTIAL
 PACING_FUN = EVEN_PACING_FUN

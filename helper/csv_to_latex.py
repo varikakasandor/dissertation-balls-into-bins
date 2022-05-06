@@ -47,6 +47,6 @@ def csv_to_latex(inp_path, out_path, top_highlight=1, name_dict=NAME_DICT):
 
 
 if __name__ == "__main__":
-    csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex")
-    csv_to_latex("../evaluation/k_thinning/data/comparison.csv", "../evaluation/k_thinning/data/comparison.tex")
+    # csv_to_latex("../evaluation/two_thinning/data/comparison.csv", "../evaluation/two_thinning/data/comparison.tex")
+    # csv_to_latex("../evaluation/k_thinning/data/comparison.csv", "../evaluation/k_thinning/data/comparison.tex")
     csv_to_latex("../evaluation/graphical_two_choice/data/comparison.csv", "../evaluation/graphical_two_choice/data/comparison.tex")
