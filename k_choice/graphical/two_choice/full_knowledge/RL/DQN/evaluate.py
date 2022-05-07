@@ -14,7 +14,7 @@ def get_best_model_path(n=N, m=M, nn_type=NN_TYPE):
     return best_model_path
 
 
-def load_best_model(n=N, m=M, max_possible_load=None, hidden_size=128, num_lin_layers=3, nn_type=NN_TYPE, device=DEVICE):
+def load_best_model(n=N, m=M, max_possible_load=None, hidden_size=128, num_lin_layers=2, nn_type=NN_TYPE, device=DEVICE):
     max_possible_load = max_possible_load if max_possible_load is not None else min(m, m // n + 2 * ceil(sqrt(log(n))))
     model = GeneralNet
     try:
