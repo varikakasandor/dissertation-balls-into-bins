@@ -10,7 +10,7 @@
 % \NOTE{D}{General note: This book https://d2l.ai/index.html has good references for the original papers.}
 
 
-\section{Two-Thinning}
+\section{\TwoThinning}
 
 
 
@@ -23,12 +23,6 @@
 As there is no prior work on RL for the discussed balls-into-bins setting, I implemented the RL algorithms from scratch using PyTorch for the NNs. Even though there are some attempts at general purpose RL libraries (e.g.\ Stable Baselines~\cite{hill2018stablebaselines}), they are very hard to customise at the moment. Following standard terminology, I will call the NN used by Deep Q-Learning as a Deep Q-Network (DQN).\NOTE{D}{Why not introduce this terminology in Chapter 2?} To discuss the implementation of Deep Q-Learning for \TwoThinning, I need the following definition.
 
 
-
-\begin{definition} [slicing strategies]
-Denoting the load vector at timestep $t$ as $v_t$\NOTE{D}{this should also be defined in Chapter 2}\NOTE{T}{Minor: I think $x_t$ or $x^t$ would be a bit more standard}, we call a \TwoThinning (or \KThinning in general) decision strategy \textit{\textbf{slicing}}, if it accepts a primary bin $i$ if and only if its load $v_t[i]$ is less than or equal to a \textit{\textbf{threshold}} $a$ (that can depend on $v_t$)\NOTE{T}{subtle point, do you also want it to depend on the history of the process? This may impact whether one of the Feldheim strategies is slicing or not...}.
-\end{definition}
-\NOTE{D}{These are called threshold processes, in here: \url{https://arxiv.org/pdf/2107.03916.pdf\#page=4}}\NOTE{T}{I was also suggest the name threshold (and not only because we used it...)}
-
 There are two ways to formulate the \TwoThinning setting as a\NOTE{D}{an} MDP. One is to treat (load vector, primary bin) pairs as states, and accept/reject as actions. The other is to treat load vectors as states, and thresholds for accepting/rejecting as actions. I chose the latter, because it implicitly restricts the search space to be explored by the RL agent to slicing strategies, which is justified by the following important (also intuitive) lemma:
 
 
@@ -37,11 +31,55 @@ There exists a slicing strategy that achieves the optimal expected final maximum
 \end{lemma}
 
 
-\begin{proof}
-    \NOTE{A}{TODO}
+Before proving this lemma, we need three more definitions and another lemma.
+
+
+\begin{definition} [majorisation]
+A vector $x$ is majorised by a vector $y$ (both of length $n$), denoted by $x \preccurlyeq y$ iff $$\sum_{i=0}^j x[i] \leq \sum_{i=0}^j y[i]\mathrm{, for\ all\ j\in [n]}$$. In other words, all the prefix sums of $x$ are smaller than the corresponding prefix sums of $y$.
+\end{definition}
+
+
+\begin{definition} [allocation probability vector]
+For a sorted load vector $v$ and decision strategy $f$, we define the \textit{allocation probability vector} $P^f_v$: $P^f_v[i]$ is the probability of allocating the next ball at load vector $v$ into bin $i$ (the $i$th least loaded bin) according to $f$. We can decompose $P^f_v$ into $P^f_{v1}+P^f_{v2}$, denoting the primary and secondary allocation probability vectors respectively.
+\end{definition}
+
+
+\begin{lemma} [simplified version of Theorem 7 of~\cite{azar1999twochoice}] \label{lemma: majorisation-implies-better}
+If for two strategies $f$ and $g$, and every load vector $v$, $P^f_v\preccurlyeq P^g_v$, then $E^g\leq E^f$.
+\end{lemma}
+
+\begin{remark}
+The proof in~\cite{azar1999twochoice} proceeds by applying a coupling between the two strategies and then showing by induction that the load vectors from $g$ are majorised by the load vectors from $f$ at each step.
+\end{remark}
+
+
+\begin{definition} [inversions]
+Let's call a load vector $v$ and indices $0\leq i<j<n$ an \textit{inversion} of a strategy $f$, if $f(v,i)=\mathrm{reject}$ but $f(v,j)=\mathrm{accept}$. Let's denote the number of inversions of a strategy by $I^f$, and the number of inversions for a fixed $v$ by $I^f_v$.
+\end{definition}
+
+
+\begin{proof} [Proof of Lemma~\ref{lemma: thresholdproperty}]
+    The proof proceeds by contradiction. Assume there is no optimal slicing strategy, so take an optimal non-slicing decision strategy $f$ with the least number of inversions $I^f$. Since $f$ is non-slicing, $I^f\geq 1$, so take an arbitrary sorted load vector $v$ with $I^f_v\geq 1$. Let $a=\argmin_{i\in [n]} f(v,i)=\mathrm{reject}$ and $b=\argmax_{i\in [n]} f(v,i)=\mathrm{accept}$. Let $g$ be a new strategy defined by $g(v,a)=\mathrm{accept}$, $g(v,b)=\mathrm{reject}$ (``swapping'' the decisions of $f$) and otherwise acting exactly as $f$. Now I show that for all load vectors $w$, $P^f_w\preccurlyeq P^g_w$.
+    
+    When $w\neq v$, $P^f_w = P^g_w$ by construction, so $P^f_w\preccurlyeq P^g_w$. For $w=v$, note that $P^g_{v1}=P^f_{v1}+\frac{1}{n}\cdot e_a-\frac{1}{n}\cdot e_b$, where $e_i$ denotes the $i$th basis vector. We have $P^f_{v1}\preccurlyeq P^g_{v1}$, because for $0\leq i<a$ and $b\leq i<n$, $\sum_{j=0}^i P^f_{v1}[j] = \sum_{j=0}^i P^g_{v1}[j]$, and for $a\leq i<n$, $\sum_{j=0}^i P^f_{v1}[j] + \frac{1}{n} = \sum_{j=0}^i P^g_{v1}[j]$ (intuitively, a probability of $\frac{1}{n}$ has been moved to the left). Now observe that $P^f_{v2}=P^g_{v2}$, because the number of rejects among $f(v,i)$ ($i\in [n]$) overall are the same as the number of rejects among $g(v,i)$ ($i\in [n]$) overall. Hence, because $P^f_{v1}\preccurlyeq P^g_{v1}$, and adding a constant $P^f_{v2}=P^g_{v2}$ doesn't change majorisation, we get $P^f_v \preccurlyeq P^g_v$.
+    
+    
+    Since $P^f_w\preccurlyeq P^g_w$ for any load vector $w$, Lemma~\ref{lemma: majorisation-implies-better} implies $E^g\leq E^f$. $I^g<I^f$, because for $w\neq v$, $I^g_w=I^f_w$, and for $w=v$, the ``swap'' removed (at least) the inversion $(v,a,b)$, and didn't introduce any new inversions (see Figure~\ref{swap-action}). Hence, either $E^g<E^f$, or $E^g=E^f$ but $I^g<I^f$, contradicting the original assumption.
 \end{proof}
 
-\NOTE{D}{Have you checked if there is a load vector, where it is better to use with probability $p_A$ threshold $f_a$ and with probability $1 - p_A$ threshold $f_b$? Andor: I don't understand. Take the one with a higher expectation, why would I use randomisation here?}
+
+\begin{remark}
+Lemma~\ref{lemma: thresholdproperty} has also been verified by the \DP strategy (defined later in Section~\ref{two-thinning-dp}) for small values of $n$ and $m$.
+\end{remark}
+
+
+
+\begin{figure}
+    \centering
+    %\includegraphics{} TODO
+    \caption{The ``swap'' action}
+    \label{swap-action}
+\end{figure}
 
 
 \subsubsection{Deep Q-Network (DQN)} \label{DQN}
@@ -61,7 +99,7 @@ Now, I will explain the input representation for the DQN.\NOTE{D}{Maybe just cha
 
 \NOTE{D}{This paragraph can be made a bit more concise: ``I sorted the load vectors and represented them using a one-hot encoding in the range $[0, m]$. Sorting improves ... . One-hot encoding is motivated since NNs cannot learn well with ... . I also tried compressing the largest values, ... }
 
-\begin{figure}[hbt!]
+\begin{figure}[h]
     \centering
     %\includesvg[scale=0.15]{Chapter2/Figs/NN_maxload.svg} -- it completely messes up the dots on the image
     \includegraphics[scale=0.5]{Chapter2/Figs/NN_maxload.png}
@@ -121,7 +159,7 @@ As discussed in Section~\ref{RLintro}, the most direct way to formulate the \Two
 \end{itemize}
 
 
-\begin{figure}[hbt!]
+\begin{figure}[h]
     \centering
     \includegraphics[scale=0.7]{Chapter3/Figs/exponential_potential_analysis.pdf}
     \caption{Showing the effect of different values of $\alpha$ to the exponential potential function with an average load of $2$.}
@@ -143,7 +181,7 @@ The idea of curriculum learning\NOTE{D}{Maybe ``Curriculum learning first provid
 The notion of normalised loads\NOTE{D}{Maybe: ``Normalising loads proved to be ''?} mentioned in Section \ref{definitions} proved to be a very useful trick\NOTE{D}{remove trick?} for RL training as well. Extending the notion to normalised thresholds (a normalised threshold $c$ at timestep $t$ is equivalent to a threshold $c+\frac{t}{n}$), we can consider slicing strategies with a constant \textit{normalised} threshold $c$. Unlike for constant \textit{unnormalised} thresholds, $c=0$ already gives a reasonable strategy (``\MeanThinning'')~\cite{los2022cachingpackingthinningtwinning}, and learning a constant output is easy for a NN already in the early episodes.
 
 
-\subsection{Dynamic Programming}
+\subsection{Dynamic Programming} \label{two-thinning-dp}
 
 
 For smaller values of $n$ and $m$ we can use dynamic programming (DP) based on the Bellman equation~\ref{eq:bellmanState} to get the exact optimal policy (``\DP strategy'') and its expected final maximum load. Now I present some observations that allow dynamic programming for a larger set of $n$ and $m$:
@@ -291,7 +329,7 @@ which gives $y = n \cdot  (1 - 2^{-\frac{1}{x}})$, and then the threshold is $v[
 \paragraph{\Threshold strategy} This is a direct of extension of the analogous strategy for \TwoThinning: it accepts the $i$th choice if the number of times a ball has been allocated to that bin as the $i$th choice so far is not greater than a constant $l$. This strategy\NOTE{D}{Maybe say an instance of this?} has been shown to be asymptotically optimal~\cite{feldheim2020dthinning}.
 
 
-\section{Graphical Two-Choice}
+\section{\GraphicalTwoChoice}
 
 
 \subsection{Deep Q-Learning Implementation} \label{graphical-DQN}
@@ -363,7 +401,7 @@ Now I list the types of graphs on which I will evaluate the decision strategies.
 
 \NOTE{D}{A figure with the representative graphs would be quite useful here.}
 
-\subsection{Reinforcement Lerning Hyperparameter Optimisation}
+\section{Reinforcement Lerning Hyperparameter Optimisation}
 
 Finding the best set of hyperparameters for RL was very challenging due to the huge space of hyperparameters. Any kind of exhaustive search (e.g.\ grid search) was infeasible, so I used approximate techniques, and combined them with expert knowledge (i.e.\ common practice and domain-specific arguments) to guide the search.
 In this section I describe the methods I used, in Chapter~\ref{evaluation} I analyse the importance of the hyperparameters, and in Appendix~\ref{hyperparameters} I present their exact values.

@@ -11,17 +11,17 @@
 \section{Balls-into-Bins}
 
 
-The simple balls-into-bins models have been introduced in the\NOTE{D}{Balls-into-bins models have been studied since the} 20th century as probability theory problems\NOTE{D}{instead ``in probability theory''?} under several different names, e.g.\ ``urn processes'' or ``occupancy problems''~\cite{kolchin1978coined}. A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for balls-into-bins models turned out to be useful in the analysis of several other (randomised) algorithms~\cite{edmonds2006cakecutting}. It is still an actively researched field gaining much attention, and in particular, the main model I will study has been first analysed theoretically in 2019~\cite{dwivedi2019firstthinning} \NOTE{D}{But known since 1986 \url{https://www.cs.usask.ca/faculty/eager/loadsharing.pdf}}.
+Balls-into-bins models have been studied since the 20th century in probability theory under several different names, e.g.\ ``urn processes'' or ``occupancy problems''~\cite{kolchin1978coined}. A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for balls-into-bins models turned out to be useful in the analysis of several other (randomised) algorithms~\cite{edmonds2006cakecutting}. It is still an actively researched field gaining much attention, and in particular, the main model I will study has been first analysed theoretically in 2019~\cite{dwivedi2019firstthinning} (but known since 1986~\cite{derek1986twothinningfirstattempt}).
 
 
 \subsection{Definitions and Assumptions} \label{definitions}
 
 
 
-The real-world load balancing problem\NOTE{T}{Technically, there is not a single (unique) real-world balancing problems, I would rather say: ``Load Balancing in the real-world is a very complex task'' or sth along these lines} is very complex,\NOTE{D}{the optimal solution depends on many specific details} and the exact characteristics differ between cases. For example, the servers might (or might not) be different (e.g.\ they serve different types of requests, or they just\NOTE{T}{drop ``just''} have different speed), the arrival rate of the jobs might be unknown (or maybe an estimated model is possible), servers might crash, etc. Building a theoretical model that is completely general and can still be analysed effectively seems infeasible\NOTE{D}{This is true of any model (hence the famous quote)}. Hence, most of the balls-into-bins models capture one or a few characteristics of load balancing, and therefore they are very diverse. There are however some common assumptions that all of models that I study make. Next I present a sufficiently general definition of the balls-into-bins abstraction, and state its assumptions. 
+Load Balancing in the real-world is a very complex task,\NOTE{D}{the optimal solution depends on many specific details} and the exact characteristics differ between cases. For example, the servers might (or might not) be different (e.g.\ they serve different types of requests, or they have different speed), the arrival rate of the jobs might be unknown (or maybe an estimated model is possible), servers might crash, etc. Building a theoretical model that is completely general and can still be analysed effectively seems infeasible. Hence, most of the balls-into-bins models capture one or a few characteristics of load balancing, and therefore they are very diverse. There are however some common assumptions that all of models that I study make. Next I present a sufficiently general definition of the balls-into-bins abstraction, and state its assumptions. 
 
 \begin{definition}[Balls-into-bins] \label{definition: balls-into-bins}
-In the balls-into-bins problems, there are $n$ bins, and there are $m$ balls arriving sequentially. Whenever a ball arrives, it is placed in one of the bins according to a randomised protocol.\NOTE{T}{it is bit odd to insist that the protocol is randomised. In addition to objective, I'd also re-iterate that balls are jobs and bins are servers.}
+In the balls-into-bins problems, there are $n$ bins, and there are $m$ balls arriving sequentially. Whenever a ball arrives, it is placed in one of the bins according to a (usually randomised) protocol.\NOTE{T}{it is bit odd to insist that the protocol is randomised. In addition to objective, I'd also re-iterate that balls are jobs and bins are servers.}
 \end{definition}
 \NOTE{D}{Maybe add the objective here?}
 \NOTE{D}{A figure would be helpful here.}
@@ -66,9 +66,11 @@ A generalisation of \TwoChoice is \KChoice, where not $2$, but $K$ bins are comp
 \NOTE{D}{Maybe you can remove everything after == ?}\NOTE{T}{agreed}
 
 
+
 \paragraph{\TwoThinning}
 
 This is one of the main settings I will focus on, and this has been defined in Chapter ~\ref{introduction} already.
+
 
 \iffalse %I should double check, but I think this is all explained in the fst chapter. 
 . Here I present the main interpretation of this protocol, but in Section\NOTE{T}{Section} ~\ref{alternative} I present another way to look at this setting. An important difference between this protocol, and \KChoice is that this protocol additionally requires a decision strategy, a free parameter of the protocol\NOTE{D}{Maybe remove ``a free parameter of the protocol''}. When a ball arrives, a (primary) bin is chosen uniformly at random, and the according to the strategy, the primary bin is accepted, and the ball is placed into that bin, or it is rejected, and the ball is placed into a (secondary) bin chosen again uniformly at random. \NOTE{D}{This strategy is commonly a threshold function.}The motivation for this interpretation of \TwoThinning is that unlike for \TwoThinning\NOTE{D}{Two-Choice?} where always $2$\NOTE{D}{two} servers are interrupted by a query, here if the primary load is accepted by the strategy, than only $1$\NOTE{D}{one} server is interrupted. A subtlety is that the secondary and primary bins can in fact be the same, while in a real-world application, the client would probably avoid the primary bin if it has been rejected\NOTE{D}{OK, but the improvement is minor}.
@@ -101,6 +103,37 @@ Analogously, \textsc{Graphical Two-Thinning} is a reasonable protocol as well, b
 \iffalse
 As stated briefly in Chapter ~\ref{introduction}, the project is about optimising free parameters of various balls-into-bins settings. Now with the definitions in hand, we can see that it amounts to finding good strategies for \TwoThinning, \KThinning and \GraphicalTwoChoice. While most of the available strategies are manually defined (e.g.\ choose the lesser loaded, or accept if greater than $x$), I will use algorithms to find good strategies! Hence, I would like to make an important distinction between \textbf{protocol}\NOTE{T}{better to use always protocol, and not setting. Otherwise too many terms...} and \textbf{algorithm}: an algorithm is used to optimise free parameters of a protocol, which can then be used in the balls-into-bins framework with the parameters generated by the algorithm. In particular, I will use RL and dynamic programming as algorithms, to find good strategies for the parametric protocols discussed above. I will use this terminology from now on. On this note, I will use the terms \textbf{decision strategy} and the more general term \textbf{free parameters} interchangeably, always choosing based on the context. \NOTE{A}{Move elsewhere?}\NOTE{D}{Maybe somewhere with the subheading ``notation''}
 \fi
+
+
+\subsection{Notations}
+
+For the lemmas and conjectures presented in later chapters, it is useful to define some of the above notions formally as well.
+
+\begin{definition} [\TwoThinning decision strategy]
+A \TwoThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$ and bin $i\in[n]$, $f(v, i)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
+\end{definition}
+
+
+\begin{definition} [\KThinning decision strategy]
+A \KThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$, bin $i\in[n]$, $2\leq c \leq k$ indicating the number of choices left for the current ball, $f(v, i, c)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
+\end{definition}
+
+
+\begin{definition} [slicing strategy]
+We call a \TwoThinning (or \KThinning in general) decision strategy \textit{slicing}, if it accepts bin $i$ at (sorted) load vector $v$ if and only if its load $v[i]$ is less than or equal to a \textit{threshold} $a$ (that can depend on $v$).
+\end{definition}
+
+
+\begin{definition} [monotone strategy]
+Note that \KThinning slicing strategies are defined $k-1$ thresholds $\delta_1,\delta_2,\ldots,\delta_{k-1}$ (in the order in which they are applied) for each (sorted) load vector $v$. We call a \KThinning slicing strategy \textit{monotone}, if $\delta_i\leq \delta_{i+1}$ for each $1\leq i\leq k-2$ for each $v$.
+\end{definition}
+
+
+\begin{definition} [expected final maximum load]
+Let's denote the expected final maximum load of a (decision) strategy $f$ for a setting $h$ by $E^f_h$, or $E^f$ when $h$ is implicit from the context.
+\end{definition}
+
+
 
 \subsection{Notes on Related Work and Background Reading}
 
@@ -282,7 +315,9 @@ In practice, due to stability reasons~\cite{barnard1993semigradient}, \NOTE{A}{C
 \NOTE{D}{Extra parenthesis before $r$}
 \NOTE{D}{See also comment about square parentheses}
 
-There are several other algorithms, but most of them are not a great fit for our settings.\NOTE{D}{There are several other algorithms and variants, some of which I implemented and did not outperform Deep Q-Learning (See Appendix ??)} While I implemented most of these approaches, they didn't provide superior performance to Deep Q-Learning, so due to the length constraint on the dissertation, I decided not to include them in the Implementation and Evaluation chapters. I briefly introduce these alternatives with their merits and drawbacks in Appendix ~\ref{alternativeRL}. \NOTE{A}{Maybe include Sarsa learning as that really is kind of properly implemented.}
+\subsubsection{Alternatives}
+
+There are several other algorithms and variants, some of which I implemented and did not outperform Deep Q-Learning -- see Appendix ~\ref{alternativeRL} for further discussion.
 
 
 \subsection{Recurrent Neural Networks} \label{RNN}
@@ -290,7 +325,7 @@ There are several other algorithms, but most of them are not a great fit for our
 
 As discussed in Section ~\ref{deepq-learning}, Deep Q-Learning requires a neural network (NN) to represent the Q-table as a function approximation.\NOTE{D}{remove? I experimented with several NN architectures for $Q_w$, some of which I briefly explain here.} I tried several NN architectures, and here I introduce those that were not covered in the IB Artificial Intelligence course\NOTE{D}{You must have covered RNNs in some course, right? Formal models of language?}, and I will explain their advantages and disadvantages in Section ~\ref{DQN}. 
 
-Apart from fully-convolutional\NOTE{D}{fully-connected you mean?} NNs covered in IB Artificial Intelligence\NOTE{D}{No need to mention this.}, I worked with recurrent neural networks (RNN)~\cite{hopfield1982RNNoriginal}. The idea behind RNNs is that they process sequential information. There is a hidden state, and whenever a new input arrives, the hidden state is updated according to a common update weight matrix. RNNs can be used in several ways (e.g.\ translation), but I will use only the hidden state after processing all the input, which contains a condensed summary (``embedding'') of the data.\NOTE{D}{Rephrase this paragraph. Maybe start by saying: ``I used recurrent neural networks (RNNs) to obtain an encoding of the load vector. RNNs ... (Merge details from the next paragraph.}
+Apart from fully-connected\NOTE{D}{fully-connected you mean?} NNs covered in IB Artificial Intelligence\NOTE{D}{No need to mention this.}, I worked with recurrent neural networks (RNN)~\cite{hopfield1982RNNoriginal}. The idea behind RNNs is that they process sequential information. There is a hidden state, and whenever a new input arrives, the hidden state is updated according to a common update weight matrix. RNNs can be used in several ways (e.g.\ translation), but I will use only the hidden state after processing all the input, which contains a condensed summary (``embedding'') of the data.\NOTE{D}{Rephrase this paragraph. Maybe start by saying: ``I used recurrent neural networks (RNNs) to obtain an encoding of the load vector. RNNs ... (Merge details from the next paragraph.}
 \NOTE{D}{There are several instances of RNNs, the two most notable beign}
 
 

@@ -36,16 +36,18 @@ def analyse_random_regular(n=N, m=M, runs_per_d=RUNS_PER_D):
 
 
 def create_plot():
-    df = pd.read_csv("32_32_random_regular_greedy_analysis.csv")
+    df = pd.read_csv("data/32_32_random_regular_greedy_analysis.csv")
     vals = [df[df["d"] == i]["score"].tolist() for i in range(1, 32)]
     xs = list(range(1, 32))
     avgs = [np.mean(np.array(l)) for l in vals]
     stds = [np.std(np.array(l)) for l in vals]
+
+    plt.rcParams['font.size'] = '14'
     plt.errorbar(xs, avgs, yerr=stds, label="standard deviation")
     plt.xlabel("degree (d)")
     plt.ylabel("average max load of Greedy on 1000 runs")
     plt.legend()
-    plt.savefig("Greedy_degree_analysis.png")
+    plt.savefig("data/greedy_degree_analysis.pdf")
 
 if __name__ == "__main__":
-    analyse_random_regular()
+    create_plot()

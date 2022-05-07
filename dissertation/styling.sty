@@ -1,9 +1,10 @@
-\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
-% \newcommand{\NOTE}[2]{}
+%\newcommand{\NOTE}[2]{$^{\textcolor{red}\clubsuit}$\marginpar{\setstretch{0.43}\textcolor{blue}{\bf\tiny #1: }\textcolor{red}{\bf\tiny #2}}}
+\newcommand{\NOTE}[2]{}
 \usepackage{mathtools}
 \usepackage[flushleft]{threeparttable}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
 
 \usepackage[capitalise]{cleveref} % For referencing sections, theorems, lemmas, etc
 \usepackage{amsthm}
@@ -20,11 +21,13 @@
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem*{remark}{Remark}
 
+
 \usepackage{float}
 \usepackage{svg}
 \usepackage{graphicx}
 \usepackage{enumitem}
 \DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \usepackage[labelfont=bf]{caption}
 \newcommand{\OneChoice}{\textsc{One-Choice}\xspace} 
@@ -44,7 +47,8 @@
 \newcommand{\DQN}{Deep Q-Learning\xspace} 
 \newcommand{\AlwaysAccept}{Always Accept\xspace} 
 \newcommand{\Random}{Random\xspace} 
-\newcommand{\Threshold}{Threshold\xspace} 
+\newcommand{\Threshold}{Threshold\xspace}
+\newcommand{\ConstantOffset}{Constant Offset\xspace} 
 \newcommand{\DP}{DP\xspace} 
 \newcommand{\MeanThinning}{Mean-Thinning\xspace} 
 \newcommand{\LocalRewardOptimiser}{Local Reward Optimiser\xspace}

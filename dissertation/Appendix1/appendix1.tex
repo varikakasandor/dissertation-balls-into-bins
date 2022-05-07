@@ -60,9 +60,8 @@ Note that the number of training episodes and the patience interval used for ear
 
 
 
-\begin{table}[h!]\label{tab:two-thinning-hyperparameters}
+\begin{table}[h]
 \begin{threeparttable}
-\caption{\textsc{Two-Thinning} Deep Q-Learning Hyperparameters}
 \centering
 \begin{tabular}{l|c}
 \toprule
@@ -88,20 +87,16 @@ number of curriculum learning episodes            & 50 \\
 using normalised domain               &     true \\ 
 \bottomrule
 \end{tabular}
-\begin{tablenotes}
-      \small
-      \item Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average/mode values are shown for the other hyperparameters.
-\end{tablenotes}
 \end{threeparttable}
+\caption{\textsc{Two-Thinning} Deep Q-Learning hyperparameters\protect\footnotemark}
+\label{tab:two-thinning-hyperparameters}
 \end{table}
 
+\footnotetext{Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average/mode values are shown for the other hyperparameters.}
 
 
-
-
-\begin{table}[h!]\label{tab:k-thinning-hyperparameters}
+\begin{table}[h]
 \begin{threeparttable}
-\caption{\textsc{K-Thinning} Deep Q-Learning Hyperparameters}
 \centering
 \begin{tabular}{l|c}
 \toprule
@@ -128,14 +123,14 @@ using normalised domain               &     true \\
 \bottomrule
 \end{tabular}
 \end{threeparttable}
+\caption{\textsc{K-Thinning} Deep Q-Learning hyperparameters}
+\label{tab:k-thinning-hyperparameters}
 \end{table}
 
 
 
-
-\begin{table}[h!]\label{tab:graphical-k-choice-hyperparameters}
+\begin{table}[h]
 \begin{threeparttable}
-\caption{\textsc{Graphical-K-Choice} Deep Q-Learning Hyperparameters}
 \centering
 \begin{tabular}{l|c}
 \toprule
@@ -159,4 +154,6 @@ number of curriculum learning episodes            & 50 \\
 \bottomrule
 \end{tabular}
 \end{threeparttable}
+\caption{\textsc{\GraphicalTwoChoice} Deep Q-Learning hyperparameters}
+\label{tab:graphical-two-choice-hyperparameters}
 \end{table}

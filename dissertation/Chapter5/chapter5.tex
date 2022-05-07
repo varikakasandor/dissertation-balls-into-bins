@@ -9,14 +9,34 @@
 \fi
 
 
+\section{Assessment of Contributions to the Field}
 
-\section{Applicability of RL to Balls-into-Bins}
-\NOTE{A}{Analysis of balls-into-bins using RL. The original title suggests that it is actually applicable.}
 
-\NOTE{D}{Mention the three success criteria and whether the were achieved and to what extend. Give references to the various sections.}
-\NOTE{D}{Also, mention what extra you did achieve.}
+\begin{itemize}
+    \item Complementing the literature mostly concerning the asymptotic behaviour of protocols and strategies, in this project I analysed their exact performance, which is more relevant for practical applications.
+    \item I implemented RL algorithms for optimising decision strategies, which is a novel approach to balls-into-bins. Based on the results, while the RL approach certainly has its merits for cases where the \DP strategies are not applicable and the heuristic strategies are not sufficient, its potential to consistently outperform alternatives remains an open question.
+    \item By analysing optimal strategies I formulated two conjectures (\S\ref{conjecture: two-thinning-increasing-threshold}, \S\ref{conjecture: two-thinning-smooth-threshold}) and formally proved several lemmas (\S\ref{lemma: everystatereachable}, \S\ref{lemma: thresholdproperty}, \S\ref{lemma: k-thinning-increasing-threshold}, \S\ref{lemma: greedy-suboptimal}). These insights can potentially influence the design of robust yet efficient strategies.
+\end{itemize}
 
-As we have seen for each of the three settings, the difference between good and bad decisions are very subtle, which make RL very challenging to apply. Even with all the tricks I tried, it couldn't consistently outperform simpler heuristic strategies, such as the Local Reward Optimiser Strategy. Also, in order to get acceptable results, extensive and precise hyperparameter tuning was necessary in most cases. \NOTE{A}{Write something positive as well?}
+
+\section{Future Work}
+
+\begin{itemize}
+    \item Exploiting further the huge amount of ideas available in RL literature, the performance of RL could potentially be improved (e.g. Double Q-Learning~\cite{hasselt2010doubleqlearning}, Approximate Dynamic Programming~\cite{bellman1959approximatedp}).
+    \item Another idea is to use explainable AI techniques to derive strategies from the (hidden representation of the) NNs, or even directly use interpretable NNs~\cite{vacareanu2022explainableAI1}~\cite{tang2022explainableAI2}.
+    \item Closing the gap between asymptotic analysis and the values of $n$ and $m$ investigated in this dissertation, the analysis of medium-range values and the applicable strategies for that range remains for future work.
+    \item Even though we have computer-aided verification for the two conjectures, we could not find a general proof for them.
+    \item Future work should consider extending the discussed analyses to more realistic and more challenging settings, e.g.\ as discussed in Chapter~\ref{introduction}, the servers would usually synchronize their loads less frequently.
+\end{itemize}
+
+ 
+
+\iffalse % No space for this.
+It is definitely possible to try improving RL, and hopefully get closer to the optimal strategies. For example, double learning~\cite{hasselt2010doubleqlearning}, which argues that vanilla (deep) Q-Learning overestimates the action values by under the hood using $\mathbb{E}[\max_a(Q(s,a)]$ instead of $\max_a(\mathbb{E}[Q(s,a)])$. Another idea is approximate dynamic programming \cite{bellman1959approximatedp} which can potentially make better use of the fully known environment for the agent.
+\fi
+
+
+
 
 
 
@@ -24,13 +44,5 @@ As we have seen for each of the three settings, the difference between good and 
 
 I experienced the rich nature of RL, and I realised that it is a very complex field, which I would like to learn more about in the future. 
 
-Even though the project was planned to focus more on RL, we also obtained several theoretical insights via analysing strategies. This required me to deeply understand the nature of balls-into-bins, about which I learnt a lot by background reading, and exchanging ideas with my expert supervisors. 
+Even though the project was planned to focus mostly on RL, we also obtained several theoretical insights, which required me to deeply understand the balls-into-bins theory, about which I learnt a lot by background reading, exchanging ideas with my expert supervisors, and working out proofs myself -- the latter being my favourite part of the project.
 
-\section{Future Work}
-
-Apart from the ideas mentioned in other chapters, it is definitely possible to try improving RL, and hopefully get closer to the optimal strategies. For example, double learning~\cite{hasselt2010doubleqlearning}, which argues that vanilla (deep) Q-Learning overestimates the action values by under the hood using $\mathbb{E}[\max_a(Q(s,a)]$ instead of $\max_a(\mathbb{E}[Q(s,a)])$. Another idea is approximate dynamic programming \cite{bellman1959approximatedp} which can potentially make better use of the fully known environment for the agent.
-
-
-We also left some open theoretical questions (conjectures)\NOTE{T}{Good, I would suggest to transform the lemmas you cannot prove into conjecture!}, and by analysing the optimal strategies more closely, several other properties might observed, that could even help the design of simple, robust yet effective strategies. Another idea is to use explainable AI techniques to derive strategies from the (hidden representation of the) NNs, or even directly use interpretable NNs~\cite{vacareanu2022explainableAI1}~\cite{tang2022explainableAI2}.
-
-On a more practical note, future work should consider extending and analysing the discussed settings into more realistic and more challenging ones, e.g.\ as discussed in Chapter ~\ref{introduction}, the servers would usually synchronize their loads less frequently. \NOTE{A}{Give another example?}

@@ -43,7 +43,7 @@ For the \Threshold strategies, I calculated the optimal value of $l$ by modellin
 
 
 
-\section{Two-Thinning}
+\section{\TwoThinning}
 
 
 \subsection{Comparison of Strategies}\label{two-thinning-comparison}
@@ -91,7 +91,7 @@ The key conclusions from Table~\ref{tab:two-thinning-comparison} are:
 Analysing the optimal strategies for \TwoThinning, I formulated the following conjecture.
 
 \begin{conjecture}\label{conjecture: two-thinning-increasing-threshold}
-There exists an optimal strategy (i.e. largest possible expected final maximum load) such that its chosen thresholds are non-decreasing during an execution. That is, if for the $i$-th ball the protocol chooses a threshold $x$, then for every later ball of the same execution, a threshold $y\geq x$ is chosen (see Figure \ref{dp-increasing-threshold} for visualisation).
+There exists an optimal (slicing) strategy (i.e. largest possible expected final maximum load) such that its chosen thresholds are non-decreasing during an execution. That is, if for the $i$-th ball the protocol chooses a threshold $x$, then for every later ball of the same execution, a threshold $y\geq x$ is chosen (see Figure \ref{dp-increasing-threshold} for visualisation).
 \end{conjecture}
 
 
@@ -202,7 +202,7 @@ We can observe that for \TwoThinning the most important hyperparameter is to use
     \caption{\TwoThinning training curve for $n=20$, $m=400$}
      \label{two-thinning-training-curve}
 \end{figure}
-\NOTE{T}{Maybe if you do some averaging to the plot, one could see a bit more the learning progress. For example, you could take the average maximum load over the first $x$ episodes.}
+\NOTE{T}{Maybe if you do some averaging to the plot, one could see a bit more the learning progress. For example, you could take the average maximum load over the first $x$ episodes.}\NOTE{A}{Change png to pdf!}
 
 As shown in Figure~\ref{two-thinning-training-curve}, improvement during training decays very quickly, and the agent is close to its best already at the start. This is again due to the normalised load domain outlined above -- I checked the training curve without the normalised load domain trick as well, and that shows a much more usual training progression, though leading to a worse optimum. The oscillations in the training curve are mostly due to the inherent randomness in evaluation.
 
@@ -212,7 +212,7 @@ Motivated by the fact that in the normalised domain, a constant $0$ threshold is
 \begin{figure}[h]
     \centering
     \includegraphics[scale=0.6]{Chapter4/Figs/offset_analysis_50_2500.pdf}
-    \caption{Comparing constant offset strategies for $n=50$, $m=2500$.}
+    \caption{Comparing \ConstantOffset strategies for $n=50$, $m=2500$.}
     \label{two-thinning-constant-offset}
 \end{figure}
 
@@ -222,7 +222,17 @@ Motivated by the fact that in the normalised domain, a constant $0$ threshold is
 \NOTE{D}{!!Can you also try $n = 10^4$ and $m = 10^6$ (or larger)?}
 
 
-The Deep-Q Learning algorithm -- which is as shown above, statistically significantly better than Mean-Thinning -- in fact often learns a strategy similar to a constant offset strategy, as can be seen in Figure \ref{two-thinning-dqn-thresholds}. The short sporadic ``jumps'' are very challenging for the agent to get rid of, due to the reasons outlined in Section~\ref{two-thinning-comparison}. To avoid this, future work could constrain the agent to change (and only increase) the threshold by at most $1$ after each ball -- we conjecture that there always exists an optimal strategy with this property.
+The Deep-Q Learning algorithm -- which is as shown above, statistically significantly better than Mean-Thinning -- in fact often learns a strategy similar to a \ConstantOffset strategy, as can be seen in Figure \ref{two-thinning-dqn-thresholds}. The short sporadic ``jumps'' are very challenging for the agent to get rid of, due to the reasons outlined in Section~\ref{two-thinning-comparison}. To avoid this, future work could constrain the agent to change (and only increase) the threshold by at most $1$ after each ball, which is motivated by Conjecture~\ref{conjecture: two-thinning-smooth-threshold}.
+
+
+\begin{conjecture}\label{conjecture: two-thinning-smooth-threshold}
+There exists an optimal (slicing) strategy such that its chosen thresholds are changed by at most $1$ in any step during an execution.
+\end{conjecture}
+
+
+\begin{remark}
+Together with Conjecture~\ref{conjecture: two-thinning-increasing-threshold} these would imply an optimal strategy whose threshold either stays the same or increases by $1$ in each step.
+\end{remark}
 
 
 \begin{figure}[h]
@@ -276,16 +286,20 @@ In Figure~\ref{k-thinning-dp-maxload} we can see how the value of $k$ influences
     \caption{Analysis of the final maximum load distribution of the DP strategy for $n=20$, $m=400$ and different values of $k$.}
     \label{k-thinning-dp-maxload}
 \end{figure}
+\NOTE{T}{Better to use some color scheme (red to green) when transitioning from $k=2$ to $k=10$}
 
-
-Now I present a conjecture about optimal strategies:
-\begin{conjecture} \label{conjecture: k-thinning-increasing-threshold}
+Now I present a lemma about optimal strategies:
+\begin{lemma} \label{lemma: k-thinning-increasing-threshold}
 There exists an optimal strategy, such that if it accepts a bin with $x$ choices left, it would accept the same bin (with the same loads) with $y<x$ choices left as well. In other words, an optimal strategy should never become more selective after rejecting some options.
-\end{conjecture}
+\end{lemma}
 
+
+\begin{proof}
+    The proof is similar in structure to the proof of Lemma~\ref{lemma: thresholdproperty}.
+\end{proof}
 
 \begin{remark}
-Conjecture~\ref{conjecture: k-thinning-increasing-threshold} has been verified by showing that this property holds for the (optimal) \DP strategy for several combinations of $n$, $m$ and $k$. Also note that Conjecture ~\ref{conjecture: two-thinning-increasing-threshold} generalises to \KThinning as well and it has been verified similarly.
+Lemma~\ref{lemma: k-thinning-increasing-threshold} has been verified by showing that this property holds for the (optimal) \DP strategy for several combinations of $n$, $m$ and $k$. Also note that Conjecture ~\ref{conjecture: two-thinning-increasing-threshold} generalises to \KThinning as well, and it has been verified similarly.
 \end{remark}
 
 
@@ -331,7 +345,7 @@ We can observe in Table~\ref{k-thinning-hyperparameter-analysis} that the normal
 The training progression shown in Figure~\ref{k-thinning-training-curve} is similar to \TwoThinning, so I do not discuss it any further.
 
 
-\section{Graphical Two-Choice}
+\section{\GraphicalTwoChoice}
 
 
 \subsection{Comparison of Strategies}
@@ -343,7 +357,7 @@ The training progression shown in Figure~\ref{k-thinning-training-curve} is simi
                                 & \multicolumn{3}{c|}{$n=4$} & \multicolumn{3}{c|}{$n=16$} & \multicolumn{3}{c|}{$n=32$}\\ \hline
                                 & \multicolumn{3}{c|}{$m=25$} & \multicolumn{3}{c|}{$m=50$} & \multicolumn{3}{c|}{$m=32$}\\ \hline
 Strategy                                & Cycle & Hypercube & Complete & Cycle & Hypercube & Complete & Cycle & Hypercube & Complete \\ \hline
-\Greedy & 7.06 $\pm$ 0.02 & 7.06 $\pm$ 0.02 & 7.19 $\pm$ 0.04 & \textbf{4.75 $\pm$ 0.05} & \textbf{4.51 $\pm$ 0.05} & \textbf{4.40 $\pm$ 0.05} & \textbf{2.40 $\pm$ 0.05} & \textbf{2.33 $\pm$ 0.04} & \textbf{2.26 $\pm$ 0.04} \\ \hline \Random & 8.96 $\pm$ 0.12 & 8.97 $\pm$ 0.12 & 8.84 $\pm$ 0.11 & 6.49 $\pm$ 0.09 & 6.62 $\pm$ 0.10 & 6.69 $\pm$ 0.10 & 3.49 $\pm$ 0.06 & 3.52 $\pm$ 0.07 & 3.50 $\pm$ 0.06 \\ \hline \LocalRewardOptimiser & 7.12 $\pm$ 0.03 & 7.11 $\pm$ 0.03 & 7.25 $\pm$ 0.04 & 4.87 $\pm$ 0.06 & 4.77 $\pm$ 0.05 & 4.74 $\pm$ 0.05 & 2.53 $\pm$ 0.05 & 2.44 $\pm$ 0.04 & 2.38 $\pm$ 0.04 \\ \hline \DP & \textbf{7.04 $\pm$ 0.02} & \textbf{7.03 $\pm$ 0.01} & \textbf{7.17 $\pm$ 0.03} & TLE & TLE & TLE & TLE & TLE & TLE \\ \hline \DQN & 7.08 $\pm$ 0.06 & 7.16 $\pm$ 0.04 & 7.31 $\pm$ 0.05 & 4.92 $\pm$ 0.07 & 5.71 $\pm$ 0.11 & 6.69 $\pm$ 0.11 & 3.81 $\pm$ 0.08 & 3.59 $\pm$ 0.08 & 3.91 $\pm$ 0.07 \\ \hline 
+\Greedy & 7.06 $\pm$ 0.02 & 7.06 $\pm$ 0.02 & 7.19 $\pm$ 0.04 & \textbf{4.75 $\pm$ 0.05} & \textbf{4.51 $\pm$ 0.05} & \textbf{4.40 $\pm$ 0.05} & \textbf{2.40 $\pm$ 0.05} & \textbf{2.33 $\pm$ 0.04} & \textbf{2.26 $\pm$ 0.04} \\ \hline \Random & 8.96 $\pm$ 0.12 & 8.97 $\pm$ 0.12 & 8.84 $\pm$ 0.11 & 6.49 $\pm$ 0.09 & 6.62 $\pm$ 0.10 & 6.69 $\pm$ 0.10 & 3.49 $\pm$ 0.06 & 3.52 $\pm$ 0.07 & 3.50 $\pm$ 0.06 \\ \hline \LocalRewardOptimiser & 7.12 $\pm$ 0.03 & 7.11 $\pm$ 0.03 & 7.25 $\pm$ 0.04 & 4.87 $\pm$ 0.06 & 4.77 $\pm$ 0.05 & 4.74 $\pm$ 0.05 & 2.53 $\pm$ 0.05 & 2.44 $\pm$ 0.04 & 2.38 $\pm$ 0.04 \\ \hline \DP & \textbf{7.04 $\pm$ 0.02} & \textbf{7.03 $\pm$ 0.01} & \textbf{7.17 $\pm$ 0.03} & TLE & TLE & TLE & TLE & TLE & TLE \\ \hline \DQN & 7.11 $\pm$ 0.03 & 7.11 $\pm$ 0.03 & 7.31 $\pm$ 0.05 & 4.88 $\pm$ 0.07 & 4.53 $\pm$ 0.05 & 4.50 $\pm$ 0.05 & 2.68 $\pm$ 0.06 & 2.54 $\pm$ 0.05 & 2.60 $\pm$ 0.06 \\ \hline 
 \end{tabular}}
 
 \caption{Average maximum load of \GraphicalTwoChoice strategies with $95\%$ confidence intervals\protect\footnotemark}
@@ -352,73 +366,59 @@ Strategy                                & Cycle & Hypercube & Complete & Cycle &
 
 \footnotetext{Note that for $n=4$, the \CycleGraph and the \HypercubeGraph are the same.}
 
+The most important conclusions from Table~\ref{tab:graphical-two-choice-comparison} are:
+
+\begin{itemize}
+    \item The \Greedy strategy is not exactly optimal, as can be seen from the $n=4$ case (I will provide an explicit counterexample in Lemma~\ref{lemma: greedy-suboptimal}). On the other hand, it is close to the performance of the \DP strategy, and when that is not applicable, \Greedy is by far the best.
+    \item While for larger $n$, agreeing with the intuition the \CompleteGraph is the most favourable for \Greedy, it works better on the \CycleGraph for $n=4$. 
+    \item The \DQN strategy performs performs consistently, but it cannot always exploit the subtle suboptimalities of \Greedy. Its performance is comparable to the performance of the \LocalRewardOptimiser strategy.
+    
+\end{itemize}
+
+
+\subsection{Theoretical Analysis}
+
 First I prove the most surprising result of this section.
 
 \begin{lemma} \label{lemma: greedy-suboptimal}
 There exists a graph, such that the \Greedy strategy is suboptimal with respect to the expected final maximum load of \GraphicalTwoChoice.
 \end{lemma}
 
-\NOTE{T}{Make the proof more formal and concise. Information on how you found this using DP is distracting, and I would move it outside the proof. Also maybe the proof is easier to verify if you have a more structured description (figure?) of the load vector and the possible choices/future states.}
 \begin{proof}
-It is enough to show that there is a state $s$ (i.e.\ a load vector $v$, edge $e$) where is is better to choose the bin with the larger load. This suffices because extending~\ref{lemma: everystatereachable}, there is a non-zero probability of reaching $s$, and hence a strategy that agrees with \Greedy everywhere else except for this state has a strictly better expected score.
-
-
-I used the dynamic programming algorithm to find the optimal strategy for \GraphicalTwoChoice, and then I searched the strategy for a state where it disagrees with \Greedy. I found a very small counterexample for the \CycleGraph with $n=4$ bins $m=6$ balls. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $l=(0,1,0,2)$, \NOTE{A}{Change order into 0,a,0,b to make it consistent with the extension later.} $e=(2,3)$,\NOTE{D}{Would it make sense to add a figure here?} i.e.\ there is an edge between the second and third bin. The reason why it is better to choose bin $3$ even though it has larger load than bin $2$ is that after that, from load vector $(0,2,0,2)$ with $2$ balls remaining we can definitely avoid having a maximum load $3$ by always placing the ball in an even-indexed bin. On the other hand, from load vector $(0,1,1,2)$, if both of the remaining edges are $(1,2)$, then there will be a maximum load of at least $3$ using whatever strategy. Therefore, the expected final maximum load of choosing bin $3$ is $2.0$, while that of bin $2$ is between $2.0$ and $3.0$.
-\end{proof}\NOTE{D}{Any ideas if this can be generalised for any cycle of length $n$?}
+Using the \DP strategy for the \CycleGraph with $n=4$ bins $m=6$ balls, I found a state $s$ (i.e.\ a load vector $v$ and edge $e$), where choosing the less loaded bin is suboptimal. Denoting the nodes as ($1$-based) indices in the load vector, the counterexample state is $v=(0,1,0,2)$,  $e=(2,3)$ i.e.\ there is an edge between the second and third bin. \Greedy would choose the third bin, but if all the later edges are $(3,4)$, $\mathrm{maxload}>2$ cannot be avoided (see Figure~\ref{greedy-counterexample}). On the other hand, by choosing the second bin and then picking the odd-indexed endpoints of the later edges, the maximum load will always be $2$. Therefore, the expected final maximum load of choosing the second bin (and then playing optimally) is $2.0$, while that of choosing the third bin is between $2.0$ and $3.0$.
+\end{proof}
 
 
 
-\begin{tikzpicture}
- 
-\node {$(0,1,0,2)$}
-    child { node {$(0,2,0,2)$}
-        child { node {$\ldots$}}}
-    child { node {$(0,1,1,2)$}
-      child { node {$(0,1,2,2)$}
-        child { node {$(0,1,3,2)$} }
-        child { node {$\ldots$} }}
-      child { node {$\ldots$} }};
- 
-\end{tikzpicture}
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \Tree [.$(0,\underline{\mathbf{1}},\underline{\mathbf{0}},2)$
+    [.$(0,1,\underline{\mathbf{1}},\underline{\mathbf{2}})$
+    [.$(0,1,\underline{\mathbf{2}},\underline{\mathbf{2}})$
+    [.$(0,1,3,2)$ ] $\ldots$ ] $\ldots$ ]
+    [.$(0,2,0,2)$ $\ldots$ ]]
+    \end{tikzpicture}
+    \caption{Counterexample for the optimality of \Greedy, showing that choosing the second bin can lead to a maximum load of $3$ while choosing the third bin cannot.}
+    \label{greedy-counterexample}
+\end{figure}
 
 
 
-\begin{tikzpicture}
-\Tree [.$(0,1,0,2)$
-[.$(0,1,1,2)$
-[.$(0,1,2,2)$
-[.$(0,1,3,2)$ ]]]
-[.$(0,2,0,2)$ [$\ldots$ ]]]
-\end{tikzpicture}
-
-
-
-We can see from the table\NOTE{D}{Table ?? shows that}, that for $n=4$ and $m=25$, even though \Greedy is not optimal for the \CycleGraph but\NOTE{D}{remove but} it is for the \CompleteGraph, the optimal strategy for the \CycleGraph (provided by the \DP strategy) still has a lower expected maximum load than \Greedy has for the \CompleteGraph. This is an important observation, because it indicates that the constraint that not all the pairs of nodes can be sampled (e.g.\ due to geographical reasons) is not just a constraint, but it can even improve the performance in some special cases.\NOTE{D}{This needs to be stated a bit simpler}
-
-
-For larger graphs, however, \Greedy tends to perform better on the \CompleteGraph than on the others. Hypothesising that its performance depends on the sparsity of the graph, I also analysed the relationship between the degree $d$ of the graph and how well \Greedy performs on it. I created $1000$ random regular graphs \NOTE{T}{How do you handle multiple edges? This is a tricky point in generating random regular graphs...} for each degree $1\leq d \leq 31$ of the $n=m=32$ case. \NOTE{T}{Very interesting... I would have hoped that maybe for $d \approx 15$ or so you would get the best performance, which in a way, would generalise the cycle for small values of $n$.}
-\NOTE{T}{Related to these experiments... In my paper with Dimitris, I think we prove a gap bound of $O(\log \log n)$ for random regular graphs, as long as their degree is polynomial in $n$ (in the heavily loaded case $m \geq n$. For $m=n$, Kenthapadi and Panigrahy [29] proved that if the degree is $n^{\Omega(1/\log \log n)}$ the gap is $O(\log \log n$).}
-
+To better understand the impact of the graph structure on \Greedy, I analysed the relationship between the degree $d$ of the graph and how well \Greedy performs on it. I created $1000$ random regular graphs for each degree $1\leq d \leq 31$ of the $n=m=32$ case. \NOTE{T}{Very interesting... I would have hoped that maybe for $d \approx 15$ or so you would get the best performance, which in a way, would generalise the cycle for small values of $n$. Andor: Interesting idea, I don't know how to generalise the cycle for smalle values of $n$.} We can see in Figure~\ref{greedy-random-regular-analysis} that smaller degrees hurt \Greedy, but after around $d=20$, the performance no longer improves.
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.6]{Chapter4/Figs/Greedy_degree_analysis.png}
-    \caption{Relating the degree of the graph to the performance of Greedy}
+    \includegraphics[scale=0.6]{Chapter4/Figs/greedy_degree_analysis_32_32.pdf}
+    \caption{Relating the degree of the graph to the performance of Greedy for $n=m=32$.}
     \label{greedy-random-regular-analysis}
 \end{figure}
 
 
-We can see that indeed smaller degrees hurt \Greedy, but after around $d=15$, the performance no longer improves. \NOTE{A}{Why does it perform worse on smaller degree graphs? Give some intuition. Also for why it plateaus. What effect might connectedness have on the performance? Does it matter e.g.\ for $d=2$ how many components the graph has? Future work...}
-
-
-
-Even though \Greedy is shown to be suboptimal in some cases, it is still by far the best strategy in the table (apart from \DP), it proved to be an impossible challenge for RL to exploit the weaknesses of \Greedy. In fact, for $n=m=32$, \DQN is not even superior to the \Random strategy, which is equivalent to \OneChoice for any regular graph.\NOTE{D}{Why do you think this is the case? What could be going wrong here?}
-
-
 \subsection{Deep Q-Learning Analysis}
 
-To better understand the difficulty in finding an optimal strategy, I extended the \CycleGraph counterexample from Lemma ~\ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the edge going between the $2$nd and $3$rd nodes. 
+To better understand the difficulty in finding an optimal strategy, I extended the \CycleGraph counterexample from Lemma ~\ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the next edge still going between the second and third bins. Figure~\ref{greedy-counterexample-analysed} and Figure~\ref{greedy-counterexample-analysed-for-dqn} show that the shape of the region containing counterexamples to the \Greedy strategy is difficult to characterise, and to precisely learn by RL. By using the $\Phi_{neigh}$ potential function for Deep Q-Learning, the agent is guided towards choosing second bin, and by using a graph-oblivious potential (e.g.\ $\Phi_{max}$), the agent is guided towards choosing the third bin. Therefore, neither of the potential functions is perfect. We can indeed see in Figure~\ref{greedy-counterexample-analysed-for-dqn} that the DQN could not learn the exact pattern, though there is some resemblance.
 
 
 \begin{figure}
@@ -426,52 +426,50 @@ To better understand the difficulty in finding an optimal strategy, I extended t
 \begin{minipage}[t]{.48\linewidth}
   \centering
   \includegraphics[scale=0.45]{Chapter4/Figs/0a0b_4_25_analysis.png}
-  \caption{The optimal decisions for the \CycleGraph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $2$-$3$. Green means choosing the $2$nd bin is better, red means choosing the $3$rd bin is better, and $x$ means they have the same expected score.}
+  \caption{The optimal decisions for the \CycleGraph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $(2,3)$. Green indicates choosing the second bin is better, red indicates choosing the third bin is better, and $x$ indicates that they have the same expected score.}
   \label{greedy-counterexample-analysed}
 \end{minipage}\hfill
 \begin{minipage}[t]{.48\linewidth}
   \centering
   \includegraphics[scale=0.45]{Chapter4/Figs/0a0b_4_25_analysis_dqn.png}
-  \caption{The decisions made by the \DQN strategy for the \CycleGraph with $n=4$, $m=25$, load vector $(0,a,0,b)$ and edge $2$-$3$. Green means choosing the $2$nd bin is better, red means choosing the $3$rd bin is better, and $x$ means they have the same expected score.}
+  \caption{The decisions made by the \DQN strategy in the situation from Figure~\ref{greedy-counterexample-analysed}.}
   \label{greedy-counterexample-analysed-for-dqn}
 \end{minipage}
 \end{figure}
-\NOTE{D}{Maybe the black color could be slightly lighter?}
 
-
-
-We can see in the figure\NOTE{D}{Which figure} that the green region contains the counterexamples to the \Greedy strategy, but there is an even larger region where the greedy choice is correct, and characterising the shapes of the regions is difficult. By using a neighbourhood average based potential function for Deep Q-Learning, the agent is guided towards choosing $2$rd bin, and by using a graph-oblivious maximum load potential, the agent is guided towards choosing the $3$rd bin. Therefore, neither of the potential functions is perfect. For reference, here are the exact decisions made by the trained \DQN strategy: \NOTE{A}{I am not sure if I should include it or not... It doesn't look very promising.}
-
-
-
-We can see that the network could not learn the exact pattern, though there is some resemblance.
 
 
 \subsubsection{Hyperparameter Analysis}
 
-I present the hyperparameter importance analysis of \NumberofHyperparameterIterations runs for the Hypercube\NOTE{T}{very confusing? A hypercube with $4$ nodes is just a cycle, so it is better to only talk about cycles...} graph with $n=4$ and $m=25$, but the order is similar for other cases too.
 
-\begin{figure}[h] 
-    \centering
-    \includegraphics[scale=0.4]{Chapter4/Figs/graphical_two_choice_hypercube_4_25_importance.png}
-    \caption{\GraphicalTwoChoice Hyperparameter Importance \cite{biewald2020wandb}}
-    \label{graphical-two-choice-hyperparameter-importance}
-\end{figure}
+Analysing Table~\ref{graphical-two-choice-hyperparameter-importance}, the negative correlation of ``hidden\_size'' and ``num\_lin\_layers'' with the score suggests that adding more parameters to the DQN does not help. 
 
 
-Unlike the ``use\_threshold'' parameter for \TwoThinning, there is no very important hyperparameter (in fact, the trained scores are within a $0.4$ range for each analysed combination). The negative correlation of ``hidden\_size'' and ``num\_lin\_layers'' with the score shows that adding complexity to the neural network doesn't help.
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+ \textbf{Hyperparameter} & \textbf{Importance} & \textbf{Correlation} \\
+ \addlinespace[0.2cm]
+ \texttt{pre\_train\_episodes} & \Progress{0.207}{blue} & \Progress{0.450}{green} \\
+ \texttt{num\_lin\_layers} & \Progress{0.190}{blue} & \Progress{0.344}{red} \\
+ \texttt{hidden\_size} & \Progress{0.162}{blue} & \Progress{0.462}{red} \\
+ \texttt{optimise\_freq} & \Progress{0.074}{blue} & \Progress{0.333}{red} \\
+ \texttt{target\_update\_freq} & \Progress{0.071}{blue} & \Progress{0.124}{red} \\
+\end{tabular}
+\caption{\GraphicalTwoChoice hyperparameter importance for the \CycleGraph with $n=4$ and $m=25$ \cite{biewald2020wandb}}
+\label{graphical-two-choice-hyperparameter-importance}
+\end{center}
+\end{table}
 
 
 \subsubsection{Training}
 
-I present the training curve for the \HypercubeGraph with $n=4$ and $m=25$, but the pattern is similar for other cases too.
-
+Figure~\ref{graphical-two-choice-training-curve} shows a much steadier improvement during training for \GraphicalTwoChoice than what we saw for \TwoThinning and \KThinning. This is mostly because there is no reasonable easy-to-learn initial strategy for \GraphicalTwoChoice with the chosen MDP formulation, unlike the \ConstantOffset strategies for \TwoThinning.
 
 \begin{figure}[h] 
     \centering
-    \includegraphics[scale=0.6]{Chapter4/Figs/training_progression_hypercube_4_25.png}
-    \caption{\GraphicalTwoChoice Training Curve}
-    \label{graphical-two-choice-hyperparameter-importance}
+    \includegraphics[scale=0.6]{Chapter4/Figs/training_progression_hypercube_32_32.pdf}
+    \caption{\GraphicalTwoChoice training curve for the \CycleGraph with $n=m=32$.}
+    \label{graphical-two-choice-training-curve}
 \end{figure}
 
-We can see that unlike for \TwoThinning, the starting point is very poor, so that is a sharp increase initially. After $150$ episodes, the scores plateaus, even though the optimal expected maximum load is even lower.
