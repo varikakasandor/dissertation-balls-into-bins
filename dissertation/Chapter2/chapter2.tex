@@ -14,7 +14,7 @@
 Balls-into-bins models have been studied since the 20th century in probability theory under several different names, e.g.\ ``urn processes'' or ``occupancy problems''~\cite{kolchin1978coined}. A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for balls-into-bins models turned out to be useful in the analysis of several other (randomised) algorithms~\cite{edmonds2006cakecutting}. It is still an actively researched field gaining much attention, and in particular, the main model I will study has been first analysed theoretically in 2019~\cite{dwivedi2019firstthinning} (but known since 1986~\cite{derek1986twothinningfirstattempt}).
 
 
-\subsection{Definitions and Assumptions} \label{definitions}
+\subsection{Assumptions} \label{assumptions}
 
 
 
@@ -105,9 +105,9 @@ As stated briefly in Chapter ~\ref{introduction}, the project is about optimisin
 \fi
 
 
-\subsection{Notations}
+\subsection{Definitions and Notation} \label{notation}
 
-For the lemmas and conjectures presented in later chapters, it is useful to define some of the above notions formally as well.
+For the lemmas and conjectures presented in later chapters, it is useful to define and extend some of the above notions formally as well.
 
 \begin{definition} [\TwoThinning decision strategy]
 A \TwoThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$ and bin $i\in[n]$, $f(v, i)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
@@ -115,7 +115,7 @@ A \TwoThinning decision strategy is a function $f$, such that for any (sorted) l
 
 
 \begin{definition} [\KThinning decision strategy]
-A \KThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$, bin $i\in[n]$, $2\leq c \leq k$ indicating the number of choices left for the current ball, $f(v, i, c)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
+A \KThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$, bin $i\in[n]$ and $0\leq c<k-1$ indicating the number of balls rejected at $v$, $f(v, i, c)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
 \end{definition}
 
 
@@ -124,8 +124,14 @@ We call a \TwoThinning (or \KThinning in general) decision strategy \textit{slic
 \end{definition}
 
 
+\begin{definition} [threshold function]
+Note that a \KThinning \textit{slicing} strategy $f$ can be alternatively defined by a corresponding \textit{threshold function} $h^f$, such that $h^f(v,c)$ is the threshold used at load $v$ after $c$ balls rejected.
+\end{definition}
+
+
+
 \begin{definition} [monotone strategy]
-Note that \KThinning slicing strategies are defined $k-1$ thresholds $\delta_1,\delta_2,\ldots,\delta_{k-1}$ (in the order in which they are applied) for each (sorted) load vector $v$. We call a \KThinning slicing strategy \textit{monotone}, if $\delta_i\leq \delta_{i+1}$ for each $1\leq i\leq k-2$ for each $v$.
+We call a \KThinning slicing strategy $f$ \textit{monotone}, if $h^f(v,c)\leq h^f(v,c+1)$ for each $v$ and $0\leq c<k-1$. Intuitively, a monotone strategy should never become more selective after rejecting a ball.
 \end{definition}
 
 

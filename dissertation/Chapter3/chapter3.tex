@@ -40,7 +40,7 @@ A vector $x$ is majorised by a vector $y$ (both of length $n$), denoted by $x \p
 
 
 \begin{definition} [allocation probability vector]
-For a sorted load vector $v$ and decision strategy $f$, we define the \textit{allocation probability vector} $P^f_v$: $P^f_v[i]$ is the probability of allocating the next ball at load vector $v$ into bin $i$ (the $i$th least loaded bin) according to $f$. We can decompose $P^f_v$ into $P^f_{v1}+P^f_{v2}$, denoting the primary and secondary allocation probability vectors respectively.
+For a sorted load vector $v$ and decision strategy $f$, we define the \textit{allocation probability vector} $P^f_v$: $P^f_v[i]$ is the probability of allocating the next ball at load vector $v$ into bin $i$ (the $i$th least loaded bin) according to $f$. For \TwoThinning, we can decompose $P^f_v$ into $P^f_{v1}+P^f_{v2}$, denoting the primary and secondary allocation probability vectors respectively.
 \end{definition}
 
 
@@ -53,7 +53,7 @@ The proof in~\cite{azar1999twochoice} proceeds by applying a coupling between th
 \end{remark}
 
 
-\begin{definition} [inversions]
+\begin{definition} [\TwoThinning inversions]
 Let's call a load vector $v$ and indices $0\leq i<j<n$ an \textit{inversion} of a strategy $f$, if $f(v,i)=\mathrm{reject}$ but $f(v,j)=\mathrm{accept}$. Let's denote the number of inversions of a strategy by $I^f$, and the number of inversions for a fixed $v$ by $I^f_v$.
 \end{definition}
 
@@ -64,7 +64,7 @@ Let's call a load vector $v$ and indices $0\leq i<j<n$ an \textit{inversion} of 
     When $w\neq v$, $P^f_w = P^g_w$ by construction, so $P^f_w\preccurlyeq P^g_w$. For $w=v$, note that $P^g_{v1}=P^f_{v1}+\frac{1}{n}\cdot e_a-\frac{1}{n}\cdot e_b$, where $e_i$ denotes the $i$th basis vector. We have $P^f_{v1}\preccurlyeq P^g_{v1}$, because for $0\leq i<a$ and $b\leq i<n$, $\sum_{j=0}^i P^f_{v1}[j] = \sum_{j=0}^i P^g_{v1}[j]$, and for $a\leq i<n$, $\sum_{j=0}^i P^f_{v1}[j] + \frac{1}{n} = \sum_{j=0}^i P^g_{v1}[j]$ (intuitively, a probability of $\frac{1}{n}$ has been moved to the left). Now observe that $P^f_{v2}=P^g_{v2}$, because the number of rejects among $f(v,i)$ ($i\in [n]$) overall are the same as the number of rejects among $g(v,i)$ ($i\in [n]$) overall. Hence, because $P^f_{v1}\preccurlyeq P^g_{v1}$, and adding a constant $P^f_{v2}=P^g_{v2}$ doesn't change majorisation, we get $P^f_v \preccurlyeq P^g_v$.
     
     
-    Since $P^f_w\preccurlyeq P^g_w$ for any load vector $w$, Lemma~\ref{lemma: majorisation-implies-better} implies $E^g\leq E^f$. $I^g<I^f$, because for $w\neq v$, $I^g_w=I^f_w$, and for $w=v$, the ``swap'' removed (at least) the inversion $(v,a,b)$, and didn't introduce any new inversions (see Figure~\ref{swap-action}). Hence, either $E^g<E^f$, or $E^g=E^f$ but $I^g<I^f$, contradicting the original assumption.
+    Since $P^f_w\preccurlyeq P^g_w$ for any load vector $w$, Lemma~\ref{lemma: majorisation-implies-better} implies $E^g\leq E^f$. $I^g<I^f$, because for $w\neq v$, $I^g_w=I^f_w$, and for $w=v$, the ``swap'' removed (at least) the inversion $(v,a,b)$, and didn't introduce any new inversions (see Figure~\ref{two-thinning-swap-action}). Hence, either $E^g<E^f$, or $E^g=E^f$ but $I^g<I^f$, contradicting the original assumption.
 \end{proof}
 
 
@@ -77,8 +77,8 @@ Lemma~\ref{lemma: thresholdproperty} has also been verified by the \DP strategy 
 \begin{figure}
     \centering
     %\includegraphics{} TODO
-    \caption{The ``swap'' action}
-    \label{swap-action}
+    \caption{The ``swap'' action for \TwoThinning}
+    \label{two-thinning-swap-action}
 \end{figure}
 
 
@@ -178,7 +178,7 @@ The idea of curriculum learning\NOTE{D}{Maybe ``Curriculum learning first provid
 
 \subsubsection{Normalised Domain} \label{normalised-domain}
 
-The notion of normalised loads\NOTE{D}{Maybe: ``Normalising loads proved to be ''?} mentioned in Section \ref{definitions} proved to be a very useful trick\NOTE{D}{remove trick?} for RL training as well. Extending the notion to normalised thresholds (a normalised threshold $c$ at timestep $t$ is equivalent to a threshold $c+\frac{t}{n}$), we can consider slicing strategies with a constant \textit{normalised} threshold $c$. Unlike for constant \textit{unnormalised} thresholds, $c=0$ already gives a reasonable strategy (``\MeanThinning'')~\cite{los2022cachingpackingthinningtwinning}, and learning a constant output is easy for a NN already in the early episodes.
+The notion of normalised loads\NOTE{D}{Maybe: ``Normalising loads proved to be ''?} mentioned in Section \ref{assumptions} proved to be a very useful trick\NOTE{D}{remove trick?} for RL training as well. Extending the notion to normalised thresholds (a normalised threshold $c$ at timestep $t$ is equivalent to a threshold $c+\frac{t}{n}$), we can consider slicing strategies with a constant \textit{normalised} threshold $c$. Unlike for constant \textit{unnormalised} thresholds, $c=0$ already gives a reasonable strategy (``\MeanThinning'')~\cite{los2022cachingpackingthinningtwinning}, and learning a constant output is easy for a NN already in the early episodes.
 
 
 \subsection{Dynamic Programming} \label{two-thinning-dp}
