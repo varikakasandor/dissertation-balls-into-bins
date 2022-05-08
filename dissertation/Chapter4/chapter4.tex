@@ -308,8 +308,8 @@ For a strategy $f$, we call a (sorted) load vector $v$ and two integers $0\leq i
     When $w\neq v$, $P^f_w=P^g_w$ by construction, so $P^f_w \preccurlyeq P^g_w$. For $w=v$, let's denote the ratio of bins with load $>x$ as $r(x)$. Then, applying the rules of \KThinning, $$P^f_v[i]=\sum_{j=0}^{k-1} \left(\prod_{l=0}^{j-1} r(h^f(v,l))\right)\cdot\frac{1}{n}\cdot\mathbbm{1}_{v[i]\leq h^f(v,j)}$$ because the ball can be allocated to bin $i$ after $j$ rejected balls if the next bin chosen is $i$ and its load is less than or equal to the next threshold. By case splitting on the load of bin $i$, we get
     
     $$P^g_v[i]= \begin{cases}
-        P^f_v[i]+\left(\prod_{l=0}^{c-1} r(h^f(v,l))\right)\cdot(r(h^f(v,c+1))-r(h^f(v,c))), & \text{for } v[i]\leq h^f(v,c+1),\\
-        P^f_v[i]+\left(\prod_{l=0}^{c-1} r(h^f(v,l))\right)\cdot(r(h^f(v,c+1))-1), & \text{for } h^f(v,c+1)<v[i]\leq h^f(v,c),\\
+        P^f_v[i]+\frac{\prod_{l=0}^{c-1} r(h^f(v,l))}{n}\cdot(r(h^f(v,c+1))-r(h^f(v,c))), & \text{for } v[i]\leq h^f(v,c+1),\\
+        P^f_v[i]+\frac{\prod_{l=0}^{c-1} r(h^f(v,l))}{n}\cdot(r(h^f(v,c+1))-1), & \text{for } h^f(v,c+1)<v[i]\leq h^f(v,c),\\
         P^f_v[i], & \text{for } h^f(v,c)<v[i].
     \end{cases}$$
     
