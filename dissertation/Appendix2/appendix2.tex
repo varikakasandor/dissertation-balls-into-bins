@@ -12,7 +12,7 @@ Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + Q(s_{t+1}, a')) - Q(s_t,a
 
 $a'$ is also sampled according to the $\epsilon$-greedy technique, and it is not chosen greedily to be the best estimate like in Q-Learning. Then, naturally, the next chosen action will be exactly $a'$.
 
-Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy~\cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our settings.
+Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy~\cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our protocols.
 
 \section{Monte Carlo Methods}
 

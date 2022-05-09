@@ -11,12 +11,12 @@
 
 \section{General Notes} \label{evaluationnotes}
 
-In this chapter I provide quantitative and qualitative analysis and comparison of the settings presented in previous chapters, focusing on the:
+In this chapter I provide quantitative and qualitative analysis and comparison of the protocols presented in previous chapters, focusing on the:
 
 \begin{itemize}
     \item properties of the optimal \DP strategy for \TwoThinning,
     \item limitations of the \Greedy Strategy for \GraphicalTwoChoice and
-    \item patterns in Deep Q-Learning training
+    \item patterns in \DQL training
 \end{itemize} \NOTE{A}{Dimitris, is it okay for the bullet points?}
 
 
@@ -26,13 +26,13 @@ I compared the strategies across \NumberofRuns runs, showing the average score (
 For space reasons I will usually choose some representative values of $n$ and $m$ to illustrate the general trends, covering different ranges of $n$ and different average final loads $\frac{m}{n}$.
 
 
-I utilised parallel processing to speed up the execution of Deep Q-Learning policies, which are the bottleneck for thorough and statistically significant evaluation. To exploit the parallelism of the GPU even with the inherently sequential MDP, I ran several (usually $64$) independent samples in parallel. Note that this is much simpler for \TwoThinning and \GraphicalTwoChoice, where the number of steps in the MDP is fixed ($m$) in any execution.
+I utilised parallel processing to speed up the execution of \DQL policies, which are the bottleneck for thorough and statistically significant evaluation. To exploit the parallelism of the GPU even with the inherently sequential MDP, I conducted several (usually $64$) independent runs in parallel. Note that this is much simpler for \TwoThinning and \GraphicalTwoChoice, where the number of steps in the MDP is fixed ($m$) in any execution.
 
 
-Even with this evaluation speedup, the usability of Deep Q-Learning for large values of $n$ and $m$ is still limited due to the training time. The largest range for which I successfully trained a RL algorithm in at most a day is $n=1000$, $m=1500$, but I decided to focus on slightly smaller values for the evaluation as that is more illustrative and complementary to the literature available. \NOTE{A}{TODO: create some timing plot.} 
+Even with this evaluation speedup, the usability of \DQL for large values of $n$ and $m$ is still limited due to the training time. The largest range for which I successfully trained a RL algorithm in at most a day is $n=1000$, $m=1500$, but I decided to focus on slightly smaller values for the evaluation as that is more illustrative and complementary to the literature available. \NOTE{A}{TODO: create some timing plot.} 
 
 
-I note that there is merit in not just executing several runs with the trained trained Deep Q-Learning model, but also retraining it several times (e.g.\ $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the Deep Q-Learning framework for balls-into-bins settings, but I decided to stick to the more classical single trained model and essentially evaluate the peak performance.
+I note that there is merit in not just executing several runs with the trained trained \DQL model, but also retraining it several times (e.g.\ $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the \DQL framework for balls-into-bins protocols, but I decided to stick to the more classical single trained model and essentially evaluate the peak performance.
 
 
 Note that the Dynamic Programming (\DP) strategies are optimal by construction, but they are too slow for larger values of $n$ and $m$ which I denote by Time Limit Exceeded (TLE). The limit was set to $12$ hours of training/hyperparameter tuning/precomputation overall for all the strategies. Also, even though we have the exact expected final maximum load of the \DP strategy, I decided to run it just like the other strategies for fair comparison (e.g.\ large outliers that the \DP strategy takes into account occur very rarely during execution), so it might not always be the best in the comparisons on \NumberofRuns runs (this could be resolved by using the same random seed when evaluating each strategy).
@@ -116,7 +116,7 @@ There exists an optimal (slicing) strategy (i.e. largest possible expected final
 
 
 \NOTE{D}{This would be part of a ``thorough'' qualitative evaluation. If would spot a trend it would also be nice to support it with some quantitative data. Andor: do you still think I should add it or I have convinced you that we should rather remove things not add?}
-This is a very surprising conjecture, because the \Threshold strategy and other strategies for similar settings that have been shown to be asymptotically optimal do not have this property (this is not a contradiction as they are only optimal up to a constant factor), they are mostly not even slicing strategies.
+This is a very surprising conjecture, because the \Threshold strategy and other strategies for similar protocols that have been shown to be asymptotically optimal do not have this property (this is not a contradiction as they are only optimal up to a constant factor), they are mostly not even slicing strategies.
 
 
 \begin{remark}
@@ -154,7 +154,7 @@ In many real-world applications it does not suffice if the maximum load is low i
 \end{figure}
 
 
-\subsection{Deep Q-Learning Analysis}
+\subsection{\DQL Analysis}
 
 
 \subsubsection{Hyperparameter Analysis}
@@ -270,7 +270,7 @@ Strategy                                & $k=2$ & $k=3$ & $k=5$ & $k=10$ & $k=2$
 \end{table}
 
 
-Intuitively, the larger $k$ is, the better a strategy can do, and the table confirms it for most of the strategies. We can see from the table that the \Quantile and \LocalRewardOptimiser strategies are almost as good as the \DP strategy for most values of $n$, $m$ and $k$, even though neither of those strategies consider future rewards. For large $k$ ($5$ or $10$) and not too large $n$, strategies can control with high probability where to place the ball. Nevertheless, this kind of advantage is much easier to exploit by a manual algorithm, than to learn by Deep Q-Learning.
+Intuitively, the larger $k$ is, the better a strategy can do, and the table confirms it for most of the strategies. We can see from the table that the \Quantile and \LocalRewardOptimiser strategies are almost as good as the \DP strategy for most values of $n$, $m$ and $k$, even though neither of those strategies consider future rewards. For large $k$ ($5$ or $10$) and not too large $n$, strategies can control with high probability where to place the ball. Nevertheless, this kind of advantage is much easier to exploit by a manual algorithm, than to learn by \DQL.
 
 
 
@@ -315,7 +315,7 @@ For a strategy $f$, we call a (sorted) load vector $v$ and two integers $0\leq i
     
     after some algebraic simplification, showing that only a few terms of the sum in $P_v^f$ are affected by the ``swap''\NOTE{A}{This is a bit tedious to explain how I got this sum but there is really nothing fancy going on, just applying the rules of \KThinning and doing some simplification. Should I explain anymore? Or is it convincing enough?}. Note that $r(h^f(v,c+1))-r(h^f(v,c))>0$ because $h^f(v,c+1)<h^f(v,c)$ by definition of $c$, and similarly $r(h^f(v,c+1))-1<0$ because $r$ is a ratio. Hence, probability has only been moved to the left after the ``swap'', so $P^f_v \preccurlyeq P^g_v$\NOTE{A}{I could write this sentence one down formally, is it worth the space or this handwavy sentence is enough?}.
     
-    Since $P^f_w\preccurlyeq P^g_w$ for any load vector $w$, Lemma~\ref{lemma: majorisation-implies-better} implies $E^g\leq E^f$. $J^g=J^f-1<J^f$, because the ``swap'' removed the inversion between $c$ and $c+1$ and didn't introduce any new inversions apart from changing the role of $c$ and $c+1$ (see Figure~\ref{k-thinning-swap-action}). Hence, either $E^g<E^f$, or $E^g=E^f$ but $J^g<J^f$, contradicting the original assumption.
+    Since $P^f_w\preccurlyeq P^g_w$ for any load vector $w$, Lemma~\ref{lemma: majorisation-implies-better} implies $E^g\leq E^f$. $J^g=J^f-1<J^f$, because the ``swap'' removed the inversion between $c$ and $c+1$ and did not introduce any new inversions apart from changing the role of $c$ and $c+1$ (see Figure~\ref{k-thinning-swap-action}). Hence, either $E^g<E^f$, or $E^g=E^f$ but $J^g<J^f$, contradicting the original assumption.
 \end{proof}
 
 
@@ -331,7 +331,7 @@ Lemma~\ref{lemma: k-thinning-monotone} has been verified by showing that this pr
 \end{remark}
 
 
-\subsection{Deep Q-Learning Analysis}
+\subsection{\DQL Analysis}
 
 
 
@@ -433,7 +433,7 @@ Using the \DP strategy for the \CycleGraph with $n=4$ bins $m=6$ balls, I found 
 
 
 
-To better understand the impact of the graph structure on \Greedy, I analysed the relationship between the degree $d$ of the graph and how well \Greedy performs on it. I created $1000$ random regular graphs for each degree $1\leq d \leq 31$ of the $n=m=32$ case. \NOTE{T}{Very interesting... I would have hoped that maybe for $d \approx 15$ or so you would get the best performance, which in a way, would generalise the cycle for small values of $n$. Andor: Interesting idea, I don't know how to generalise the cycle for smalle values of $n$.} We can see in Figure~\ref{greedy-random-regular-analysis} that smaller degrees hurt \Greedy, but after around $d=20$, the performance no longer improves.
+To better understand the impact of the graph structure on \Greedy, I analysed the relationship between the degree $d$ of the graph and how well \Greedy performs on it. I created $1000$ random regular graphs for each degree $1\leq d \leq 31$ of the $n=m=32$ case. \NOTE{T}{Very interesting... I would have hoped that maybe for $d \approx 15$ or so you would get the best performance, which in a way, would generalise the cycle for small values of $n$. Andor: Interesting idea, I do not know how to generalise the cycle for smalle values of $n$.} We can see in Figure~\ref{greedy-random-regular-analysis} that smaller degrees hurt \Greedy, but after around $d=20$, the performance no longer improves.
 
 
 \begin{figure}[h]
@@ -444,9 +444,9 @@ To better understand the impact of the graph structure on \Greedy, I analysed th
 \end{figure}
 
 
-\subsection{Deep Q-Learning Analysis}
+\subsection{\DQL Analysis}
 
-To better understand the difficulty in finding an optimal strategy, I extended the \CycleGraph counterexample from Lemma ~\ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the next edge still going between the second and third bins. Figure~\ref{greedy-counterexample-analysed} and Figure~\ref{greedy-counterexample-analysed-for-dqn} show that the shape of the region containing counterexamples to the \Greedy strategy is difficult to characterise, and to precisely learn by RL. By using the $\Phi_{neigh}$ potential function for Deep Q-Learning, the agent is guided towards choosing second bin, and by using a graph-oblivious potential (e.g.\ $\Phi_{max}$), the agent is guided towards choosing the third bin. Therefore, neither of the potential functions is perfect. We can indeed see in Figure~\ref{greedy-counterexample-analysed-for-dqn} that the DQN could not learn the exact pattern, though there is some resemblance.
+To better understand the difficulty in finding an optimal strategy, I extended the \CycleGraph counterexample from Lemma~\ref{lemma: greedy-suboptimal} to load vectors of the form $(0, a, 0, b)$, with the next edge still going between the second and third bins. Figure~\ref{greedy-counterexample-analysed} and Figure~\ref{greedy-counterexample-analysed-for-dqn} show that the shape of the region containing counterexamples to the \Greedy strategy is difficult to characterise, and to precisely learn by RL. By using the $\Phi_{neigh}$ potential function for \DQL, the agent is guided towards choosing second bin, and by using a graph-oblivious potential (e.g.\ $\Phi_{max}$), the agent is guided towards choosing the third bin. Therefore, neither of the potential functions is perfect. We can indeed see in Figure~\ref{greedy-counterexample-analysed-for-dqn} that the DQN could not learn the exact pattern, though there is some resemblance.
 
 
 \begin{figure}

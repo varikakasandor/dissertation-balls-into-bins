@@ -15,7 +15,7 @@
 \begin{itemize}
     \item Complementing the literature mostly concerning the asymptotic behaviour of protocols and strategies, in this project I analysed their exact performance, which is more relevant for practical applications.
     \item I implemented RL algorithms for optimising decision strategies, which is a novel approach to balls-into-bins. Based on the results, while the RL approach certainly has its merits for cases where the \DP strategies are not applicable and the heuristic strategies are not sufficient, its potential to consistently outperform alternatives remains an open question.
-    \item By analysing optimal strategies I formulated two conjectures (\S\ref{conjecture: two-thinning-increasing-threshold}, \S\ref{conjecture: two-thinning-smooth-threshold}) and formally proved several lemmas (\S\ref{lemma: everystatereachable}, \S\ref{lemma: thresholdproperty}, \S\ref{lemma: k-thinning-increasing-threshold}, \S\ref{lemma: greedy-suboptimal}). These insights can potentially influence the design of robust yet efficient strategies.
+    \item By analysing optimal strategies I formulated two conjectures (\S\ref{conjecture: two-thinning-increasing-threshold}, \S\ref{conjecture: two-thinning-smooth-threshold}) and formally proved several lemmas (\S\ref{lemma: everystatereachable}, \S\ref{lemma: thresholdproperty}, \S\ref{lemma: k-thinning-monotone}, \S\ref{lemma: greedy-suboptimal}). These insights can potentially influence the design of robust yet efficient strategies.
 \end{itemize}
 
 
@@ -25,8 +25,8 @@
     \item Exploiting further the huge amount of ideas available in RL literature, the performance of RL could potentially be improved (e.g. Double Q-Learning~\cite{hasselt2010doubleqlearning}, Approximate Dynamic Programming~\cite{bellman1959approximatedp}).
     \item Another idea is to use explainable AI techniques to derive strategies from the (hidden representation of the) NNs, or even directly use interpretable NNs~\cite{vacareanu2022explainableAI1}~\cite{tang2022explainableAI2}.
     \item Closing the gap between asymptotic analysis and the values of $n$ and $m$ investigated in this dissertation, the analysis of medium-range values and the applicable strategies for that range remains for future work.
-    \item Even though we have computer-aided verification for the two conjectures, we could not find a general proof for them.
-    \item Future work should consider extending the discussed analyses to more realistic and more challenging settings, e.g.\ as discussed in Chapter~\ref{introduction}, the servers would usually synchronize their loads less frequently.
+    \item Even though I have computer-aided verification for the two conjectures, I could not find a general proof for them.
+    \item Future work should consider extending the discussed analyses to more realistic and more challenging protocols, e.g.\ as discussed in Chapter~\ref{introduction}, the servers would usually synchronize their loads less frequently.
 \end{itemize}
 
  
@@ -38,11 +38,9 @@ It is definitely possible to try improving RL, and hopefully get closer to the o
 
 
 
-
-
 \section{Lessons Learnt}
 
 I experienced the rich nature of RL, and I realised that it is a very complex field, which I would like to learn more about in the future. 
 
-Even though the project was planned to focus mostly on RL, we also obtained several theoretical insights, which required me to deeply understand the balls-into-bins theory, about which I learnt a lot by background reading, exchanging ideas with my expert supervisors, and working out proofs myself -- the latter being my favourite part of the project.
+Even though the project was planned to focus mostly on RL, I also obtained several theoretical insights, which required me to deeply understand the balls-into-bins theory, about which I learnt a lot by background reading, exchanging ideas with my expert supervisors, and working out proofs myself -- the latter being my favourite part of the project.
 
