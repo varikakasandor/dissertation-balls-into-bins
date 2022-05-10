@@ -3,7 +3,7 @@
 \chapter{Hyperparameters}\label{hyperparameters} 
 
 
-\section{List of Hyperparameters}
+\section*{List of Hyperparameters}
 
 
 \NOTE{A}{Reorder in a more systematic way?}
@@ -56,7 +56,7 @@
 Note that the number of training episodes and the patience interval used for early stopping are not included in the hyperparameter search explicitly. This is because there isn't an optimal value for them based only on the score, as the score only improves by adding more episodes and not stopping early -- it just takes more time. Therefore, I have run a first phase of the hyperparameter optimisation finding a sweetspot for the number of episodes, where the difference between the strength of different hyperparameters is already apparent (though the score could potentially improve by training longer), but it is still feasible to do several runs in a few hours. Then, during the main optimisation phase I have used a fixed number of episodes, and I didn't use early stopping.
 
 
-\section{Final Hyperparameter Values}
+\section*{Final Hyperparameter Values}
 
 
 

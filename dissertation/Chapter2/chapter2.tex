@@ -108,10 +108,6 @@ As stated briefly in Chapter~\ref{introduction}, the project is about optimising
 
 For the lemmas and conjectures presented in later chapters, it is useful to define and extend some of the above notions formally as well. Let's denote the integers between $0$ and $n-1$ by $[n]$, indicating the indices of the bins.
 
-\begin{definition}
-A \TwoThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$ and bin $i\in[n]$, $f(v, i)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
-\end{definition}
-
 
 \begin{definition} [\TwoThinning decision strategy]
 A \TwoThinning decision strategy is a function $f$, such that for any (sorted) load vector $v$ and bin $i\in[n]$, $f(v, i)\in\{\mathrm{accept},\ \mathrm{reject}\}$.
@@ -287,7 +283,7 @@ The most common approach for dealing with the exploitation-exploration trade-off
 
 
 
-\subsubsection{Q-Learning}
+\subsubsection*{Q-Learning}
 
 
 Q-Learning~\cite{watkins1989qlearning} uses the action-value function based Bellman equation~\eqref{eq:bellmanAction}. The algorithm maintains a so-called ``Q-table'' $Q(s,a)$, which stores the current estimates of action-value function $Q_{\pi^*}(s,a)$ of the optimal policy. The agent plays the game several times using the $\epsilon$-greedy technique to choose the next action in state $s$ based on the Q-table at state $s$. After every step, it updates the Q-table using a linear interpolation with smoothing factor $\alpha \in (0,1)$ according to the following update rule:
@@ -298,7 +294,7 @@ Q(s_t,a_t) \leftarrow Q(s_t,a_t) + \alpha\left( r_t + \max_{a'} Q(s_{t+1}, a')) 
 \NOTE{D}{Did you see comment about changing $Q$ to $\hat{Q}$? Andor: I think it is standard notation to use simply $Q$, but I see your point. I think it is reasonable to leave it as it is unless you have very strong objections.}
 
 
-\subsubsection{\DQL} \label{deepq-learning}
+\subsubsection*{\DQL} \label{deepq-learning}
 
 
 Q-Learning, and its iterative approximation method is a good choice for moderately sized state spaces, where more direct (mainly dynamic programming) methods are infeasible. However, for exponentially large state spaces (as in our case), it is infeasible to store the Q-table. In \DQL~\cite{mnih2013DQN}\NOTE{A}{Is $\sim$ needed? How does it work with xspace?}, the Q-table is approximated using a neural network $Q_w$ with a tractable number of weights $w$.
@@ -316,7 +312,7 @@ In practice, due to stability reasons~\cite{barnard1993semigradient}, \NOTE{A}{C
 
 Following standard terminology, I will call the NN used by \DQL as a Deep Q-Network (DQN).
 
-\subsubsection{Alternatives}
+\subsubsection*{Alternatives}
 
 There are several other algorithms and variants, some of which I implemented and did not outperform \DQL -- see Appendix~\ref{alternativeRL} for further discussion.
 
@@ -326,7 +322,7 @@ There are several other algorithms and variants, some of which I implemented and
 
 I experimented with several NN architectures for $Q_w$, and here I introduce those that were not covered in the IB Artificial Intelligence or other courses.
 
-Recurrent neural networks (RNN)~\cite{hopfield1982RNNoriginal} process sequential information, by using a hidden state, and updating it by a common weight matrix on every new input (see Figure~\ref{RNN-image}). I will use RNNs to obtain an embedding of the load vector (and not to produce an output sequence).
+Recurrent neural networks (RNN)~\cite{hopfield1982RNNoriginal} process sequential information, by using a hidden state, and updating it by a common weight matrix on every new input (see Figure~\ref{RNN-image}). I used RNNs to obtain an embedding of the load vector (and not to produce an output sequence).
 
 \begin{figure}[h]
     \centering
@@ -352,7 +348,7 @@ We still have to address the question of why to choose the secondary server at r
 
 \section{Starting Point}
 
-The starting point is exactly as stated in my project proposal ( see Appendix~\ref{proposal}). \NOTE{A}{!!Should I add anything else? I really do not know what they want here.}
+The starting point is exactly as stated in my project proposal (see Appendix~\ref{proposal}). \NOTE{A}{!!Should I add anything else? I really do not know what they want here.}
 
 
 \section{Software Engineering Methodology}

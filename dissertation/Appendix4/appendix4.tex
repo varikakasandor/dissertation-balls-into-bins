@@ -1,0 +1,31 @@
+%!TEX root = ../thesis.tex
+\chapter{\KThinning Implementation Details}\label{k-thinning details} 
+
+
+\section*{\DQL Implementation}
+
+
+To formulate the \KThinning problem as a MDP, I decided to use (load vector, number of choices left) pairs as states, and just like for \TwoThinning, thresholds as actions. The ``number of choices left'' part of the states indicate how many more bins can be rejected before the ball would be allocated into a randomly chosen bin. The state transitions happen according to the definition of \KThinning. To tackle the sparse reward problem, I decided to use the same potential functions as for \TwoThinning (hence not taking into account the number of choices left) to avoid introducing unnecessary bias for the agent.
+
+
+For the DQN, I extended the architecture for \TwoThinning by concatenating the final hidden state of the RNN with the one-hot encoded representation of the number of choices left, feeding them together to the linear layers. The rest of the implementation is analogous to \TwoThinning.
+
+
+
+\section*{Dynamic Programming}
+
+For \KThinning, I implemented a DP algorithm analogous to that for \TwoThinning, with the states being (sorted load vector, number of choices left) pairs in this case.
+
+
+The recurrence equations are:
+
+\begin{align} 
+    V_{\pi^*}((v, 0)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=a] \notag \\
+    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=v[i]] \notag \\
+    &= \max_{i \in [n]} \left(\sum_{0\leq j \leq i} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} \cdot  \sum_{j \in [n]} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k))\right) \text{ ,} \label{eq:kthinning-dynamicprogramming} \\
+    V_{\pi^*}((v, x+1)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,x+1), a_t=a] \notag \\
+    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v, x+1), a_t=v[i]] \notag \\
+    &= \max_{i \in [n]} \left(\sum_{0\leq j \leq i} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} \cdot  V_{\pi^*}((v, x))\right) \text{ ,}
+\end{align}
+
+and the base case is $V_{\pi^*}((v, k))=-\mathrm{maxload}(v)$ for $\mathrm{sum}(v)=m$. The runtime of this algorithm is $k$ times the runtime of the DP algorithm for \TwoThinning: $\Theta(|S|\cdot n\cdot k)$.
