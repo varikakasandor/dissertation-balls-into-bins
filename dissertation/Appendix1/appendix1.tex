@@ -1,159 +1,22 @@
 %!TEX root = ../thesis.tex
 
-\chapter{Hyperparameters}\label{hyperparameters} 
+\chapter{Notes on Related Work}\label{related-work} 
+
+Following is a summary of my background reading and my observations:
 
 
-\section*{List of Hyperparameters}
-
-
-\NOTE{A}{Reorder in a more systematic way?}
-\NOTE{A}{TODO: add usual values and/or reasons?}
-\NOTE{A}{Should I add the ranges and options I used during the hyperparamter search?}
-\begin{itemize} 
-    \item batch size: the number of samples to take from the experience replay buffer using which the DQN is updated.
-    
-    \item $\epsilon$-start: for the $\epsilon$-greedy technique, it is common practice to gradually decrease $\epsilon$ during training. The reason is that after some training, less exploration is needed, as the best actions already start to take shape. I decrease $\epsilon$ according a negative exponential function, starting from $\epsilon$-start.
-    
-    \item $\epsilon$-decay: the decay parameter of the negative exponential function.\NOTE{T}{maybe better to use some formulas here?}
-    
-    \item $\epsilon$-end: as training goes on, $\epsilon$ converges to $\epsilon$-end.
-     
-    
-    \item target update frequency: after every how many episodes is the target network synchronised with the main network.
-    
-    \item optimising frequency: this controls after every how many steps (i.e.\ actions) is the main network updated. Not updating it after every step is both a speed-up, and can control the reuse of samples in the experience replay buffer.
-    
-    \item memory capacity: the maximum size of the experience replay buffer.
-    
-    \item evaluation runs during training: to determine if the current model is better than the best one so far, I run this many full executions of the game with the current model, and average the scores. Note that this is very costly, as one execution of the game is equivalent to a full episode of training.
-    
-    \item maximum threshold of DQN: as mentioned in Section ~\ref{DQN}, the DQN is restricted to using only thresholds below this limit. A reasonable choice of this maximum threshold is around the target expected maximum load we expect to get, which can be estimated e.g.\ by the performance of simpler protocols, such as \OneChoice or \TwoChoice, or by theoretical results.
-    
-    \item loss function: the loss function to use between the current Q-value estimate and the new (``target'') Q-value estimate. \NOTE{A}{Explain better.}
-    
-    \item optimiser: the optimiser used for updating the neural network. \NOTE{A}{Update my code to include this as well.}
-    
-    \item learning rate: the learning rate of the optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
-    
-    \item DQN -- hidden state size of RNN: this is the determines into how many numbers does the DQN have to ``compress'' the information about the load vector.
-    
-    \item DQN -- number of hidden layers of RNN: even though the main property of RNNs is that they process sequences, they can also have depth as well with any number of hidden layers.
-    
-    \item DQN -- number of linear layers after RNN: at least one layer is needed to bring the result to the right shape, but I allow more as well.
-    
-    \item potential function: some of the potential functions are only applicable to certain protocols (e.g.\ \GraphicalTwoChoice).
-    
-    \item number of curriculum learning episodes: using curriculum as pretraining, this hyperparameter determines the overall number of episodes in pretraining.
-    
-    \item using normalised domain: this is a boolean choosing between normalised and absolute domain.
-    
-    
-
-
+\begin{itemize}
+    \item 
+    I wanted to understand why there are so many different protocols, see how they are interconnected, and explore the main directions of current research. These allowed me to choose in a principled way which protocols to focus on. In particular, \TwoThinning, the main protocol of my study, has been analysed as a resource efficient protocol in-between \OneChoice and \TwoChoice. (We can see a similar phenomenon with the so-called \textsc{($1+\beta$)-process}~\cite{peres2015oneplusbeta}).
+    \item
+    I found that most of the papers in this area approach the topic from a theoretical viewpoint, and there is a big gap between these results and the practical applications. Even though my approach is also a theoretical one, I found it important to gain practical motivation, and therefore I actively searched for papers bridging this gap (e.g.~\cite{wang2017twochoicerouting}).
+    \item
+    As preparation for formulating my own lemmas and conjectures for the dissertation, I wanted to gain an insight into how lower and upper bounds can be derived theoretically on the maximum load of various protocols. Therefore I studied several proofs, e.g.\ that \TwoChoice achieves a maximum load of $\frac{\ln(\ln(n))}{\ln(2)} + O(1)$ after $n$ balls~\cite{azar1999twochoice}. These proofs did not just provide insights into why or why not different protocols work well, but the proofs also provide intuition for improving protocols, or what is even more important for my project, creating good strategies. For example, the so-called \Threshold strategy for \TwoThinning is based on the observation that rejected balls form a \OneChoice process, for which tight bounds are available~\cite{feldheim2021thinning}.
+    \item
+    Perhaps surprisingly, the more general case where $m\geq n$ is much more challenging than the $m=n$ case (i.e.\ where the number of balls equal the number of bins)~\cite{berenbrink2006heavilyloaded}. In real-world applications this assumption may usually not hold, only if the number of jobs is somehow controlled. My approaches outlined in Chapter~\ref{implementation} will not be limited by this constraint.
+    \iffalse % I discussed it all already in the Introduction, I think
+    \item
+    Almost exclusively all of the proofs are asymptotic -- they only hold for very large $n$, mostly due to approximations, such as Stirling's formula~\cite{feldheim2021thinning}. This is very restrictive for real-world applications, as discussed in Chapter~\ref{introduction}. Similarly, (and sometimes also as a consequence of the above), the bounds hold only up to a constant/logarithmic factor, i.e.\ they are fixed only up to the $\Theta$ notation. In particular, there exist strategies that have been shown to be optimal for \TwoThinning, such as the ``$\ell$-threshold strategy'' for $m=n$, but this is also not necessarily optimal for practically realistic values of $n$ and $m$! \NOTE{A}{Better phrasing. An interesting idea that I will get back to in Chapter~\ref{evaluation} is trying to find out or bound the constant factors hidden behind the $\Theta$ notation, which would be very useful for comparisons.}
+    \NOTE{D}{This sounds interesting}
+    \fi
 \end{itemize}
-
-
-Note that the number of training episodes and the patience interval used for early stopping are not included in the hyperparameter search explicitly. This is because there isn't an optimal value for them based only on the score, as the score only improves by adding more episodes and not stopping early -- it just takes more time. Therefore, I have run a first phase of the hyperparameter optimisation finding a sweetspot for the number of episodes, where the difference between the strength of different hyperparameters is already apparent (though the score could potentially improve by training longer), but it is still feasible to do several runs in a few hours. Then, during the main optimisation phase I have used a fixed number of episodes, and I didn't use early stopping.
-
-
-\section*{Final Hyperparameter Values}
-
-
-
-\begin{table}[h]
-\begin{threeparttable}
-\centering
-\begin{tabular}{l|c}
-\toprule
-Hyperparameter             &     Value \\
-\midrule
-batch size               &     32 \\ 
-$\epsilon$-start               &    0.25 \\ 
-$\epsilon$-decay         &     3500\\
-$\epsilon$-end              &     0.05 \\
-target update frequency               &     25 \\ 
-optimising frequency          &     25 \\ 
-memory capacity     &     500 \\
-evaluation runs during training             &     10 \\
-maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
-loss function               &     SmoothL1Loss \\ 
-optimiser        &     Adam \\
-learning rate             &     0.005 \\
-DQN - hidden state size of RNN               &     128 \\ 
-DQN - number of hidden layers of RNN         &     3 \\ 
-DQN - number of linear layers after RNN     &     2 \\
-potential function            &    $\Phi_{max}$ \\
-number of curriculum learning episodes            & 50 \\ 
-using normalised domain               &     true \\ 
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\caption{\textsc{Two-Thinning} Deep Q-Learning hyperparameters\protect\footnotemark}
-\label{tab:two-thinning-hyperparameters}
-\end{table}
-
-\footnotetext{Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average/mode values are shown for the other hyperparameters.}
-
-
-\begin{table}[h]
-\begin{threeparttable}
-\centering
-\begin{tabular}{l|c}
-\toprule
-Hyperparameter             &     Value \\
-\midrule
-batch size               &     32 \\ 
-$\epsilon$-start               &    0.2 \\ 
-$\epsilon$-decay         &     3000\\
-$\epsilon$-end              &     0.06 \\
-target update frequency               &     20 \\ 
-optimising frequency          &     15 \\ 
-memory capacity     &     650 \\
-evaluation runs during training             &     10 \\
-maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
-loss function               &     SmoothL1Loss \\ 
-optimiser        &     Adam \\
-learning rate             &     0.005 \\
-DQN - hidden state size of RNN               &     128 \\ 
-DQN - number of hidden layers of RNN         &     2 \\ 
-DQN - number of linear layers after RNN     &     3 \\
-potential function            &    $\Phi_{exp}$ with $\alpha=0.5$ \\
-number of curriculum learning episodes            & 40 \\ 
-using normalised domain               &     true \\ 
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\caption{\textsc{K-Thinning} Deep Q-Learning hyperparameters}
-\label{tab:k-thinning-hyperparameters}
-\end{table}
-
-
-
-\begin{table}[h]
-\begin{threeparttable}
-\centering
-\begin{tabular}{l|c}
-\toprule
-Hyperparameter             &     Value \\
-\midrule
-batch size               &     64 \\ 
-$\epsilon$-start               &    0.45 \\ 
-$\epsilon$-decay         &     4000\\
-$\epsilon$-end              &     0.06 \\
-target update frequency               &     25 \\ 
-optimising frequency          &     15 \\ 
-memory capacity     &     650 \\
-evaluation runs during training             &     10 \\
-loss function               &     HuberLoss \\ 
-optimiser        &     Adam \\
-learning rate             &     0.005 \\
-DQN - hidden state size               &     128 \\ 
-DQN - number of linear layers     &     2 \\
-potential function            &    $\Phi_{neigh}$ \\
-number of curriculum learning episodes            & 50 \\ 
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\caption{\textsc{\GraphicalTwoChoice} Deep Q-Learning hyperparameters}
-\label{tab:graphical-two-choice-hyperparameters}
-\end{table}

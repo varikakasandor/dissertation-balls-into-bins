@@ -913,7 +913,7 @@ wish to left align your text}
 
 \thispagestyle{empty}
 % Author
-\hspace{6em} 
+\hspace{11em} 
 {\LARGE \usebox{\PHD@author}}
 \vspace*{2em}
 
@@ -1278,4 +1278,3 @@ wish to left align your text}
 			- \totalheightof{\usebox{\PHD@collegedate}}
 }
 }
-

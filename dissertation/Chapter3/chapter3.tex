@@ -20,10 +20,10 @@
 \subsection{\DQL Implementation} \label{dqn-implmentation-two-thinning}
 
 
-As there is no prior work on RL for the discussed balls-into-bins protocols, I implemented the RL algorithms from scratch using PyTorch for the NNs. Even though there are some attempts at general purpose RL libraries (e.g.\ Stable Baselines~\cite{hill2018stablebaselines}), they are very hard to customise at the moment. To discuss the implementation of \DQL for \TwoThinning, I need the following definition.
+As there is no prior work on RL for the discussed balls-into-bins protocols, I implemented the RL algorithms from scratch using PyTorch for the NNs. Even though there are some attempts at general purpose RL libraries (e.g.\ Stable Baselines~\cite{hill2018stablebaselines}), they are very hard to customise at the moment.
 
 
-There are two ways to formulate the \TwoThinning protocol as an MDP. One is to treat (load vector, primary bin) pairs as states, and accept/reject as actions. The other is to treat load vectors as states, and thresholds for accepting/rejecting as actions. I chose the latter, because it implicitly restricts the search space to be explored by the RL agent to slicing strategies, which is justified by the following important (also intuitive) lemma:
+Since all servers use the same strategy, it is convenient for the training of RL to use a single agent which makes all the decisions (and later all the servers would use a copy of the trained agent). There are two ways to formulate the \TwoThinning protocol as an MDP. One is to treat (load vector, primary bin) pairs as states, and accept/reject as actions. The other is to treat load vectors as states, and thresholds for accepting/rejecting as actions. I chose the latter, because it implicitly restricts the search space to be explored by the RL agent to slicing strategies, which is justified by the following important (also intuitive) lemma:
 
 
 \begin{lemma} [\TwoThinning threshold property] \label{lemma: thresholdproperty}
@@ -35,7 +35,7 @@ Before proving this lemma, we need some more definitions and another lemma.
 
 
 \begin{definition} [majorisation]
-A vector $x$ is majorised by a vector $y$ (both of length $n$), denoted by $x \preccurlyeq y$ iff $$\sum_{i=0}^j x[i] \leq \sum_{i=0}^j y[i]\mathrm{, for\ all\ j\in [n]}$$. In other words, all the prefix sums of $x$ are smaller than the corresponding prefix sums of $y$.
+A vector $x$ is majorised by a vector $y$ (both of length $n$), denoted by $x \preccurlyeq y$ iff $$\sum_{i=0}^j x[i] \leq \sum_{i=0}^j y[i]\mathrm{, for\ all\ j\in [n]} \text{ .}$$In other words, all the prefix sums of $x$ are smaller than the corresponding prefix sums of $y$.
 \end{definition}
 
 
@@ -106,13 +106,13 @@ The input to the DQN is a representation of the load vector $v$, and the output 
 \end{figure}
 \NOTE{T}{I think having a figure here is a good idea, but I'm no sure the figure is a good illustration... Andor: ...and also not a relevant one, as it shows something which I claim didn't help... Any better ideas?}
 
-\paragraph{DQN Architecture} Arguably, the highest loaded bins of a load vector are more important bins, since we care about minimising the maximum load.\NOTE{D}{Would be nice if you could support this in the evaluation. Andor: agree, it would be nice. Any specific ideas? Sounds difficult to analyse.}\NOTE{D}{You could flip the load vector and show that the results are worse. Andor: agree, it would be nice, maybe for future work}\NOTE{T}{To me this claim is a bit ``bold''. If you want to balance well in the long-term, you may really have to look at all load values and not just the two or three highest. Andor: yes, but to \textit{decide} on the current threshold, the load of the heaviest loaded bins seems more important. Do you disagree? (I know this is handwavy, but note that this is still more reasoning than most people put into choosing their NN architectures, I think).} In the extreme, if the bin with the maximum load contained one more ball, that would be more significant than if an average loaded bin contained one more ball. Hence, my idea was to process the load vector in increasing order of the (one-hot encoded) loads, that is, in increasing order of importance. For this purpose, using a vanilla RNN -- which processes sequential data, inherently focusing more on later inputs -- is a natural choice. I also tried GRU and LSTM mentioned in Section~\ref{RNN}, but even though they have desirable properties, they could not provide any improvement (partly due to the fixed-sized input sequences), so I do not discuss them any further\NOTE{D}{Would be good to refer to a figure in the evaluation section. Andor: yes, but there is no space to evaluate and compare exactly everything. Isn't it valid if I decide not to discuss it any further and focus on other things in the evaluation?}\NOTE{D}{OK, though it is quite common to have an ablation study. Andor: instead I have thorough hyperparamter analysis which includes many hyperparamters e.g. the details of RNN. I should have probably included GRU and LSTM as hyperparamters as well.}. The hidden state of the RNN after the last input is fed through some number of fully connected layers to produce the estimates for $Q(v, a)$. As for the activation functions, I use ReLU for the fully-connected layers, and $\tanh$ inside the RNN, following common practice (see e.g.~\cite{szandala2020activationfunctions}).
+\paragraph{DQN Architecture} Arguably, the highest loaded bins of a load vector are more important bins, since we care about minimising the maximum load.\NOTE{D}{Would be nice if you could support this in the evaluation. Andor: agree, it would be nice. Any specific ideas? Sounds difficult to analyse.}\NOTE{D}{You could flip the load vector and show that the results are worse. Andor: agree, it would be nice, maybe for future work}\NOTE{T}{To me this claim is a bit ``bold''. If you want to balance well in the long-term, you may really have to look at all load values and not just the two or three highest. Andor: yes, but to \textit{decide} on the current threshold, the load of the heaviest loaded bins seems more important. Do you disagree? (I know this is handwavy, but note that this is still more reasoning than most people put into choosing their NN architectures, I think).} In the extreme, if the bin with the maximum load contained one more ball, that would be more significant than if an average loaded bin contained one more ball. Hence, my idea was to process the load vector in increasing order of the (one-hot encoded) loads, that is, in increasing order of importance. For this purpose, using a RNN -- which processes sequential data, inherently focusing more on later inputs -- is a natural choice. I tried more complex versions of the vanilla RNN (e.g. LSTM~\cite{shewalkar2019rnngrulstm}) too, but even though they have desirable properties, they could not provide any improvement (partly due to the fixed-sized input sequences). The hidden state of the RNN after the last input is fed through some number of fully connected layers to produce the estimates for $Q(v, a)$. As for the activation functions, I use ReLU for the fully-connected layers, and $\tanh$ inside the RNN, following common practice (see e.g.~\cite{szandala2020activationfunctions}).
 
 
 \subsubsection*{Stabilising Training}
 
 
-In practice, \DQL -- and in general any off-policy deep reinforcement learning algorithm -- can become unstable during training. There are several methods proposed in the literature to address this issue, and I implemented three of them that work well together in practice (see e.g.~\cite{mnih2015dqnstabilitycombined}): experience replay~\cite{lin1992experiencereplay}, target network~\cite{argueta1992targetnetwork}, and changing the optimiser (see Appendix~\ref{stabilising-training} for further discussion).
+In practice, \DQL -- and in general any off-policy deep reinforcement learning algorithm -- can become unstable during training. There are several methods proposed in the literature to address this issue, and I implemented three of them that work well together in practice (see e.g.~\cite{mnih2015dqnstabilitycombined}): experience replay~\cite{lin1992experiencereplay}, target network~\cite{fan2020target}, and changing the optimiser (see Appendix~\ref{stabilising-training} for further discussion).
 
 
 \subsection{Ideas Implemented for Improvement} \label{improvementideas}
@@ -147,7 +147,7 @@ As discussed in Section~\ref{RLintro}, the most direct way to formulate the \Two
 \subsubsection*{Curriculum Learning}
 
 
-Curriculum learning~\cite{bengio2009curriculumoriginal} first provides easier problems to the agent, and just gradually increase the difficulty up to the original problem. I used this method as a pretraining phase for some number of \textit{pretrain episodes}. Without curriculum learning, the agent cannot learn as much as desired from the hard problems initially\NOTE{D}{it would be nice to have some empirical evidence to support this in the evaluation section. Andor: agree, but there are more important things to evaluate in the given space and time, no?}. For \TwoThinning, I first provided load vectors with $m-1$ balls allocated, then with $m-2$ balls allocated, and so on until starting from the original empty bins. To find relevant training samples with $m-k$ starting balls, I ran the vanilla \OneChoice protocol with $m'=m-k$ balls, providing samples from a closely related protocol to \TwoThinning. I decided to distribute the iterations between the levels according to an arithmetic progression, putting more weight on smaller $k$'s.
+Curriculum learning~\cite{bengio2009curriculumoriginal} first provides easier problems to the agent, and just gradually increase the difficulty up to the original problem. I used this method as a pretraining phase for some number of \textit{pretrain episodes}. Without curriculum learning, the agent cannot learn as much as desired from the hard problems initially\NOTE{D}{it would be nice to have some empirical evidence to support this in the evaluation section. Andor: agree, but there are more important things to evaluate in the given space and time, no?}. For \TwoThinning, I first provided load vectors with $m-1$ balls allocated, then with $m-2$ balls allocated, and so on until starting from the original empty bins. To find relevant training samples with $m-k$ starting balls, I ran the vanilla \OneChoice protocol with $m'=m-k$ balls, providing samples from a closely related protocol to \TwoThinning. I distributed the iterations between the levels according to an arithmetic progression, putting more weight on smaller $k$'s.
 
 
 
@@ -159,7 +159,7 @@ Normalising loads mentioned in Section \ref{assumptions} proved to be very usefu
 \subsection{Dynamic Programming} \label{two-thinning-dp}
 
 
-For smaller values of $n$ and $m$ we can use dynamic programming (DP) based on Bellman equation~\eqref{eq:bellmanState} to get the exact optimal policy (``\DP strategy'') and its expected final maximum load. Now I present some observations that allow dynamic programming for a larger set of $n$ and $m$:
+For smaller values of $n$ and $m$ we can use DP based on Bellman equation~\eqref{eq:bellmanState} to get the exact optimal policy (``\DP strategy'') and its expected final maximum load. Now I present some observations that allow DP for a larger set of $n$ and $m$:
 
 
 \begin{itemize}
@@ -204,7 +204,7 @@ For any load vector $v$ with $0\leq x\leq m$ balls, and any strategy, there is a
 
 
 
-Interestingly, there is no closed-form formula for the number of states. \NOTE{T}{Maybe cut this paragraph from here, or completely? Andor: Dimitris, what do you think?} Even for $m=n$, when the number of states equals the so-called partition function $p(n)$, only approximate results are known: $p(n) \sim e^{\sqrt{n}}$~\cite{hardy1918partitionfunction}. I implemented the calculation of the exact number of states $f(m, n)$ as a function of $m$ and $n$, i.e.\ the number of non-decreasing partitions of $m$ of size $n$, for which I also used dynamic programming:
+Interestingly, there is no closed-form formula for the number of states. \NOTE{T}{Maybe cut this paragraph from here, or completely? Andor: Dimitris, what do you think?} Even for $m=n$, when the number of states equals the so-called partition function $p(n)$, only approximate results are known: $p(n) \sim e^{\sqrt{n}}$~\cite{hardy1918partitionfunction}. I implemented the calculation of the exact number of states $f(m, n)$ as a function of $m$ and $n$, i.e.\ the number of non-decreasing partitions of $m$ of size $n$, for which I also used DP:
 
 \begin{equation} \label{eq: numberofpartitions}
     f(m, n) = \begin{cases}
@@ -217,12 +217,12 @@ Interestingly, there is no closed-form formula for the number of states. \NOTE{T
 The values of $f$ confirmed the empirical performance of the DP algorithm.
 
 \iffalse % I think it is enough if I mention this just in the evaluation
-For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of \DQL (few hours).\NOTE{D}{You will need to add a figure in the evaluation section.} These limits are indeed smaller than that of \DQL, so while dynamic programming can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly not very large\NOTE{D}{Are you sure?}. The main drawback of the dynamic programming algorithm is rather that it does not use function approximation, so it has to represent every state explicitly, which would cause memory error even before it would take too much time. \NOTE{A}{Add these rough estimates of n,m to \DQL as well.}
+For example, for $n=10$, $m$ cannot exceed $60$, and for $n=30$, $m$ cannot exceed around $45$ so that it runs in time comparable to the training of \DQL (few hours).\NOTE{D}{You will need to add a figure in the evaluation section.} These limits are indeed smaller than that of \DQL, so while DP can provide the exactly optimal policy, it is not applicable for larger values. I note that the difference in the range of applicability of the two algorithms is perhaps surprisingly not very large\NOTE{D}{Are you sure?}. The main drawback of the DP algorithm is rather that it does not use function approximation, so it has to represent every state explicitly, which would cause memory error even before it would take too much time. \NOTE{A}{Add these rough estimates of n,m to \DQL as well.}
 \fi
 
 \subsection{Other Strategies}
 
-In addition to the strategies given by RL and DP, I implemented several other, more ``manual'' strategies. I provide a thorough comparison in Chapter~\ref{evaluation}.
+In addition to the strategies given by RL and DP, I implemented several other, heuristic strategies. I provide a thorough comparison in Chapter~\ref{evaluation}.
 
 
 \paragraph{\AlwaysAccept strategy}
@@ -365,10 +365,9 @@ After trying several methods (e.g. genetic algorithms~\cite{wicaksono2018genetic
 
 \section{Repository Overview}
 
-The structure of the most relevant files and directories of the (git) repository is shown below, expanding similar directories only once. Note that there are multiple layers of evaluation: one next to the training files which were used mainly during implementation, one evaluation environment for each protocol, which were used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis. The strategies and the graph structures are implemented and analysed in an object-oriented style for reasons including modularity and code reuse.
+The structure of the most relevant files and directories of the (git) repository is shown below. \iffalse Note that there are three layers of evaluation code: one next to the training files which were used mainly during implementation, one evaluation environment for each protocol, which were used for analysing strategies in a principled way, and there is an evaluation folder which contains driver code and hyperparameter analysis.\fi The strategies and the graph structures are implemented and analysed in an object-oriented style for reasons including modularity, code reuse and ease of evaluation. I implemented all the code in the repository.
 
 
-\NOTE{A}{Should I add more files? e.g.\ non-deep RL attempts.}
 
 {
 \definecolor{folderbg}{RGB}{124,166,198}
@@ -420,23 +419,21 @@ The structure of the most relevant files and directories of the (git) repository
         [full\_knowledge, label=right:(strategies having access to the full load vector)
             [RL
                 [DQN
+                    [saved\_models, label=right:(I store here the best trained models)]
                     [constants.py, file]
                     [neural\_network.py, file]
                     [train.py, file]
-                    [evaluate.py, file]
-                    [saved\_models, label=right:(I store here the best trained models)]
-                    [...]
+                    [..., file]
                 ]
-                [DeepSarsaRL]
-                [PolicyGradient]
+                [...]
             ]
             [dp.py, file]
         ]
         [constant\_threshold]
         [strategies, label=right:(strategy classes)
-            [strategy\_base.py, label=right:(abstract base class), file]
+            [strategy\_base.py, file]
             [mean\_thinning\_strategy.py, file]
-            [...]
+            [..., file]
         ]
         [environment.py, label=right:(environment for analysing the strategies), file]
         [...]
@@ -455,17 +452,17 @@ The structure of the most relevant files and directories of the (git) repository
   },
 [Project
     [k\_choice
-        [simulation.py, label=right:(code for running simple \OneChoice and \TwoChoice), file]
         [graphical
             [two\_choice
                 [graphs, label=right:(graph structure classes)
                     [graph\_base.py, label=right:(abstract base class), file]
                     [cycle.py, file]
-                    [...]
+                    [..., file]
                 ]
                 [...]
             ]
         ]
+        [simulation.py, label=right:(code for running simple \OneChoice and \TwoChoice), file]
     ]
     [evaluation
         [hyperparameter\_tuning]
@@ -473,7 +470,7 @@ The structure of the most relevant files and directories of the (git) repository
         [...]
     ]
     [helper, label=right:(useful utility functions and classes)]
-    [unit\_testing]
+    [unit\_testing, label=right:(testing the DP algorithm and the heuristic strategies)]
     [dissertation]
     [...]
 ]

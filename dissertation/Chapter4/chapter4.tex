@@ -35,7 +35,7 @@ Even with this evaluation speedup, the usability of \DQL for large values of $n$
 I note that there is merit in not just executing several runs with the trained trained \DQL model, but also retraining it several times (e.g.\ $20$ runs with each of $5$ independently trained model), because the rewards received during training are also probabilistic. This idea would rather evaluate the robustness of the \DQL framework for balls-into-bins protocols, but I decided to stick to the more classical single trained model and essentially evaluate the peak performance.
 
 
-Note that the Dynamic Programming (\DP) strategies are optimal by construction, but they are too slow for larger values of $n$ and $m$ which I denote by Time Limit Exceeded (TLE). The limit was set to $12$ hours of training/hyperparameter tuning/precomputation overall for all the strategies. Also, even though we have the exact expected final maximum load of the \DP strategy, I decided to run it just like the other strategies for fair comparison (e.g.\ large outliers that the \DP strategy takes into account occur very rarely during execution), so it might not always be the best in the comparisons on \NumberofRuns runs (this could be resolved by using the same random seed when evaluating each strategy).
+Note that the \DP strategies are optimal by construction, but they are too slow for larger values of $n$ and $m$ which I denote by Time Limit Exceeded (TLE). The limit was set to $12$ hours of training/hyperparameter tuning/precomputation overall for all the strategies. Also, even though we have the exact expected final maximum load of the \DP strategy, I decided to run it just like the other strategies for fair comparison (e.g.\ large outliers that the \DP strategy takes into account occur very rarely during execution), so it might not always be the best in the comparisons on \NumberofRuns runs (this could be resolved by using the same random seed when evaluating each strategy).
 
 
 For the \Threshold strategies, I calculated the optimal value of $l$ by modelling it as a Multi-Armed Bandit problem (covered in II Randomised Algorithms)~\cite{katehakis1987multiarmedbandit}, using an $\epsilon$-greedy technique with $\epsilon=0.1$ (details omitted).
@@ -237,7 +237,7 @@ Together with Conjecture~\ref{conjecture: two-thinning-increasing-threshold} the
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.6]{Chapter4/Figs/dqn_learnt_thresholds.png}
+    \includegraphics[scale=0.6]{Chapter4/Figs/dqn_learnt_thresholds_20_400.pdf}
     \caption{Analysis of the chosen thresholds of the \DQN strategy for a run of $n=20$, $m=400$.}
     \label{two-thinning-dqn-thresholds}
 \end{figure}

@@ -1,21 +1,34 @@
-%!TEX root = ../thesis.tex
-\chapter{Stabilising Training}\label{stabilising-training} 
+\chapter{Alternative RL Algorithms}\label{alternativeRL} 
 
 
 
-\paragraph{Experience Replay}
+\paragraph{Sarsa-Learning}
 
-Experience replay~\cite{lin1992experiencereplay} aims to address the problem that in vanilla \DQL, subsequent update steps are correlated but theoretical guarantees hold only for i.i.d. training samples -- e.g.\  in our case, after we update the weights of the DQN around a load vector with $x$ balls, we next update it around a load vector with $x+1$ balls. This correlation stems from updating in the same order as executing the actions in the game. With experience replay, instead of calling the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient} on the current $(s, a, s', r)$ tuple, we store this tuple in an experience replay buffer. Then, after every fixed number of steps, a batch of tuples are sampled uniformly at random from the buffer, and the DQN is updated according to those tuples. Another benefit of the idea is that samples can be reused multiple times, leading to a more efficient learning. Nevertheless, there should be a size limit on the buffer to get rid of outdated samples, which I implemented using a deque data structure with a limited memory capacity. Finally, note that sampling a batch of tuples rather than a single sample when updating has been shown to have a stabilising effect~\cite{qian2020batchingsgd}.
+Sarsa Learning is very similar to Q-Learning, and it generalises to Deep Sarsa-Learning just as Q-Learning generalises to Deep Q-Learning. The difference is that unlike Q-Learning, which is an off-policy method, Sarsa is on-policy. This means that in its update equation:
+
+\begin{equation} \label{eq:sarsa-learningUpdate}
+Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + Q(s_{t+1}, a')) - Q(s_t,a_t)]
+\end{equation}
+
+$a'$ is also sampled according to the $\epsilon$-greedy technique, and it is not chosen greedily to be the best estimate like in Q-Learning. Then, naturally, the next chosen action will be exactly $a'$.
+
+Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy~\cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our protocols.
+
+\paragraph{Monte Carlo Methods}
 
 
-\paragraph{Target Network}
+While Q- and Sarsa-Learning update their estimates based on other estimates (from one step ahead), Monte Carlo methods only use actual rewards for the update. This way, initialisation of the estimates doesn't matter that much, so it is more robust. In particular, the update rule in a simple Monte Carlo method is
+
+\begin{equation} \label{eq:monte-carloUpdate}
+Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[G_t - Q(s_t,a_t)]
+\end{equation}
+
+The problem with this approach is slow training. The reason is partly that if any exploration action (the case with probability $\epsilon$) is taken after timestep $t$, then, $Q(s_t,a_t)$ cannot be updated, since the new estimate doesn't necessarily reflect the estimated optimal value. Overall, Monte Carlo methods are rarely used in practice but they can be combined with Q-Learning (see e.g. the recent~\cite{wang2018montecarloqlearning}), which is an option I do not consider any further.
+
+\paragraph{Policy Gradient}
+
+Policy gradient methods are in contrast with the methods outlined above because they do not learn state- or action-value functions, instead they directly learn an optimal (stochastic) policy. Briefly, these algorithms use (another) neural network that represents the policy, and therefore returns probabilities choosing a given action in a given state. This leads to using the outputs of the neural network directly while playing the games during training, not the $\epsilon$-greedy technique. An advantage of this method is that there is no sharp boundary between the currently best estimated action and the second best, unlike for $\epsilon$-greedy. \NOTE{A}{Maybe add an equation. The problem is that it is a bit out of nowhere without derivation, and the derivation is a bit long.}
 
 
-The main difference between Q-Learning and \DQL is that in the former, during one step we only update a single value in the Q-table, while in the latter, due to the function approximation, many neighbouring values are also affected. This becomes problematic, since looking at the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient} for \DQL, to update around a Q-value $Q_{\mathbf{w_t}}(s_t, a_t)$, a neighbouring Q-value $Q_{\mathbf{w_t}}(s_{t+1}, a')$ is used. This can lead to a blow-up in the Q-values, intuitively, as a chain reaction. Target networks~\cite{argueta1992targetnetwork} have two copies of the same network architecture: one whose weights are updated by the update rule, and one that provides $Q_{\mathbf{w_t}}(s_{t+1}, a')$ of the ``target'' part $r_{t+1}+ \max_{a'} Q_{\mathbf{w'_t}}(s_{t+1}, a')$ of the rule. This weights $w'$ of the target network are updated to that of the main network periodically, every fixed number of training episodes. Another way to think about this is as a way to achieve the stability of~\eqref{eq:deep-q-learning-update-with-semi-gradient}, while still using the full gradient descent update rule.
 
-
-\paragraph{Using a better Optimiser}
-
-
-Expanding on the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient}, which updates the weights (based on the gradient) using simple Stochastic Gradient Descent (SGD), SGD could be replaced by any other (more complex) optimiser, such as ADAM~\cite{kingma2015adamoptimiser}. Briefly, it additionally adjusts the step size based on moving averages and variances of the gradient. I also added gradient clipping \cite{mikolov2012gradientclippingoriginal}, a widely used extension in deep reinforcement learning, which does not allow absolute gradient values to exceed $1$, hence prevents exploding gradients and has been shown to also speed up training~\cite{zhang2020gradientclippingaccelerate}.
-
+From the several policy gradient related approaches, I implemented the so-called Actor-Critic method~\cite{grondman2012actorcritic} and it didn't provide superior results to Deep Q-Learning or Sarsa-Learning. As explained in~\cite{bhandari2019policygradientconvergence}, policy gradient methods might converge to a local maximum, not the global optimum policy, and they might requires more time to converge. Policy gradient methods are still an active area of research, and while their usecase in unknown environments with state aliasing (where a stochastic strategy is desired) is clear, they are not yet the most widely used in full-knowledge scenarios like ours (i.e.\ where the exact current state is known).

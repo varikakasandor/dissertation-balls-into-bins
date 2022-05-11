@@ -1,31 +1,21 @@
 %!TEX root = ../thesis.tex
-\chapter{\KThinning Implementation Details}\label{k-thinning details} 
-
-
-\section*{\DQL Implementation}
-
-
-To formulate the \KThinning problem as a MDP, I decided to use (load vector, number of choices left) pairs as states, and just like for \TwoThinning, thresholds as actions. The ``number of choices left'' part of the states indicate how many more bins can be rejected before the ball would be allocated into a randomly chosen bin. The state transitions happen according to the definition of \KThinning. To tackle the sparse reward problem, I decided to use the same potential functions as for \TwoThinning (hence not taking into account the number of choices left) to avoid introducing unnecessary bias for the agent.
-
-
-For the DQN, I extended the architecture for \TwoThinning by concatenating the final hidden state of the RNN with the one-hot encoded representation of the number of choices left, feeding them together to the linear layers. The rest of the implementation is analogous to \TwoThinning.
+\chapter{Stabilising Training}\label{stabilising-training} 
 
 
 
-\section*{Dynamic Programming}
+\paragraph{Experience Replay}
 
-For \KThinning, I implemented a DP algorithm analogous to that for \TwoThinning, with the states being (sorted load vector, number of choices left) pairs in this case.
+Experience replay~\cite{lin1992experiencereplay} aims to address the problem that in vanilla \DQL, subsequent update steps are correlated but theoretical guarantees hold only for i.i.d. training samples -- e.g.\  in our case, after we update the weights of the DQN around a load vector with $x$ balls, we next update it around a load vector with $x+1$ balls. This correlation stems from updating in the same order as executing the actions in the game. With experience replay, instead of calling the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient} on the current $(s, a, s', r)$ tuple, we store this tuple in an experience replay buffer. Then, after every fixed number of steps, a batch of tuples are sampled uniformly at random from the buffer, and the DQN is updated according to those tuples. Another benefit of the idea is that samples can be reused multiple times, leading to a more efficient learning. Nevertheless, there should be a size limit on the buffer to get rid of outdated samples, which I implemented using a deque data structure with a limited memory capacity. Finally, note that sampling a batch of tuples rather than a single sample when updating has been shown to have a stabilising effect~\cite{qian2020batchingsgd}.
 
 
-The recurrence equations are:
+\paragraph{Target Network}
 
-\begin{align} 
-    V_{\pi^*}((v, 0)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=a] \notag \\
-    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,0), a_t=v[i]] \notag \\
-    &= \max_{i \in [n]} \left(\sum_{0\leq j \leq i} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} \cdot  \sum_{j \in [n]} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k))\right) \text{ ,} \label{eq:kthinning-dynamicprogramming} \\
-    V_{\pi^*}((v, x+1)) &= \max_a \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v,x+1), a_t=a] \notag \\
-    &= \max_{i \in [n]} \mathbb{E} [r_{t+1} + V_{\pi^*}(s_{t+1}) \mid s_t=(v, x+1), a_t=v[i]] \notag \\
-    &= \max_{i \in [n]} \left(\sum_{0\leq j \leq i} \frac{1}{n}\cdot V_{\pi^*}((v+e_j,k)) + \frac{n-i-1}{n} \cdot  V_{\pi^*}((v, x))\right) \text{ ,}
-\end{align}
 
-and the base case is $V_{\pi^*}((v, k))=-\mathrm{maxload}(v)$ for $\mathrm{sum}(v)=m$. The runtime of this algorithm is $k$ times the runtime of the DP algorithm for \TwoThinning: $\Theta(|S|\cdot n\cdot k)$.
+The main difference between Q-Learning and \DQL is that in the former, during one step we only update a single value in the Q-table, while in the latter, due to the function approximation, many neighbouring values are also affected. This becomes problematic, since looking at the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient} for \DQL, to update around a Q-value $Q_{\mathbf{w_t}}(s_t, a_t)$, a neighbouring Q-value $Q_{\mathbf{w_t}}(s_{t+1}, a')$ is used. This can lead to a blow-up in the Q-values, intuitively, as a chain reaction. Target networks~\cite{fan2020target} have two copies of the same network architecture: one whose weights are updated by the update rule, and one that provides $Q_{\mathbf{w_t}}(s_{t+1}, a')$ of the ``target'' part $r_{t+1}+ \max_{a'} Q_{\mathbf{w'_t}}(s_{t+1}, a')$ of the rule. This weights $w'$ of the target network are updated to that of the main network periodically, every fixed number of training episodes. Another way to think about this is as a way to achieve the stability of~\eqref{eq:deep-q-learning-update-with-semi-gradient}, while still using the full gradient descent update rule.
+
+
+\paragraph{Using a better Optimiser}
+
+
+Expanding on the update rule~\eqref{eq:deep-q-learning-update-with-semi-gradient}, which updates the weights (based on the gradient) using simple Stochastic Gradient Descent (SGD), SGD could be replaced by any other (more complex) optimiser, such as ADAM~\cite{kingma2015adamoptimiser}. Briefly, it additionally adjusts the step size based on moving averages and variances of the gradient. I also added gradient clipping \cite{mikolov2012gradientclippingoriginal}, a widely used extension in deep reinforcement learning, which does not allow absolute gradient values to exceed $1$, hence prevents exploding gradients and has been shown to also speed up training~\cite{zhang2020gradientclippingaccelerate}.
+

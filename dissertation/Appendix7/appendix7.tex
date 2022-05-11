@@ -1,180 +1,39 @@
 %!TEX root = ../thesis.tex
-\chapter{Project Proposal}\label{proposal} 
-
-\section*{Overview}
-
-Balls-into-bins can be seen as an abstraction of stochastic load balancing. The general goal is to allocate incoming balls (tasks) into bins (servers) achieving a sufficiently balanced load distribution. Without any constraints, this is a simple problem (e.g. round robin scheduling works  perfectly). However, for systems with many and distant servers, having a centralised load balancer that keeps track of all the load levels becomes infeasible due to networking, memory and processing complexity.  A simple alternative is called \OneChoice, where the ball is placed into a random bin. Unlike round robin, this is a stateless protocol, and it can be easily decentralised, both making it much more robust~\cite{nasir2015power}. One of the standard results in this field is that \TwoChoice, where two randomly chosen bins are queried about their load, and the ball is placed in the lesser loaded one, achieves a significant improvement over \OneChoice in minimising the maximum load~\cite{azar1999twochoice}. It turns out that such balls-into-bins protocols and results can be applied to various other computer science related problems as well apart from load balancing (of servers), for example hashing~\cite{dahlgaard2016power}, and fair cake-cutting~\cite{edmonds2006balanced}.
-
-We consider alterations of the \TwoChoice setting, which provide potentially more realistic and more robust models of load balancing. Most of them are directly applicable, while some of them are mainly of theoretical interest. These settings often have free parameters that can be set (unlike \TwoChoice, that does not require any parameter). 
-The goal of this project is to learn optimal free parameters (or in general optimal protocols) for these different settings. To do this, we will mainly focus on Reinforcement Learning (RL) techniques, but conventional algorithms, such as dynamic programming will be explored as well. I will return to the motivation for choosing RL and its applicability after giving an example setting in the next paragraph.
-
-The starting point will be the \TwoThinning process~\cite{feldheim2021thinning}. There are $n$ bins and $m=n$ balls: for each ball in the sequence, the protocol gets to know the load of a random bin chosen uniformly, and it should make a binary decision whether to allocate the ball there, or into a random bin chosen from the $n$ bins uniformly. The challenge is to find the right cut-off point for the $i$-th ball (how much load is required to choose the second option) based on the value of $i$, to minimise the maximum load after all the balls have arrived. This setting -- which is intermediate between \OneChoice and \TwoChoice~\cite{feldheim2021thinning} -- is motivated by avoiding possibly unnecessarily querying a second bin as it is in \TwoChoice. A possible RL model for this setting would have the load and current bin sample as a \textit{state}, the decision function as an \textit{action} and a function of the maximum load as a \textit{reward} that is only received at the end of the process.
+\chapter{\KThinning \DQL Analysis}\label{k-thinning-dql-analysis} 
 
 
-The reason we chose to apply reinforcement learning (RL) techniques for these settings is that they are very hard to tackle using conventional methods, largely because of their large state space and probabilistic nature, while RL is effective in exploring large state spaces to optimise reward in a stochastic process. This combination of balls-into-bins and RL relates to recent work~\cite{mitzenmacher2020algorithms} on tackling hard combinatorial optimisation problems by Machine Learning. For some settings that we are going to investigate, there exist mathematical proofs about the optimality of some choice of free parameters, and results they achieve~\cite{feldheim2021thinning}. In these cases, our aim is to reproduce these optimal free parameters by learning. In other cases, there are no strong theoretical guarantees available so far. Here, the goal is evaluating the ``performance'' a RL algorithm can achieve, and -- where applicable -- compare it to conventional algorithms other than RL based ones, such as greedy or dynamic programming.
-
-Due to the breadth of the project and the large variety of existing RL algorithms we will have to restrict our attention to a few of them. Because of its flexibility (e.g. model-free, immediate updates) and its wide-ranging success in similar situations~\cite{jang2019q}, we plan to start by Q-learning. We expect several issues to arise when implementing RL algorithms, for example in settings with high dimensional state spaces, deep learning versions of Q-learning might also be explored to compress the state space.
+\section*{Hyperparameter Analysis}
 
 
-After \TwoThinning, we will look at more complicated settings. Some possible examples are listed next. There will not be time for exploring all combinations of these versions, and I will pick some of them based on the success of related previously explored versions.
-\begin{itemize}
-    \item
-    \textbf{Extending the environment}
-    \begin{itemize}
-        \item
-        Looking at the case with $m>n$ balls. Surprisingly, most of the theoretical results do only hold for the lightly loaded case ($m=n$)~\cite{berenbrink2006heavilyloaded}.
-        \item
-        \TwoChoice can be seen as sampling uniformly from the edges of the complete graph formed by the bins as nodes. However, in practice, the graph representing an underlying network might be different, as e.g., only nearby servers can be used. It turns out that the greedy strategy of \TwoChoice is -- perhaps counter-intuitively -- suboptimal for general graphs~\cite{bansal2021twochoicegraphical}.
-        \item
-        The balls and the bins might be heterogeneous, motivated by the different capacity/maximum load and requirements/weights of various tasks and servers. The bins might also provide noisy answers to the queries.
-        \item
-        In \TwoThinning if the sampled bin has too high load, the ball is placed in a random bin. Instead, the process could recursively restart by sampling another bin, until an acceptable bin is sampled or a maximum number of rounds is reached~\cite{czumaj1997randomized}.
-    \end{itemize}
-    
-    \item
-    \textbf{Representing the state space}
-    
-    \begin{itemize}
-        \item
-        Instead of allocating the $i$-th ball based only on that value of $i$, the protocol could keep track of some summary of the load levels, or even get the sampled bin's ID (before or after the decision is made). This is motivated by the fact that even though it is not feasible for the protocol (load balancer) to keep track of all the load levels, it might still store some bits of information in its memory to optimise its decisions.
-        \item
-        On the other hand, motivated by the reduction in communication (for potential efficiency and secrecy benefits), the protocol might be allowed to ask only one or more binary queries of the form ``is the load greater than $x$ or not?''.
-        \item
-        In these settings, the challenge of efficiently encoding the states for both the RL algorithm and the protocol it produces naturally arises.
-    \end{itemize}
-    \item
-    \textbf{Changing the objective function}
-    
-    \begin{itemize}
-        \item
-        Depending on the exact application domain, the objective function might differ from minimising the maximum load (e.g. minimising empirical standard deviation).
-        \item
-        It could also take into account some cost for asking another query, aim for a continuously balanced load, or even try to reach an arbitrary target distribution.
-    \end{itemize}
-\end{itemize}
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+ \textbf{Hyperparameter} & \textbf{Importance} & \textbf{Correlation} \\
+ \addlinespace[0.2cm]
+ \texttt{optimise\_freq} & \Progress{0.138}{blue} & \Progress{0.42}{red} \\
+ \texttt{target\_update\_freq} & \Progress{0.133}{blue} & \Progress{0.124}{green} \\
+ \texttt{eps\_decay} & \Progress{0.088}{blue} & \Progress{0.051}{red} \\
+ \texttt{pre\_train\_episodes} & \Progress{0.084}{blue} & \Progress{0.293}{green} \\
+ \texttt{batch\_size} & \Progress{0.074}{blue} & \Progress{0.205}{red} \\
+\end{tabular}
+\caption{\KThinning hyperparameter importance~\cite{biewald2020wandb} for $n=20$, $m=400$.}
+\label{k-thinning-hyperparameter-analysis}
+\end{center}
+\end{table}
 
 
-\section*{Evaluation}
-
-Evaluation will mainly consist of comparing the ``performance'' of (RL/conventional) algorithms across the several combinations of the settings discussed above. The first component of the comparison will be the efficiency (mainly time and memory complexity) for finding (learning) the values of the free parameters. The second, most important component is (the efficiency and) the score (according to the corresponding objective function) of the resulting protocol, potentially compared against the mathematically proven bounds as well.
-
-For the second type of comparisons, we will use randomised simulations. The number of runs will be chosen based on the time complexity of simulations, while adhering to the principles of statistical significance. The same applies to the number of balls and bins used, but both larger and smaller inputs will be experimented with, especially because many theoretical bounds hold only for sufficiently large $m$, so for small $m$, a RL algorithm might outperform it.
-
-Where applicable, algorithms and protocols will be evaluated analytically too.
-
-\section*{Possible extensions}
-
-\begin{itemize}
-    \item
-    Implementing an end-to-end application of one of the settings (e.g. hashing). This would mean that the objective function would not be created intuitively (e.g. minimising maximum load), instead the application domain's objective function can be used.
-    \item
-    Explaining the behaviour of a trained RL model by mapping it to a conventional algorithm or interpreting the encoding of the states (that is, how it can usefully represent the relevant information about the loads without explicitly storing the entire load vector).
-    \item
-    Formally conjecturing optimal parameters and bounds on results deduced from learnt processes and simulations. If time permits, further extension would be proving these.
-    \item
-    Finding intermediate metrics for assessing how favourable the load distribution is at a moment during the process according to the final objective function. Those two can easily be different.
-    \item
-    Creating a series of benchmark challenges for RL methods with gradually increasing difficulty. Having mathematically proven results for some settings, the correctness and efficiency of the methods could conveniently be compared on these benchmarks.
-\end{itemize}
+We can observe in Table~\ref{k-thinning-hyperparameter-analysis} that the normalised load domain trick is not as crucial for \KThinning as it was for \TwoThinning\NOTE{A}{Mention some bullshit possible reason?}. On the other hand, the analysis suggests more frequent optimisation update steps and more curriculum learning (pretraining) episodes. 
 
 
-\section*{Starting point}
-
-Before preparation, I had no experience in RL and balls-into-bins problems. Over the summer, I did much background reading on the theory of RL, and I have read several papers about various settings of balls-into-bins, and corresponding proofs on bounds and optimality of the protocols. This also helped me gain a better understanding of the potentials of applying RL algorithms to this area.
-
-I have not yet written any code or other material for this project at the time of this proposal. I have a solid knowledge of Python and its machine learning libraries, but I will have to familiarise myself with its specific RL tools.
-
-\section*{Success criteria}
-
-I will consider the project to be successful iff:
-
-\begin{itemize}
-    \item
-    Some RL models have been trained and applied on various settings.
-    \item
-    Conventional algorithms (such as dynamic programming) have been implemented as an alternative to RL.
-    \item
-    A thorough evaluation has been conducted according to what is stated in the Evaluation section.
-    \item
-    An easy-to-use and easy-to-extend framework has been implemented, where new settings and algorithms can be tested out.
-\end{itemize}
+\section*{Training}
 
 
-\section*{Work plan}
-
-My work plan consists of 2-week work packages, some parts taking up multiple packages. A few of them are for contingency, revision and resting. Milestones are also attached. Throughout each package I will maintain a logbook with all my ideas, TODOs, and accomplishments which can later be used for writing the dissertation.
-
-
-
-\begin{itemize}
-    \item 
-    \textbf{7 Oct--20 Oct}: experiment with RL in Python and implement some settings without free parameters (e.g. \TwoChoice) as preparation.
-    
-    Milestones: none
-    \item
-    \textbf{21 Oct--3 Nov}: implement the first RL method for \TwoThinning, together with conventional algorithms (e.g. dynamic programming). Plan the most reasonable next setting or alternative approach to the same setting to work on, according to the results.
-    
-    Milestones: first RL model ready
-    \item
-    \textbf{4 Nov--17 Nov}: turn to other similar settings, potentially try multiple RL algorithms. It will also require some further background reading in the balls-into-bins literature.
-    
-    Milestones: none
-    \item
-    \textbf{18 Nov--1 Dec}: continue previous package
-    
-    Milestones: several settings explored, initial comparisons created
-    \item
-    \textbf{2 Dec--15 Dec}: if there is a straightforward way towards an extension based on the results (e.g. a formal conjecture can be made about the optimal parameters), go for that, otherwise fine-tune the previous methods. Also create a write-up for myself, supervisors, and the department.
-   
-    Milestones: progress report created
-    \item
-    \textbf{16 Dec--29 Dec}: revision, winter break, contingency. Possibly working on some extensions.
-    
-    Milestones: being fresh for resuming working on the project
-    \item
-    \textbf{30 Dec--12 Jan}: explore further settings, including those which are not simple alterations of the initial setting and might require a completely new algorithm, e.g. changing the objective function.
-    
-    Milestones: none
-    \item
-    \textbf{13 Jan--26 Jan}: continue previous package, start evaluating the core deliverables by analytical methods.
-    
-    Milestones: algorithms implemented for substantially different settings
-    \item
-    \textbf{27 Jan--9 Feb}: continue evaluating the core deliverables, with main focus on running simulations.
-    
-    Milestones: comparison of algorithms on various settings is created
-    \item
-    \textbf{10 Feb--23 Feb}: start writing the draft of the main body of the dissertation, including the fresh evaluations too. Continue with extensions as time permits.
-    
-    Milestones: main sections of the first draft completed
-    \item
-    \textbf{24 Feb--9 Mar}: based on all the work done so far including the extensions as well, write initial draft of the remaining sections too.
-    
-    Milestones: dissertation submitted for first feedback
-    \item
-    \textbf{10 Mar--23 Mar}: revision, Easter break, contingency
-    
-    Milestones: supervisors and friends urged for giving feedback
-    \item
-    \textbf{24 Mar--6 Apr}: start working on a second draft based on the feedback collected, and finish any remaining evaluation or extension still running.
-    
-    Milestones: none
-    \item
-    \textbf{7 Apr--20 Apr}: continue updating the second draft.
-    
-    Milestones: second draft sent in for feedback
-    \item
-    \textbf{21 Apr--4 May}: finalise dissertation based on the feedback.
-    
-    Milestones: final dissertation submitted
-\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.6]{Chapter4/Figs/training_progression_rolling_window_5_25_3.pdf}
+    \caption{\KThinning training curve for $n=5$, $m=25$, $k=3$, with $10$ episodes wide rolling window averaging for readability purposes.}
+    \label{k-thinning-training-curve}
+\end{figure}
 
 
-\section*{Resource declaration}
-
-\begin{itemize}
-    \item
-    My personal laptop: for convenience, I am planning to use my own laptop for writing code and storing files, instead of the MCS facility. The whole project will be version controlled on git, and weekly backup copies of the repository will be made on Google Drive as well. I might create backup copies on MCS too.
-    \item
-    HPC facility for GPUs: for training complex neural networks efficiently (which is not part of the core deliverable), I might need strong GPUs. Therefore, together with my supervisors, we have already applied for computational credits on the HPC facility of the university.
-\end{itemize}
+The training progression shown in Figure~\ref{k-thinning-training-curve} is similar to that of \TwoThinning. We can also observe that after reaching a new best score, the agent requires many more episodes to consistently settle below this score.

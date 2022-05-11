@@ -11,38 +11,38 @@
 \section{Balls-into-Bins}
 
 
-Balls-into-bins models have been studied since the 20th century in probability theory under several different names, e.g.\ ``urn processes'' or ``occupancy problems''~\cite{kolchin1978coined}. A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for balls-into-bins models turned out to be useful in the analysis of several other (randomised) algorithms~\cite{edmonds2006cakecutting}. It is still an actively researched field gaining much attention, and in particular, the main model I will study has been first analysed theoretically in 2019~\cite{dwivedi2019firstthinning} (but known since 1986~\cite{derek1986twothinningfirstattempt}).
+Balls-into-bins models have been studied since the 20th century in probability theory under several different names, e.g.\ ``urn processes'' or ``occupancy problems''~\cite{kolchin1978coined}. A few years later its applicability to real world problems, such as load balancing, has been highlighted, and further research led to the analyses of even more realistic and efficient models. Apart from practical applications, the results derived for balls-into-bins models turned out to be useful in the analysis of several other (randomised) algorithms~\cite{edmonds2006cakecutting}. It is still an actively researched field gaining much attention, and in particular, the main model I will study has been first analysed theoretically in 2019~\cite{dwivedi2019firstthinning} (but known since 1986~\cite{derek1986twothinningfirstattempt}). Now I present a definition of the balls-into-bins abstraction.
+
+
+
+\begin{definition}[Balls-into-bins] \label{definition: balls-into-bins}
+In the balls-into-bins problems, there are $n$ bins (servers), and there are $m$ balls (jobs) arriving sequentially. Whenever a ball arrives, it is placed in one of the bins according to a (usually randomised) protocol. The protocol is assessed according to the expected final maximum load.
+\end{definition}
+
 
 
 \subsection{Assumptions} \label{assumptions}
 
 
 
-Load Balancing in the real-world is a very complex task, the optimal solution depends on many specific details and the exact characteristics differ between cases. For example, the servers might (or might not) be different (e.g.\ they serve different types of requests, or they have different speed), the arrival rate of the jobs might be unknown (or maybe an estimated model is possible), servers might crash, etc. Building a theoretical model that is completely general and can still be analysed effectively seems infeasible. Hence, most of the balls-into-bins models capture one or a few characteristics of load balancing, and therefore they are very diverse. Now I present a sufficiently general definition of the balls-into-bins abstraction, and state its assumptions. 
-
-\begin{definition}[Balls-into-bins] \label{definition: balls-into-bins}
-In the balls-into-bins problems, there are $n$ bins (servers), and there are $m$ balls (jobs) arriving sequentially. Whenever a ball arrives, it is placed in one of the bins according to a (usually randomised) protocol.
-\end{definition}
-\NOTE{D}{Maybe add the objective here? Andor: I was thinking about that, but I want to elaborate somewhere on the alternative objective functions.}
-\NOTE{D}{A figure would be helpful here. Andor: What kind of figure do you imagine? Do you think this is an important figure to add (space and time constraints etc.)?}
-
-\NOTE{D}{!!This list is quite heavy to read. Maybe you could start by describing the protocols? Andor: why is it heavy to read?}Following are the most important assumptions made by the balls-into-bins model that I will study (and also by the majority of the available literature):
+Load balancing in the real-world is a complex task, whose optimal solution depends the exact characteristics of the system. Building a theoretical model that captures all the characteristics is infeasible. Balls-into-bins are no exception, often making the following assumptions:
 
 
 \begin{itemize}
     \item
-    Balls never leave the bins. While in most real-world scenarios jobs do end, this model can still provide a good local approximation, or represent the overall work assigned over a time period. Also, most of the theoretical works in the literature analyse the normalised (maximum) load, i.e.\ the difference between the (maximum) load and the average load over all the servers, and this subtraction has a similar type of effect as finishing jobs over time. For other applications, such as hashing~\cite{wieder2017ballsintobinslandscape}, persistent balls are realistic. There are nevertheless some balls-into-bins protocols that include also the deletion of the balls~\cite{azar1999twochoice}, but I will not consider those in this dissertation.
+    Balls never leave the bins. While in most real-world scenarios jobs do end, this model can still provide a good local approximation, or represent the overall work assigned over a time period. Also, most of the theoretical works in the literature analyse the normalised (maximum) load, i.e.\ the difference between the (maximum) load and the average load over all the servers, and this subtraction has a similar type of effect as finishing jobs over time. For other applications, such as distributed hash tables~\cite{wieder2017ballsintobinslandscape}, persistent balls are realistic. 
     \item
-    The number of balls $m$ is known in advance. As shown in~\cite{feldheim2021longtermthinning}, there are much better strategies for some protocols with this assumption (in terms of normalised maximum load). In many applications, even if $m$ is unknown, it can be estimated from previous runs.
+    Number of balls $m$ is known in advance. As shown in~\cite{feldheim2021longtermthinning}, there are strategies achieving an asymptotically smaller (normalised) maximum load if $m$ is known. In many applications $m$ can be estimated from previous runs.
     \item
-    The balls and the bins are homogeneous. This assumes that there is just a single type of job (e.g.\ they are of unit size) and all the servers are of the same quality (e.g.\ they have the same speed). These assumptions are valid in several cases, e.g.\ even though Google searches are different, a built-in timeout mechanism makes them approximately unit-sized \NOTE{A}{Reference?}. The more general case of heterogeneous balls and bins has also been analysed, see e.g.~\cite{berenbrink2008weighted}.
-    \item
-    The randomised protocols are assessed according to the expected value of the maximum load after all $m$ balls have been allocated (\textbf{expected final maximum load}). It is important to emphasize the stochastic nature of the process, that is why we optimise an expected value. Note that while there are several other metrics that can be important for load balancing in practice (e.g.\ expected empirical variance of the final loads, variance of final maximum load, expected maximum normalised load throughout the whole run), only a few papers have considered those so far~\cite{feldheim2021longtermthinning}, so I do not discuss them any further. \NOTE{A}{Should I expand more on what the varience of the load distribution, the variance of the maximum load etc. mean?}
+    Balls and the bins are homogeneous. In practice, servers might have different processing speed or might crash, and jobs might be of different types. Unit-sized jobs are valid in several cases, e.g.\ even though Google searches are different, the built-in timeout makes them approximately unit-sized.
     
+    
+    \item
+    Different objective functions may be of interest. As the balls-into-bins process is stochastic, possible other metrics include: expected $\ell_2$-norm of the final load, variance of the final maximum load or expected maximum normalised load throughout the whole run.
 \end{itemize}
 
 
-
+There are other variants handling deletion~\cite{azar1999twochoice}, unknown $m$~\cite{feldheim2021longtermthinning}, heterogeneous balls and bins~\cite{berenbrink2008weighted}) and different objective functions~\cite{feldheim2021longtermthinning}.
 
 
 \subsection{Protocols} \label{protocols}
@@ -59,8 +59,7 @@ The general pattern in the protocols below is that they are more robust and are 
 This is the simplest randomised algorithm. The arriving ball is allocated uniformly at random into one of the bins.
 
 \paragraph{\TwoChoice}
-\NOTE{T}{I would prefer a more concise, mathematical description of each protocol, clearly separated from motivation etc. Andor: I agree it would be nice, but I am not sure if it is worth the effort to set up some notation, as I do not use it later.}
-In this protocol, two bins are chosen uniformly at random (possibly the same two bins), and the ball is placed in the lesser loaded of the two bins . In case of a tie, the ball is allocated uniformly at random into one of the two bins. Implementing \TwoChoice in practice is challenging due to concurrency and communication delays: the servers need to report their loads by interrupting their currently running process; the client has to wait for the response by both servers, and then allocate the job to one of them (one and half round trips).
+For each ball, two bins are chosen uniformly at random, and it is allocated in the lesser loaded of the two (breaking ties randomly). Implementing \TwoChoice in practice is challenging due to concurrency and communication delays: the servers need to report their loads by interrupting their currently running process; the client has to wait for the response by both servers, and then allocate the job to one of them.
 \iffalse % doesn't add much
 A generalisation of \TwoChoice is \KChoice, where not $2$, but $K$ bins are compared.
 \fi
@@ -72,25 +71,24 @@ This is one of the main protocols I will focus on, and this has been defined in 
 
 
 \iffalse %I should double check, but I think this is all explained in the fst chapter. 
-Here I present the main interpretation of this protocol, but in Section\NOTE{T}{Section}~\ref{alternative} I present another way to look at this protocol. An important difference between this protocol, and \KChoice is that this protocol additionally requires a decision strategy, a free parameter of the protocol\NOTE{D}{Maybe remove ``a free parameter of the protocol''}. When a ball arrives, a (primary) bin is chosen uniformly at random, and the according to the strategy, the primary bin is accepted, and the ball is placed into that bin, or it is rejected, and the ball is placed into a (secondary) bin chosen again uniformly at random. \NOTE{D}{This strategy is commonly a threshold function.}The motivation for this interpretation of \TwoThinning is that unlike for \TwoThinning\NOTE{D}{Two-Choice?} where always $2$\NOTE{D}{two} servers are interrupted by a query, here if the primary load is accepted by the strategy, than only $1$\NOTE{D}{one} server is interrupted. A subtlety is that the secondary and primary bins can in fact be the same, while in a real-world application, the client would probably avoid the primary bin if it has been rejected\NOTE{D}{OK, but the improvement is minor}.
+Here I present the main interpretation of this protocol, but in Section~\ref{alternative} I present another way to look at this protocol. An important difference between this protocol, and \KChoice is that this protocol additionally requires a decision strategy, a free parameter of the protocol\NOTE{D}{Maybe remove ``a free parameter of the protocol''}. When a ball arrives, a (primary) bin is chosen uniformly at random, and the according to the strategy, the primary bin is accepted, and the ball is placed into that bin, or it is rejected, and the ball is placed into a (secondary) bin chosen again uniformly at random. \NOTE{D}{This strategy is commonly a threshold function.}The motivation for this interpretation of \TwoThinning is that unlike for \TwoThinning\NOTE{D}{Two-Choice?} where always $2$\NOTE{D}{two} servers are interrupted by a query, here if the primary load is accepted by the strategy, than only $1$\NOTE{D}{one} server is interrupted. A subtlety is that the secondary and primary bins can in fact be the same, while in a real-world application, the client would probably avoid the primary bin if it has been rejected\NOTE{D}{OK, but the improvement is minor}.
 \fi
 
 \paragraph{\KThinning}
 
-\KThinning is a generalisation of \TwoThinning. For each ball, up to $k$ bin samples are taken sequentially uniformly at random until one of them is accepted by the decision strategy. In theory, \KThinning provides a major improvement over \TwoThinning~\cite{feldheim2020dthinning, los2021quantilethreshold}.
+\KThinning generalises \TwoThinning. For each ball, up to $k$ bin samples are taken sequentially uniformly at random until one of them is accepted by the decision strategy. In theory, \KThinning provides an asymptotic improvement over \TwoThinning~\cite{feldheim2020dthinning, los2021quantilethreshold}.
 
 
 \paragraph{\GraphicalTwoChoice}
-This protocol is a generalisation of \TwoChoice, where only a subset of the pairs of bins can be sampled. Treating the bins as nodes and the pairs that can be sampled as edges of a graph, \GraphicalTwoChoice samples an edge uniformly at random for each ball. It is often assumed that the graph is regular (i.e.\ all nodes have the same degree), otherwise the symmetric final maximum load objective function is not reasonable -- take the star graph as an example of a highly unbalanced graph \NOTE{A}{!! How to cite it properly? Also I feel that this figure doesn't add much, and everyone knows what a star graph is... "Good choice of figures"... I don't remember who suggested me to add this figure.}.
+This protocol generalises \TwoChoice, where only a subset of the pairs of bins can be sampled. Treating the bins as nodes and the pairs that can be sampled as edges of a graph, \GraphicalTwoChoice samples an edge uniformly at random for each ball. It is often assumed that the graph is regular (i.e.\ all nodes have the same degree), otherwise the symmetry of the final maximum load objective function may not be reasonable, e.g.\ star graph
 
-\begin{figure}[hbt!] \label{star-graph}
+\begin{figure}[hbt!] \label{graphical-two-choice-intro}
     \centering
-    \includegraphics[scale=0.1]{Chapter2/Figs/star_graph.png}
-    \caption{Star graph~\cite{stargraph}}
+    \includegraphics[scale=1.5]{Chapter2/Figs/graphical_two_choice_intro.pdf}
+    \caption{One step of the \GraphicalTwoChoice protocol. The decision strategy had to decide between the endpoints of the orange edge, and chose the green one.}
 \end{figure}
-\NOTE{D}{Maybe it would be good to add a figure of a regular graph or two figures to illustrate how the process works. Andor: agree, it would be nice, but is it worth it? Not sure how much help a figure would be for the reader, or I would have to spend weeks on making that figure.}
 
-The real-world motivation for this protocol stems from the geographical locality of the servers~\cite{krishnaram2006graphicaltwochoiceoriginal}. One possible practical implementation\NOTE{T}{I think this part could be shortened, possibly even removed. Andor: how to shorten it? Do you think it is enough if I had motivation for \TwoThinning and I don't need to motivate \GraphicalTwoChoice?} of \GraphicalTwoChoice for load balancing is that the client chooses a server $A$ uniformly at random, server $A$ queries the current load of a neighbouring server $B$ chosen uniformly at random, and then $A$ decides whether itself or $B$ should complete the job. In this case the edges correspond to nearby servers, but different underlying graphs are also possible~\cite{peres2015oneplusbeta}, and there are other applications as well (e.g.\ for efficient storage of hash tables~\cite{krishnaram2006graphicaltwochoiceoriginal}). For this dissertation, I will make the same simplifying assumptions for \GraphicalTwoChoice as for \TwoThinning. \NOTE{T}{You mean no jobs are removed, and balls are of same size? I think this assumption should be part of the model, and not an addition to the process description. Andor: no... I meant the silly assumption that the full load vector is known. But I feel I shouldn't emphasize it too much as this is the main weakness of the dissertation.}
+The real-world motivation for this protocol stems from the geographical locality of the servers~\cite{krishnaram2006graphicaltwochoiceoriginal}. One possible practical implementation\NOTE{T}{I think this part could be shortened, possibly even removed. Andor: how to shorten it? Do you think it is enough if I had motivation for \TwoThinning and I don't need to motivate \GraphicalTwoChoice?} of \GraphicalTwoChoice for load balancing is that the client chooses a server $A$ uniformly at random, server $A$ queries the current load of a neighbouring server $B$ chosen uniformly at random, and then $A$ decides whether itself or $B$ should complete the job. In this case the edges correspond to nearby servers, but different underlying graphs are also possible~\cite{peres2015oneplusbeta}, and there are other applications as well (e.g.\ for efficient storage of hash tables~\cite{krishnaram2006graphicaltwochoiceoriginal}). For this dissertation, I will make the same simplifying assumptions for \GraphicalTwoChoice as for \TwoThinning.
 
 
 Note that remarkably, the \Greedy strategy, which allocates the ball into the lesser loaded endpoint of the edge has been shown not to be optimal in general~\cite{bansal2021twochoicegraphical}, and hence this protocol also requires a decision strategy. I present\NOTE{D}{Be sure to mention this in the introduction. It is not guaranteed to be read here. Andor: I agree, it would be nice, but Introduction is already too long. Not sure where I could highlight the important results apart from the Conclusion where I already did. I might think that is enough, but maybe not?} the first known concrete counterexample for the suboptimality of Greedy in Lemma~\ref{lemma: greedy-suboptimal}.
@@ -143,37 +141,14 @@ Let us denote the expected final maximum load of a (decision) strategy $f$ for a
 
 \subsection{Notes on Related Work and Background Reading}
 
-\NOTE{A}{Give more concrete examples?!}
-\NOTE{D}{I think you have already demonstrated that you have read the prior work by the numerous references that you have. Andor: So should I cut down on this section?}
-\NOTE{D}{I think a clear way to demonstrate that you have researched the prior work, would be to create a table with the processes and theoretical gap they achieve in the lightly loaded and heavily loaded case. (you can find something like this in prior work). Andor: I disagree, as those gaps are not directly useful for my project, and this section points out some nice insights on the other hand. But you can convince me.}
+As part of the preparation I was reading several papers about the theory of balls-into-bins. Now I present my main findings in Appendix~\ref{related-work}.
 
-As part of the preparation I was reading several papers about the theory of balls-into-bins. Now I present my main findings: 
-
-
-\begin{itemize}
-    \item 
-    I wanted to understand why there are so many different protocols, see how they are interconnected, and explore the main directions of current research. These allowed me to choose in a principled way which protocols to focus on. In particular, \TwoThinning, the main protocol of my study, has been analysed as a resource efficient protocol in-between \OneChoice and \TwoChoice. (We can see a similar phenomenon with the so-called \textsc{($1+\beta$)-process}~\cite{peres2015oneplusbeta}).
-    \item
-    I found that most of the papers in this area approach the topic from a theoretical viewpoint, and there is a big gap between these results and the practical applications. Even though my approach is also a theoretical one, I found it important to gain practical motivation, and therefore I actively searched for papers bridging this gap (e.g.~\cite{wang2017twochoicerouting}).
-    \item
-    As preparation for formulating my own lemmas and conjectures for the dissertation, I wanted to gain an insight into how lower and upper bounds can be derived theoretically on the maximum load of various protocols. Therefore I studied several proofs, e.g.\ that \TwoChoice achieves a maximum load of $\frac{\ln(\ln(n))}{\ln(2)} + O(1)$ after $n$ balls~\cite{azar1999twochoice}. These proofs did not just provide insights into why or why not different protocols work well, but the proofs also provide intuition for improving protocols, or what is even more important for my project, creating good strategies. For example, the so-called \Threshold strategy for \TwoThinning is based on the observation that rejected balls form a \OneChoice process, for which tight bounds are available~\cite{feldheim2021thinning}.
-    \item
-    Perhaps surprisingly, the more general case where $m\geq n$ is much more challenging than the $m=n$ case (i.e.\ where the number of balls equal the number of bins)~\cite{berenbrink2006heavilyloaded}. In real-world applications this assumption may usually not hold, only if the number of jobs is somehow controlled. As we will see in Chapter~\ref{implementation}, my approaches will not be limited by this constraint.
-    \iffalse % I discussed it all already in the Introduction, I think
-    \item
-    Almost exclusively all of the proofs are asymptotic -- they only hold for very large $n$, mostly due to approximations, such as Stirling's formula~\cite{feldheim2021thinning}. This is very restrictive for real-world applications, as discussed in Chapter~\ref{introduction}. Similarly, (and sometimes also as a consequence of the above), the bounds hold only up to a constant/logarithmic factor, i.e.\ they are fixed only up to the $\Theta$ notation. In particular, there exist strategies that have been shown to be optimal for \TwoThinning, such as the ``$\ell$-threshold strategy'' for $m=n$, but this is also not necessarily optimal for practically realistic values of $n$ and $m$! \NOTE{A}{Better phrasing. An interesting idea that I will get back to in Chapter~\ref{evaluation} is trying to find out or bound the constant factors hidden behind the $\Theta$ notation, which would be very useful for comparisons.}
-    \NOTE{D}{This sounds interesting}
-    \fi
-\end{itemize}
-
-\NOTE{D}{This should also be in the introduction and conclusions. Andor: would be nice, but there are no words remaining for that :(}
-Combining many of the above points, to the best of my knowledge my work is novel in several aspects. The decision strategies I find using algorithms such as dynamic programming (DP), are optimised for a specific value of $n$ and $m$, and hence have the capacity to outperform the asymptotically optimal, manually defined strategies. In particular, using dynamic programming, I find the optimal strategies for moderate values of $n$ and $m$, exploiting that the state space is finite (i.e.\ there are just finitely many load configurations), which is the first such analysis to the best of our knowledge.
 
 
 \section{Reinforcement Learning} \label{RLintro}
 
 
-In the Part IB Artificial Intelligence course we have been introduced to supervised learning. While Reinforcement learning (RL) is also about optimising an objective function, it differs in several aspects (e.g.\ no labelled data, interactive environment). A very readable introduction to RL can be found in~\cite{sutton2018RLbook}, expanding on my explanation below.
+In the Part IB Artificial Intelligence course we have been introduced to supervised learning. While RL is also about optimising an objective function, it differs in several aspects (e.g.\ no labelled data, interactive environment). A very readable introduction to RL can be found in~\cite{sutton2018RLbook}, expanding on my explanation below.
 
 
 In RL, there is an agent that is trying to learn an optimal policy by interacting with an environment. It starts in a start state\NOTE{T}{odd formulation. Isn't the point that the start states has no training set/no initial information? Andor: can you explain a bit more? Doesn't the next sentence make this one clear?}, carries out an action, receives a reward from the environment, observes a new state, and repeats this process until it reaches an end state. This process (game) is executed (played) several times (one such run is often called an ``episode'' or ``epoch''), until a sufficiently good policy is learnt. There are several versions of RL, e.g.\ depending on what we are optimising exactly, but there is a common underlying mathematical model, the so-called Markov Decision Process that I will introduce next.\NOTE{T}{Make this more precise. I do not think MDP cover everything in RL learning. Andor: are you sure? I would think it does cover most of it, and certainly what we need. Can you give some concrete examples of what are missing?}
@@ -276,6 +251,7 @@ Even with these equations, finding the optimal policy is not trivial. The two ma
 
 \subsection{Algorithms}
 
+\NOTE{A}{Cut down on the maths according to John!}
 
 In all of our protocols the state space is large (the number of ways $m$ balls can be placed in $n$ bins is exponentially large), so the agent can focus only on a subset of the states and actions during training. It has to balance between exploring new actions (possibly leading to new states), and gaining confidence in its top actions. This is more generally known as the exploration-exploitation trade-off~\cite{kaelbling1996explorationexploitation}.
 
@@ -297,7 +273,7 @@ Q(s_t,a_t) \leftarrow Q(s_t,a_t) + \alpha\left( r_t + \max_{a'} Q(s_{t+1}, a')) 
 \subsubsection*{\DQL} \label{deepq-learning}
 
 
-Q-Learning, and its iterative approximation method is a good choice for moderately sized state spaces, where more direct (mainly dynamic programming) methods are infeasible. However, for exponentially large state spaces (as in our case), it is infeasible to store the Q-table. In \DQL~\cite{mnih2013DQN}\NOTE{A}{Is $\sim$ needed? How does it work with xspace?}, the Q-table is approximated using a neural network $Q_w$ with a tractable number of weights $w$.
+Q-Learning, and its iterative approximation method is a good choice for moderately sized state spaces, where more direct (mainly DP) methods are infeasible. However, for exponentially large state spaces (as in our case), it is infeasible to store the Q-table. In \DQL~\cite{mnih2013DQN}\NOTE{A}{Is $\sim$ needed? How does it work with xspace?}, the Q-table is approximated using a neural network $Q_w$ with a tractable number of weights $w$.
 
 Since with function approximations it is not possible to update $Q_w(s, a)$ in isolation, the update rule also has to be adjusted. A natural choice would be to use the gradient of the squared error between the old and the new estimate:
 
@@ -331,11 +307,14 @@ Recurrent neural networks (RNN)~\cite{hopfield1982RNNoriginal} process sequentia
      \label{RNN-image}
 \end{figure}
 
+
+\iffalse
+
+
 There are more complex versions of the vanilla RNN\NOTE{D}{Make sure that it is clear this is the RNN in Elmer. Andor: I don't understand this sentence.} that can remember earlier inputs more (and be less susceptible to the vanishing/exploding gradient problem~\cite{noh2021rnnvanishinggradient}) by using some kind of gating mechanism controlling how much the hidden state is overwritten. The two most notable such architectures are GRU and LSTM (see~\cite{shewalkar2019rnngrulstm} for a thorough comparison).
 
 % \section{Real World and Balls-into-Bins} \label{alternative} I think I explained enough motivation all throughout, no need for more.
 
-\iffalse
 There are several ways to make the abstract balls-into-bins model more realistic. Let's\NOTE{T}{Let us} take \TwoThinning as the running example. One idea is not to keep track of the full load distribution, but instead store just some summary. This would require less amount of shared state on the servers, and make the protocol possibly more distributed. On the extreme, using no shared state at all, all clients could use a global threshold when accepting/rejecting primary servers, making it a completely distributed protocol. Something in-between could be storing the overall load of the system, that is the number of jobs present overall on the servers. I will discuss the implementation for these ideas in Section~\ref{lesssharedstate}.
 
 
@@ -369,7 +348,7 @@ I used my laptop for all experiments -- its details are: \texttt{Intel(R) Core(T
 
 \subsection{Project Management}
 
-I used Git for version control and Google Drive as a secondary backup, taking monthly copies. I used the work plan in my project proposal as the target schedule, interleaving evaluation and implementation work to gain better insights about what to focus on. I also maintained a logbook that later served as the baseline for my dissertation. We had biweekly meetings with my supervisors, where we came up with several ideas\NOTE{D}{Maybe the rest of the sentence can be dropped? Andor: hm maybe, but otherwise the sentence says nothing} and analysed my results from the perspective of the closely related research they are doing. I used \LaTeX for writing this dissertation.
+I used Git for version control and Google Drive as a secondary backup, taking monthly copies. I used the work plan in my project proposal as the target schedule, interleaving evaluation and implementation work to gain better insights about what to focus on. I also maintained a logbook that later served as the baseline for my dissertation. We had biweekly meetings with my supervisors, where we came up with several ideas\NOTE{D}{Maybe the rest of the sentence can be dropped? Andor: hm maybe, but otherwise the sentence says nothing} and analysed my results from the perspective of the closely related research they are doing.
 
 \iffalse
 I used Git for version control -- it served as my primary backup, and also provides an easy-to-follow progression of my project via the commits. I additionally used Google Drive as a secondary backup, taking monthly copies. \NOTE{D}{Does this belong to the previous section? Andor: No.}

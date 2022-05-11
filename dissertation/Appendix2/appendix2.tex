@@ -1,34 +1,159 @@
-\chapter{Alternative RL Algorithms}\label{alternativeRL} 
+%!TEX root = ../thesis.tex
+
+\chapter{Hyperparameters}\label{hyperparameters} 
+
+
+\section*{List of Hyperparameters}
+
+
+\NOTE{A}{Reorder in a more systematic way?}
+\NOTE{A}{TODO: add usual values and/or reasons?}
+\NOTE{A}{Should I add the ranges and options I used during the hyperparamter search?}
+\begin{itemize} 
+    \item batch size: the number of samples to take from the experience replay buffer using which the DQN is updated.
+    
+    \item $\epsilon$-start: for the $\epsilon$-greedy technique, it is common practice to gradually decrease $\epsilon$ during training. The reason is that after some training, less exploration is needed, as the best actions already start to take shape. I decrease $\epsilon$ according a negative exponential function, starting from $\epsilon$-start.
+    
+    \item $\epsilon$-decay: the decay parameter of the negative exponential function.\NOTE{T}{maybe better to use some formulas here?}
+    
+    \item $\epsilon$-end: as training goes on, $\epsilon$ converges to $\epsilon$-end.
+     
+    
+    \item target update frequency: after every how many episodes is the target network synchronised with the main network.
+    
+    \item optimising frequency: this controls after every how many steps (i.e.\ actions) is the main network updated. Not updating it after every step is both a speed-up, and can control the reuse of samples in the experience replay buffer.
+    
+    \item memory capacity: the maximum size of the experience replay buffer.
+    
+    \item evaluation runs during training: to determine if the current model is better than the best one so far, I run this many full executions of the game with the current model, and average the scores. Note that this is very costly, as one execution of the game is equivalent to a full episode of training.
+    
+    \item maximum threshold of DQN: as mentioned in Section ~\ref{DQN}, the DQN is restricted to using only thresholds below this limit. A reasonable choice of this maximum threshold is around the target expected maximum load we expect to get, which can be estimated e.g.\ by the performance of simpler protocols, such as \OneChoice or \TwoChoice, or by theoretical results.
+    
+    \item loss function: the loss function to use between the current Q-value estimate and the new (``target'') Q-value estimate. \NOTE{A}{Explain better.}
+    
+    \item optimiser: the optimiser used for updating the neural network. \NOTE{A}{Update my code to include this as well.}
+    
+    \item learning rate: the learning rate of the optimiser. \NOTE{A}{Maybe I should also allow choosing other optimisers, such as simple SGD?}
+    
+    \item DQN -- hidden state size of RNN: this is the determines into how many numbers does the DQN have to ``compress'' the information about the load vector.
+    
+    \item DQN -- number of hidden layers of RNN: even though the main property of RNNs is that they process sequences, they can also have depth as well with any number of hidden layers.
+    
+    \item DQN -- number of linear layers after RNN: at least one layer is needed to bring the result to the right shape, but I allow more as well.
+    
+    \item potential function: some of the potential functions are only applicable to certain protocols (e.g.\ \GraphicalTwoChoice).
+    
+    \item number of curriculum learning episodes: using curriculum as pretraining, this hyperparameter determines the overall number of episodes in pretraining.
+    
+    \item using normalised domain: this is a boolean choosing between normalised and absolute domain.
+    
+    
+
+
+\end{itemize}
+
+
+Note that the number of training episodes and the patience interval used for early stopping are not included in the hyperparameter search explicitly. This is because there isn't an optimal value for them based only on the score, as the score only improves by adding more episodes and not stopping early -- it just takes more time. Therefore, I have run a first phase of the hyperparameter optimisation finding a sweetspot for the number of episodes, where the difference between the strength of different hyperparameters is already apparent (though the score could potentially improve by training longer), but it is still feasible to do several runs in a few hours. Then, during the main optimisation phase I have used a fixed number of episodes, and I didn't use early stopping.
+
+
+\section*{Final Hyperparameter Values}
 
 
 
-\paragraph{Sarsa-Learning}
+\begin{table}[h]
+\begin{threeparttable}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     32 \\ 
+$\epsilon$-start               &    0.25 \\ 
+$\epsilon$-decay         &     3500\\
+$\epsilon$-end              &     0.05 \\
+target update frequency               &     25 \\ 
+optimising frequency          &     25 \\ 
+memory capacity     &     500 \\
+evaluation runs during training             &     10 \\
+maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
+loss function               &     SmoothL1Loss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size of RNN               &     128 \\ 
+DQN - number of hidden layers of RNN         &     3 \\ 
+DQN - number of linear layers after RNN     &     2 \\
+potential function            &    $\Phi_{max}$ \\
+number of curriculum learning episodes            & 50 \\ 
+using normalised domain               &     true \\ 
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\caption{\textsc{Two-Thinning} Deep Q-Learning hyperparameters\protect\footnotemark}
+\label{tab:two-thinning-hyperparameters}
+\end{table}
 
-Sarsa Learning is very similar to Q-Learning, and it generalises to Deep Sarsa-Learning just as Q-Learning generalises to Deep Q-Learning. The difference is that unlike Q-Learning, which is an off-policy method, Sarsa is on-policy. This means that in its update equation:
-
-\begin{equation} \label{eq:sarsa-learningUpdate}
-Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[( r_t + Q(s_{t+1}, a')) - Q(s_t,a_t)]
-\end{equation}
-
-$a'$ is also sampled according to the $\epsilon$-greedy technique, and it is not chosen greedily to be the best estimate like in Q-Learning. Then, naturally, the next chosen action will be exactly $a'$.
-
-Due to this difference, Sarsa is more stable during training, but also it converges more slowly as it is not directly learning the optimal (greedy) policy, but an $\epsilon$-greedy policy~\cite{sutton2018RLbook}. Hence, Sarsa is more suitable when performance during training matters, and bad decisions are penalised (e.g. a valuable robot gets broken), but this is not the case in our protocols.
-
-\paragraph{Monte Carlo Methods}
+\footnotetext{Note that this is a simplified presentation, as only the maximum threshold value is shown as a function of $n$ and $m$. This is the only hyperparameter whose optimal value depends strongly on $n$ and $m$, so average/mode values are shown for the other hyperparameters.}
 
 
-While Q- and Sarsa-Learning update their estimates based on other estimates (from one step ahead), Monte Carlo methods only use actual rewards for the update. This way, initialisation of the estimates doesn't matter that much, so it is more robust. In particular, the update rule in a simple Monte Carlo method is
+\begin{table}[h]
+\begin{threeparttable}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     32 \\ 
+$\epsilon$-start               &    0.2 \\ 
+$\epsilon$-decay         &     3000\\
+$\epsilon$-end              &     0.06 \\
+target update frequency               &     20 \\ 
+optimising frequency          &     15 \\ 
+memory capacity     &     650 \\
+evaluation runs during training             &     10 \\
+maximum threshold of DQN             &     $\ceil{\frac{m}{n}+\sqrt{\ln(n)}}$ \\ 
+loss function               &     SmoothL1Loss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size of RNN               &     128 \\ 
+DQN - number of hidden layers of RNN         &     2 \\ 
+DQN - number of linear layers after RNN     &     3 \\
+potential function            &    $\Phi_{exp}$ with $\alpha=0.5$ \\
+number of curriculum learning episodes            & 40 \\ 
+using normalised domain               &     true \\ 
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\caption{\textsc{K-Thinning} Deep Q-Learning hyperparameters}
+\label{tab:k-thinning-hyperparameters}
+\end{table}
 
-\begin{equation} \label{eq:monte-carloUpdate}
-Q(s_t,a_t) \longrightarrow Q(s_t,a_t) + \alpha[G_t - Q(s_t,a_t)]
-\end{equation}
-
-The problem with this approach is slow training. The reason is partly that if any exploration action (the case with probability $\epsilon$) is taken after timestep $t$, then, $Q(s_t,a_t)$ cannot be updated, since the new estimate doesn't necessarily reflect the estimated optimal value. Overall, Monte Carlo methods are rarely used in practice but they can be combined with Q-Learning (see e.g. the recent~\cite{wang2018montecarloqlearning}), which is an option I do not consider any further.
-
-\paragraph{Policy Gradient}
-
-Policy gradient methods are in contrast with the methods outlined above because they do not learn state- or action-value functions, instead they directly learn an optimal (stochastic) policy. Briefly, these algorithms use (another) neural network that represents the policy, and therefore returns probabilities choosing a given action in a given state. This leads to using the outputs of the neural network directly while playing the games during training, not the $\epsilon$-greedy technique. An advantage of this method is that there is no sharp boundary between the currently best estimated action and the second best, unlike for $\epsilon$-greedy. \NOTE{A}{Maybe add an equation. The problem is that it is a bit out of nowhere without derivation, and the derivation is a bit long.}
 
 
-
-From the several policy gradient related approaches, I implemented the so-called Actor-Critic method~\cite{grondman2012actorcritic} and it didn't provide superior results to Deep Q-Learning or Sarsa-Learning. As explained in~\cite{bhandari2019policygradientconvergence}, policy gradient methods might converge to a local maximum, not the global optimum policy, and they might requires more time to converge. Policy gradient methods are still an active area of research, and while their usecase in unknown environments with state aliasing (where a stochastic strategy is desired) is clear, they are not yet the most widely used in full-knowledge scenarios like ours (i.e.\ where the exact current state is known).
+\begin{table}[h]
+\begin{threeparttable}
+\centering
+\begin{tabular}{l|c}
+\toprule
+Hyperparameter             &     Value \\
+\midrule
+batch size               &     64 \\ 
+$\epsilon$-start               &    0.45 \\ 
+$\epsilon$-decay         &     4000\\
+$\epsilon$-end              &     0.06 \\
+target update frequency               &     25 \\ 
+optimising frequency          &     15 \\ 
+memory capacity     &     650 \\
+evaluation runs during training             &     10 \\
+loss function               &     HuberLoss \\ 
+optimiser        &     Adam \\
+learning rate             &     0.005 \\
+DQN - hidden state size               &     128 \\ 
+DQN - number of linear layers     &     2 \\
+potential function            &    $\Phi_{neigh}$ \\
+number of curriculum learning episodes            & 50 \\ 
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\caption{\textsc{\GraphicalTwoChoice} Deep Q-Learning hyperparameters}
+\label{tab:graphical-two-choice-hyperparameters}
+\end{table}
