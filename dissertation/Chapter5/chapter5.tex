@@ -11,30 +11,27 @@
 
 \section{Assessment of Contributions to the Field}
 
+In Chapter~\ref{introduction}, I motivated this dissertation by the lack of non-asymptotic analysis of randomised load balancing (i.e.\ balls-into-bins) protocols. In particular, to the best of my knowledge, there has been no previous work on optimal strategies for specific number of balls (jobs) $m$ and bins (servers) $n$, whereas that is the case in most real-world applications. This work took a step towards such optimal strategies for three randomised protocols (\TwoThinning, \KThinning, \GraphicalTwoChoice) by
 
 \begin{itemize}
-    \item Complementing the literature mostly concerning the asymptotic behaviour of protocols and strategies, in this project I analysed their exact performance, which is more relevant for practical applications.
-    \item I implemented RL algorithms for optimising decision strategies, which is a novel approach to balls-into-bins. Based on the results, while the RL approach certainly has its merits for cases where the \DP strategies are not applicable and the heuristic strategies are not sufficient, its potential to consistently outperform alternatives remains an open question.
-    \item By analysing optimal strategies I formulated several conjectures (\S\ref{conjecture: two-thinning-increasing-threshold}, \S\ref{conjecture: two-thinning-smooth-threshold}) and formally proved several lemmas (\S\ref{lemma: everystatereachable}, \S\ref{lemma: thresholdproperty}, \S\ref{lemma: k-thinning-monotone}, \S\ref{lemma: greedy-suboptimal}). These insights can potentially influence the design of robust yet efficient strategies.
+    \item analysing the performance of asymptotically optimal strategies for specific values of $n$ and $m$,
+    \item finding optimal strategies for small $n$ and $m$ using dynamic programming,
+    \item implementing reinforcement learning approaches with the aim of learning optimal strategies for a wider set of $n$ and $m$, and
+    \item proving and conjecturing properties about optimal strategies.
 \end{itemize}
+
 
 
 \section{Future Work}
 
+While the project was successful, several extensions are possible for future work:
+
 \begin{itemize}
-    \item Exploiting further the huge amount of ideas available in RL literature, the performance of RL could potentially be improved (e.g. Double Q-Learning~\cite{hasselt2010doubleqlearning}, Approximate Dynamic Programming~\cite{bellman1959approximatedp}).
-    \item Another idea is to use explainable AI techniques to derive strategies from the (hidden representation of the) NNs, or even directly use interpretable NNs~\cite{vacareanu2022explainableAI1}~\cite{tang2022explainableAI2}.
-    \item Closing the gap between asymptotic analysis and the values of $n$ and $m$ investigated in this dissertation, the analysis of medium-range values and the applicable strategies for that range remains for future work.
-    \item Even though I have computer-aided verification for the two conjectures, I could not find a general proof for them.
-    \item Future work should consider extending the discussed analyses to more realistic and more challenging protocols, e.g.\ as discussed in Chapter~\ref{introduction}, the servers would usually synchronize their loads less frequently.
+    \item Based on the results, while the RL approach certainly has its merits, its potential to consistently outperform alternatives remains an open question. Its performance could potentially be improved by exploiting further the huge amount of ideas available in the RL literature (e.g.\ Double Q-Learning~\cite{hasselt2010doubleqlearning}, Approximate Dynamic Programming~\cite{bellman1959approximatedp}).
+    \item Another idea is to use explainable AI techniques to derive generalisable strategies from the NNs, or directly use interpretable NNs~\cite{vacareanu2022explainableAI1, tang2022explainableAI2}.
+    \item I formulated conjectures for which we have computer aided evidence, but they remain open questions. Insights gained from the conjectures and lemmas can potentially influence the design of efficient general strategies.
+    \item Future work should consider relaxing some of the assumptions made in Section~\ref{my-approach}. In particular, in practice the servers would usually synchronize their loads less frequently, so the exact load distribution would be unknown to the strategy.
 \end{itemize}
-
- 
-
-\iffalse % No space for this.
-It is definitely possible to try improving RL, and hopefully get closer to the optimal strategies. For example, double learning~\cite{hasselt2010doubleqlearning}, which argues that vanilla (deep) Q-Learning overestimates the action values by under the hood using $\mathbb{E}[\max_a(Q(s,a)]$ instead of $\max_a(\mathbb{E}[Q(s,a)])$. Another idea is approximate dynamic programming \cite{bellman1959approximatedp} which can potentially make better use of the fully known environment for the agent.
-\fi
-
 
 
 
@@ -42,5 +39,5 @@ It is definitely possible to try improving RL, and hopefully get closer to the o
 
 I experienced the rich and complex nature of RL, which I would like to learn more about in the future. Obtaining theoretical results required me to deeply understand the balls-into-bins theory and work out proofs myself -- the latter being my favourite part of the project.
 
-If I could start again, I would reduce the breadth of the project and thereby leave only a smaller amount of interesting discussion for the appendices.\NOTE{A}{Is this sentence needed?}
+If I could start again, I would reduce the breadth of the project and thereby leave only a smaller amount of interesting discussion for the appendices.
 

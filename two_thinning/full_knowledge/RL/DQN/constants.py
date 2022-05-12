@@ -47,9 +47,9 @@ def EVEN_PACING_FUN(start_size, n=N, m=M, all_episodes=1000):
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 32
-EPS_START = 0.2
+EPS_START = 0.3
 EPS_END = 0.05
-EPS_DECAY = 3500
+EPS_DECAY = 2000 #3500
 TRAIN_EPISODES = 350
 PRE_TRAIN_EPISODES = 50
 TARGET_UPDATE_FREQ = 20
@@ -66,7 +66,7 @@ MAX_THRESHOLD = 22
 NN_MODEL = GeneralNet
 NN_TYPE = "general_net"
 LOSS_FUCNTION = nn.MSELoss()
-LR = 0.001
+LR = 0.0005
 NN_HIDDEN_SIZE = 128
 NN_RNN_NUM_LAYERS = 3
 NN_NUM_LIN_LAYERS = 2

@@ -5,6 +5,11 @@
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
+\newcommand{\quickwordcount}[1]{%
+\immediate\write18{texcount -1 -sum -merge #1.tex > #1-words}%
+\input{#1-words}words%
+}
+
 
 \usepackage[capitalise]{cleveref} % For referencing sections, theorems, lemmas, etc
 \usepackage{amsthm}
@@ -18,8 +23,9 @@
 \newtheorem{definition}{Definition}[section] % make sure \theoremstyle is right above
 
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{observation}[theorem]{Observation}
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem*{remark}{Remark}
 

@@ -29,3 +29,21 @@
 \DeclareMathOperator{\avg}{Avg}
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
+
+
+
+% Changes for chapter spacing
+\RequirePackage{titlesec}
+
+\newcommand{\PreContentTitleFormat}{\titleformat{\chapter}[display]{\Huge\bfseries}
+{\vspace{-3cm}\bfseries\Huge\chaptertitlename\ \Huge\thechapter}
+{0.0ex}{}
+[\vspace{-0.5ex}]}
+
+% \newcommand{\ContentTitleFormat}{\titleformat{\chapter}[display]{\Huge}
+% {\Huge\filleft{\chaptertitlename} \Huge\thechapter}{1ex}
+% {\titlerule\vspace{1ex}\filright}
+% [\vspace{1ex}]}
+% \newcommand{\PostContentTitleFormat}{\PreContentTitleFormat}
+
+\PreContentTitleFormat

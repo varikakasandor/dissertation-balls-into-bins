@@ -22,7 +22,7 @@
 
 %%\include{Dedication/dedication}
 \include{Declaration/declaration}
-%%\include{Acknowledgement/acknowledgement}
+\include{Acknowledgement/acknowledgement}
 
 \include{Proforma/proforma}
 %%\include{Abstract/abstract}
@@ -30,8 +30,8 @@
 
 \tableofcontents
 
-\listoffigures
-\listoftables
+%\listoffigures
+%\listoftables
 
 
 \printnomenclature
@@ -57,7 +57,9 @@
 %\bibliographystyle{unsrt} % Use for unsorted references  
 %\bibliographystyle{plainnat} % use this to have URLs listed in References
 
+%TC:ignore
 \bibliography{References/references}
+%TC:endignore
 
 \cleardoublepage
 
@@ -66,7 +68,7 @@
 
 \end{spacing}
 
-
+%TC:ignore
 \begin{appendices}
 
 \include{Appendix1/appendix1}
@@ -80,5 +82,6 @@
 
 \end{appendices}
 \printthesisindex
+%TC:endignore
 
 \end{document}

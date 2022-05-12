@@ -267,7 +267,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
     plt.plot(rolling_window_max_loads)
     plt.xlabel("episode")
     plt.ylabel("average maximum load over 25 runs")
-    plt.savefig(join(save_path, "training_progression.pdf"))
+    plt.savefig(join(save_path, f"training_progression_{n}_{m}.pdf"))
 
     """
     scaled_threshold_jumps = scale(np.array(threshold_jumps))

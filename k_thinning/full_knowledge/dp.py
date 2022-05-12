@@ -1,16 +1,15 @@
 import functools
 import time
 from collections import Counter
-from math import log, ceil
+from math import ceil
 from os.path import abspath, dirname, join
 
 import numpy as np
+from matplotlib import pylab as pyl
 from matplotlib import pyplot as plt
 
-from helper.helper import number_of_increasing_partitions
-
 N = 5
-M = 30
+M = 20
 K = 5
 DICT_LIMIT = 10000000  # M * N * K * number_of_increasing_partitions(N, M)
 PRINT_BEHAVIOUR = True
@@ -183,6 +182,7 @@ def find_probability_dp(loads_tuple, choices_left, reach_probabilities, strategy
 def analyse_k(n=N, m=M, max_k=10, reward_fun=REWARD_FUN, use_threshold_dp=True, print_behaviour=False):
     plt.rcParams['font.size'] = '14'
     plt.clf()
+    colors = pyl.cm.viridis(np.linspace(0, 1, max_k-1))
 
     smallest_achievable = ceil(m / n)
     max_load_min = smallest_achievable - 1
@@ -204,13 +204,13 @@ def analyse_k(n=N, m=M, max_k=10, reward_fun=REWARD_FUN, use_threshold_dp=True, 
         # log_max_distribution = [log(x) for x in max_load_distribution[max_load_min:(max_load_max+1)]]
         # cdf = list(np.cumsum(max_load_distribution[max_load_min:(max_load_max+1)]))
         to_plot = raw_max_distribution
-        plt.plot(plot_range, to_plot, label=f"k={k}")
+        plt.plot(plot_range, to_plot, label=f"k={k}", color=colors[k-2])
 
     plt.xlabel("maximum load")
     plt.ylabel("probability")
     plt.xticks(plot_range)
     plt.legend()
-    file_name = f"max_load_distribution_{n}_{m}.pdf"
+    file_name = f"k_thinning_max_load_distribution_{n}_{m}.pdf"
     save_path = join(dirname(dirname(dirname(abspath(__file__)))), "evaluation", "k_thinning", "data", file_name)
     plt.savefig(save_path)
 
