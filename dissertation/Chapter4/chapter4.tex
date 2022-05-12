@@ -209,13 +209,13 @@ We can observe that for \TwoThinning the most important hyperparameter is to use
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.6]{Chapter4/Figs/training_progression_20_400.png}
-    \caption{\TwoThinning training curve for $n=20$, $m=400$}
+    \includegraphics[scale=0.6]{Chapter4/Figs/training_progression_20_400.pdf}
+    \caption{\TwoThinning training curve for $n=20$, $m=400$.}
      \label{two-thinning-training-curve}
 \end{figure}
 
 
-As shown in Figure~\ref{two-thinning-training-curve}, improvement during training decays very quickly, and the agent is close to its best already at the start. This is due to the normalised load domain trick outlined in Section~\ref{normalised-domain} -- I checked the training curve without the normalised load domain trick as well, and that shows a much more usual training progression, though leading to a worse optimum. The oscillations in the training curve are mostly due to the inherent randomness in the protocol.
+As shown in Figure~\ref{two-thinning-training-curve}, improvement during training decays very quickly\footnote{The rest of the episodes are not shown as no more improvement has happened.}, and the agent is close to its best already at the start. These are due to the normalised load domain trick outlined in Section~\ref{normalised-domain}. The oscillations in the training curve are mostly due to the inherent randomness in the protocol.
 
 
 Motivated by the fact that in the normalised domain, a constant $0$ threshold is the \MeanThinning strategy, in Figure~\ref{two-thinning-constant-offset} I tried to see if this simple \MeanThinning strategy could be improved by choosing another constant ``offset'', not $0$. For $n=50$, $m=2500$, the best offset is $1$, and it achieves on average a final maximum load of $52.5$, which is very close to the the theoretical minimum $\frac{m}{n}=50$, and also beats the \DQN strategy. It holds for general $n$ and $m$ that the best offset is usually slightly above $0$. We can also observe in Figure~\ref{two-thinning-constant-offset} that choosing a too small offset is worse than choosing a too large offset, but both sides converge to \OneChoice in the extreme.
@@ -272,7 +272,7 @@ Strategy                                & $k=2$ & $k=3$ & $k=5$ & $k=10$ & $k=2$
 \AlwaysAccept & 7.73 $\pm$ 0.11 & 7.76 $\pm$ 0.11 & 7.59 $\pm$ 0.11 & 7.67 $\pm$ 0.11 & 5.82 $\pm$ 0.09 & 5.79 $\pm$ 0.08 & 5.83 $\pm$ 0.09 & 5.86 $\pm$ 0.09 \\ \hline \LocalRewardOptimiser & \textbf{6.09 $\pm$ 0.05} & 5.74 $\pm$ 0.04 & 5.41 $\pm$ 0.04 & 5.13 $\pm$ 0.03 & 4.17 $\pm$ 0.04 & 3.73 $\pm$ 0.04 & 3.20 $\pm$ 0.04 & 3.00 $\pm$ 0.01 \\ \hline \Quantile & 6.23 $\pm$ 0.05 & 5.99 $\pm$ 0.04 & 5.50 $\pm$ 0.04 & 5.17 $\pm$ 0.03 & 4.36 $\pm$ 0.06 & 3.66 $\pm$ 0.05 & 3.12 $\pm$ 0.03 & \textbf{3.00 $\pm$ 0.00} \\ \hline \DP & 6.13 $\pm$ 0.05 & \textbf{5.73 $\pm$ 0.04} & \textbf{5.39 $\pm$ 0.04} & \textbf{5.11 $\pm$ 0.03} & \textbf{4.08 $\pm$ 0.04} & \textbf{3.63 $\pm$ 0.04} & \textbf{3.10 $\pm$ 0.03} & \textbf{3.00 $\pm$ 0.00} \\ \hline \Threshold & 6.56 $\pm$ 0.06 & 6.29 $\pm$ 0.05 & 6.14 $\pm$ 0.04 & 5.92 $\pm$ 0.03 & 4.53 $\pm$ 0.05 & 4.19 $\pm$ 0.04 & 3.92 $\pm$ 0.03 & 3.96 $\pm$ 0.03 \\ \hline \DQN & 6.67 $\pm$ 0.07 & 5.87 $\pm$ 0.05 & 5.60 $\pm$ 0.05 & 5.22 $\pm$ 0.04 & 4.51 $\pm$ 0.05 & 3.95 $\pm$ 0.05 & 3.42 $\pm$ 0.04 & 3.04 $\pm$ 0.02 \\ \hline 
 \end{tabular}}
 
-\caption{Average maximum load of \KThinning strategies with $95\%$ confidence intervals}
+\caption{Average maximum load of \KThinning strategies with $95\%$ confidence intervals.}
 \label{tab:k-thinning-comparison}
 \end{table}
 
@@ -343,7 +343,7 @@ Strategy                                & Cycle & Hypercube & Complete & Cycle &
 \Greedy & 7.06 $\pm$ 0.02 & 7.06 $\pm$ 0.02 & 7.19 $\pm$ 0.04 & \textbf{4.75 $\pm$ 0.05} & \textbf{4.51 $\pm$ 0.05} & \textbf{4.40 $\pm$ 0.05} & \textbf{2.40 $\pm$ 0.05} & \textbf{2.33 $\pm$ 0.04} & \textbf{2.26 $\pm$ 0.04} \\ \hline \Random & 8.96 $\pm$ 0.12 & 8.97 $\pm$ 0.12 & 8.84 $\pm$ 0.11 & 6.49 $\pm$ 0.09 & 6.62 $\pm$ 0.10 & 6.69 $\pm$ 0.10 & 3.49 $\pm$ 0.06 & 3.52 $\pm$ 0.07 & 3.50 $\pm$ 0.06 \\ \hline \LocalRewardOptimiser & 7.12 $\pm$ 0.03 & 7.11 $\pm$ 0.03 & 7.25 $\pm$ 0.04 & 4.87 $\pm$ 0.06 & 4.77 $\pm$ 0.05 & 4.74 $\pm$ 0.05 & 2.53 $\pm$ 0.05 & 2.44 $\pm$ 0.04 & 2.38 $\pm$ 0.04 \\ \hline \DP & \textbf{7.04 $\pm$ 0.02} & \textbf{7.03 $\pm$ 0.01} & \textbf{7.17 $\pm$ 0.03} & TLE & TLE & TLE & TLE & TLE & TLE \\ \hline \DQN & 7.11 $\pm$ 0.03 & 7.11 $\pm$ 0.03 & 7.31 $\pm$ 0.05 & 4.88 $\pm$ 0.07 & 4.53 $\pm$ 0.05 & 4.50 $\pm$ 0.05 & 2.68 $\pm$ 0.06 & 2.54 $\pm$ 0.05 & 2.60 $\pm$ 0.06 \\ \hline 
 \end{tabular}}
 
-\caption{Average maximum load of \GraphicalTwoChoice strategies with $95\%$ confidence intervals\protect\footnotemark}
+\caption{Average maximum load of \GraphicalTwoChoice strategies with $95\%$ confidence intervals\protect\footnotemark.}
 \label{tab:graphical-two-choice-comparison}
 \end{table}
 
@@ -439,7 +439,7 @@ Analysing Table~\ref{graphical-two-choice-hyperparameter-importance}, the negati
  \texttt{optimise\_freq} & \Progress{0.074}{blue} & \Progress{0.333}{red} \\
  \texttt{target\_update\_freq} & \Progress{0.071}{blue} & \Progress{0.124}{red} \\
 \end{tabular}
-\caption{\GraphicalTwoChoice hyperparameter importance for the \CycleGraph with $n=4$ and $m=25$ \cite{biewald2020wandb}}
+\caption{\GraphicalTwoChoice hyperparameter importance for the \CycleGraph with $n=4$ and $m=25$ \cite{biewald2020wandb}.}
 \label{graphical-two-choice-hyperparameter-importance}
 \end{center}
 \end{table}

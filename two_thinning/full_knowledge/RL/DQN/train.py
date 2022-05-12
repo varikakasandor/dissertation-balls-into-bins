@@ -260,7 +260,7 @@ def train(n=N, m=M, memory_capacity=MEMORY_CAPACITY, num_episodes=TRAIN_EPISODES
             target_net.load_state_dict(policy_net.state_dict())
 
 
-    final_max_loads = [-x for x in eval_scores]
+    final_max_loads = [-x for x in eval_scores][:201]
     rolling_window_max_loads = [sum([final_max_loads[j] for j in range(i, i+10)])/10 for i in range(len(final_max_loads)-10)]
     plt.clf()
     plt.rcParams['font.size'] = '14'
