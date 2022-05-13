@@ -11,7 +11,7 @@
 
 \section{Assessment of Contributions to the Field}
 
-In Chapter~\ref{introduction}, I motivated this dissertation by the lack of non-asymptotic analysis of randomised load balancing (i.e.\ balls-into-bins) protocols. In particular, to the best of my knowledge, there has been no previous work on optimal strategies for specific number of balls (jobs) $m$ and bins (servers) $n$, whereas that is the case in most real-world applications. This work took a step towards such optimal strategies for three randomised protocols (\TwoThinning, \KThinning, \GraphicalTwoChoice) by
+In Chapter~\ref{introduction}, I motivated this dissertation by the lack of non-asymptotic analysis of randomised load balancing protocols. In particular, to the best of my knowledge, there has been no previous work on optimal strategies for specific number of balls (jobs) $m$ and bins (servers) $n$, whereas that is the case in most real-world applications. This work took a step towards such optimal strategies for three randomised protocols (\TwoThinning, \KThinning, \GraphicalTwoChoice) by
 
 \begin{itemize}
     \item analysing the performance of asymptotically optimal strategies for specific values of $n$ and $m$,
@@ -28,8 +28,11 @@ While the project was successful, several extensions are possible for future wor
 
 \begin{itemize}
     \item Based on the results, while the RL approach certainly has its merits, its potential to consistently outperform alternatives remains an open question. Its performance could potentially be improved by exploiting further the huge amount of ideas available in the RL literature (e.g.\ Double Q-Learning~\cite{hasselt2010doubleqlearning}, Approximate Dynamic Programming~\cite{bellman1959approximatedp}).
+    
     \item Another idea is to use explainable AI techniques to derive generalisable strategies from the NNs, or directly use interpretable NNs~\cite{vacareanu2022explainableAI1, tang2022explainableAI2}.
-    \item I formulated conjectures for which we have computer aided evidence, but they remain open questions. Insights gained from the conjectures and lemmas can potentially influence the design of efficient general strategies.
+    
+    \item I formulated conjectures for which we have computer aided evidence, but they remain open questions. Insights gained from the conjectures and lemmas can potentially influence the design of efficient, generalisable strategies.
+    
     \item Future work should consider relaxing some of the assumptions made in Section~\ref{my-approach}. In particular, in practice the servers would usually synchronize their loads less frequently, so the exact load distribution would be unknown to the strategy.
 \end{itemize}
 
@@ -39,5 +42,5 @@ While the project was successful, several extensions are possible for future wor
 
 I experienced the rich and complex nature of RL, which I would like to learn more about in the future. Obtaining theoretical results required me to deeply understand the balls-into-bins theory and work out proofs myself -- the latter being my favourite part of the project.
 
-If I could start again, I would reduce the breadth of the project and thereby leave only a smaller amount of interesting discussion for the appendices.
+If I could start again, I would reduce the breadth of the project, and as a consequence, leave only a smaller amount of interesting discussion for the appendices.
 
